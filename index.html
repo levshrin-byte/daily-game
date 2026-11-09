@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elevation</title>
+  <meta name="description" content="A daily game: sketch the elevation profile of a real route, then see how close you got.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M1 28 L11 10 L16 18 L21 8 L31 28 Z' fill='%232f7d5b'/></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M1 28 L11 10 L16 18 L21 8 L31 28 Z"/></svg>
+      <h1>Elevation</h1>
+    </div>
+    <nav class="puzzle-nav" aria-label="Puzzle">
+      <button id="prev" class="icon-btn" aria-label="Previous puzzle">‹</button>
+      <span id="puzzle-no">#1</span>
+      <button id="next" class="icon-btn" aria-label="Next puzzle">›</button>
+      <button id="help-btn" class="icon-btn" aria-label="How to play">?</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="route">
+      <div class="route-title">
+        <span class="pin pin-a">A</span><strong id="from">—</strong>
+        <span class="arrow">→</span>
+        <span class="pin pin-b">B</span><strong id="to">—</strong>
+      </div>
+      <div class="route-meta"><span id="distance"></span> as the crow flies</div>
+      <div id="map" role="img" aria-label="Map of today's route"></div>
+    </section>
+
+    <section class="draw">
+      <div class="draw-head">
+        <span id="prompt">Sketch the ground's height along the line, from A to B.</span>
+        <div class="draw-actions">
+          <button id="clear" class="btn ghost">Clear</button>
+          <button id="submit" class="btn primary">Submit</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="chart" aria-label="Elevation drawing area"></canvas>
+        <div id="hint" class="hint">✎ Drag to draw</div>
+      </div>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div class="score-row">
+        <div class="score"><span id="score">0</span><small>/100</small></div>
+        <div>
+          <div id="rank" class="rank"></div>
+          <div id="squares" class="squares"></div>
+        </div>
+      </div>
+      <p id="fact" class="fact"></p>
+      <div class="stats">
+        <div><b id="st-played">0</b><span>Played</span></div>
+        <div><b id="st-avg">0</b><span>Average</span></div>
+        <div><b id="st-best">0</b><span>Best</span></div>
+        <div><b id="st-streak">0</b><span>Streak</span></div>
+      </div>
+      <div class="result-actions">
+        <button id="share" class="btn primary">Share result</button>
+        <span id="countdown" class="countdown"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Elevation data: <a href="https://registry.opendata.aws/terrain-tiles/">AWS Terrain Tiles</a> (SRTM and others).
+    Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>.
+  </footer>
+
+  <dialog id="help">
+    <h2>How to play</h2>
+    <ol>
+      <li>Each day there's a new straight line between two real places.</li>
+      <li>Drag across the chart to sketch how high the ground is along that line, from <b>A</b> on the left to <b>B</b> on the right.</li>
+      <li>Submit to reveal the real profile. The closer your line, the higher your score (out of 100).</li>
+    </ol>
+    <p class="muted">Each square in your result is one fifth of the route: 🟩 spot on · 🟨 close · 🟧 off · 🟥 way off.</p>
+    <form method="dialog"><button class="btn primary">Let's go</button></form>
+  </dialog>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="data/routes.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
