@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <!-- build:artifact-head (scripts/build.mjs copies everything up to build:end into the artifact) -->
   <title>Elevation</title>
-  <meta name="claude:viewport-fit-sides" content="cover">
   <meta name="description" content="A daily game: sketch the elevation profile of a real route, then see how close you got.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-  <!-- build:end -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M1 28 L11 10 L16 18 L21 8 L31 28 Z' fill='%231f5f46'/></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- build:artifact-body -->
   <div id="error-bar" class="error-bar" hidden></div>
 
   <header class="top">
@@ -99,7 +95,6 @@
       <button id="help-close" class="btn primary">Let's go</button>
     </div>
   </dialog>
-  <!-- build:end -->
 
   <script src="data/routes.js"></script>
   <script src="data/maps.js"></script>

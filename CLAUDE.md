@@ -1,43 +1,36 @@
 # Elevation: notes for Claude
 
-The owner builds and tests this project **entirely from the Claude mobile app on a phone**.
-They can't open devtools, run commands, or open local files, so every change has to reach their phone
-as something they can tap.
+The owner builds and tests this project **entirely from their phone**: they chat in the Claude mobile app and
+play the live site in their phone's browser. They can't open devtools, run commands, or open local files.
 
-## After every change (the phone loop)
+**Live site:** https://levshrin-byte.github.io/daily-game/, served by GitHub Pages straight from the
+`claude/eloquent-wozniak-mwx5wg` branch, with no build step. Every push goes live in about a minute.
 
-1. `npm install` (first time in a session: it installs the map-data and test tooling).
-2. `npm run build`, which writes `dist/elevation.html`: one self-contained file with all CSS, JS and data inlined.
-3. `npm run check`, which plays a round at iPhone size in light and dark mode, on both the plain site and
-   the artifact bundle. It fails on page errors or sideways scrolling and saves screenshots to
-   `.cache/screens/` (or `$SCREENS`). Look at the screenshots yourself before publishing.
-4. Publish `dist/elevation.html` with the Artifact tool **to the existing artifact URL**, so the owner's
-   link keeps working: https://claude.ai/artifact/44KfvmAFH2zBUJqpg8VFWn
-   (from a new session pass it as `url`, after an `action: "read"` of that URL). Don't pass `icon` on updates.
-5. Send the owner one phone screenshot with SendUserFile when the change is visual.
-6. Commit and push to the session's branch.
+## After every change
 
-The footer shows `build <timestamp>`, so the owner can confirm their phone has the new version.
+1. `npm install` (first time in a session; it installs the test and map-data tooling).
+2. `npm run check`, which plays a round at iPhone size in light and dark mode. It fails on page errors or sideways
+   scrolling and saves screenshots to `.cache/screens/` (or `$SCREENS`). Look at them before pushing.
+3. Commit and push to the branch above. That is the deploy.
+4. Tell the owner the change is live, and send a phone screenshot with SendUserFile when the change is visual.
+   GitHub Pages caches pages for up to 10 minutes. If they see the old version, they should reload. The footer's
+   "updated …" time shows which version they're on.
 
 ## Rules for the code
 
-- **It must run inside a Claude artifact.** That means no network requests: no map tiles, no APIs, no
-  CDN stylesheets. Google Fonts are the one exception, and every face needs a fallback. Scripts may only come from
-  cdnjs, jsDelivr or unpkg. `alert`, `confirm`, `prompt`, `window.open`, `navigator.share` and query
-  strings don't work there. Puzzle links use the hash (`#p12`).
+- Plain static files: `index.html`, `style.css`, `game.js` and `data/*.js`. No bundler and no build step.
 - Phone first: big tap targets (≥ 44px), no hover-only UI, and no sideways scrolling at 390px.
   The drawing canvas uses `touch-action: none`, and the map is a static canvas, so neither traps page scrolling.
-- `localStorage` is best effort: every read and write sits in try/catch.
 - Uncaught errors appear in a red bar at the top of the page, which is the only way the owner sees them.
   Keep it.
+- `localStorage` is best effort: every read and write sits in try/catch.
 - Colours are CSS tokens in `style.css`, with dark-mode overrides. Don't hard-code colours.
+- `.nojekyll` must stay, so GitHub Pages serves the files as they are.
 
 ## Project layout
 
-- `index.html`, `style.css`, `game.js`: the game. `index.html` also works as a normal static site.
-  The `<!-- build:... -->` markers tell `scripts/build.mjs` which parts go into the artifact.
 - `scripts/routes.json`: the route list (endpoints and a fact for each).
 - `scripts/bake_profiles.py` → `data/routes.js`: elevation profiles from AWS Terrain Tiles
   (needs the hosts `elevation-tiles-prod.s3.amazonaws.com` and `s3.amazonaws.com`; tiles are cached in `.cache/`).
 - `scripts/bake_maps.mjs` → `data/maps.js`: per-route vector maps (Natural Earth, GeoNames), drawn by `game.js`.
-- After editing `routes.json`, run both bake scripts, then build.
+- After editing `routes.json`, run both bake scripts.

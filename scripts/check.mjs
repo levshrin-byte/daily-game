@@ -1,6 +1,5 @@
-// Phone-sized smoke test: plays one round on the standalone site and on the artifact
-// bundle, in light and dark, and saves screenshots. Fails on page errors or sideways
-// scrolling. Run: npm run build && npm run check   (SCREENS=dir to choose the output folder)
+// Phone-sized smoke test: plays one round in light and dark mode and saves screenshots.
+// Fails on page errors or sideways scrolling. Run: npm run check   (SCREENS=dir sets the output folder)
 import { createServer } from "node:http";
 import { readFileSync, mkdirSync, existsSync } from "node:fs";
 import { extname, join } from "node:path";
@@ -15,12 +14,6 @@ mkdirSync(OUT, { recursive: true });
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };
 const server = createServer((req, res) => {
   let path = decodeURIComponent(new URL(req.url, "http://x").pathname);
-  if (path === "/artifact.html") {
-    // Mimic the artifact host: wrap the bundle in a minimal page skeleton.
-    const body = readFileSync(join(ROOT, "dist/elevation.html"), "utf8");
-    res.writeHead(200, { "content-type": "text/html" });
-    return res.end(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
-  }
   if (path.endsWith("/")) path += "index.html";
   const file = join(ROOT, path);
   if (!file.startsWith(ROOT) || !existsSync(file)) { res.writeHead(404); return res.end(); }
@@ -31,7 +24,7 @@ const base = `http://localhost:${server.address().port}`;
 
 const browser = await chromium.launch();
 let failed = false;
-for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
+for (const [label, path] of [["site", "/"]]) {
   for (const scheme of ["light", "dark"]) {
     const ctx = await browser.newContext({ ...devices["iPhone 13"], colorScheme: scheme, deviceScaleFactor: 2 });
     const page = await ctx.newPage();

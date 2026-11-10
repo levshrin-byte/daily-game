@@ -4,7 +4,7 @@ A daily game: you get a straight line between two real places, sketch the height
 
 ## Play it
 
-The phone-friendly build is published as a Claude artifact: https://claude.ai/artifact/44KfvmAFH2zBUJqpg8VFWn (see `CLAUDE.md` for the update loop).
+**https://levshrin-byte.github.io/daily-game/**, served by GitHub Pages from the `claude/eloquent-wozniak-mwx5wg` branch. Every push goes live in about a minute.
 
 ## Run locally
 
@@ -31,7 +31,7 @@ python3 -m http.server 8000
 ```sh
 pip install pillow && npm install
 # edit scripts/routes.json
-python3 scripts/bake_profiles.py && npm run bake:maps && npm run build
+python3 scripts/bake_profiles.py && npm run bake:maps
 ```
 
 Tiles are cached in `.cache/` (gitignored).

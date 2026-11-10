@@ -4,7 +4,6 @@
   "description": "Daily elevation-profile sketching game",
   "scripts": {
     "bake:maps": "node scripts/bake_maps.mjs",
-    "build": "node scripts/build.mjs",
     "serve": "python3 -m http.server 8000",
     "check": "node scripts/check.mjs"
   },

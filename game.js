@@ -24,7 +24,9 @@
   const ROUTES = window.ROUTES || [];
   const MAPS = window.MAPS || {};
   const WORLD = window.WORLD || [];
-  $("build-tag").textContent = window.BUILD ? `build ${window.BUILD}` : "";
+  // The host's Last-Modified time doubles as a version stamp, so you can tell when a phone shows a stale copy.
+  const updated = new Date(document.lastModified);
+  if (!isNaN(updated)) $("build-tag").textContent = "updated " + updated.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   // ---------- Daily selection ----------
   function dayNumber(date) {
@@ -64,7 +66,7 @@
   const today = dayNumber(new Date());
   let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0;
 
-  // Puzzle links use the hash (#p12), which works both on a normal site and inside a Claude artifact.
+  // Puzzle links use the hash (#p12).
   function puzzleFromHash() {
     const m = /^#p(\d+)$/.exec(location.hash);
     return m ? Math.min(today, Math.max(1, +m[1])) : today;
@@ -474,9 +476,6 @@
   new MutationObserver(resize).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   if (document.fonts) document.fonts.ready.then(resize);
 
-  // Keep an unfinished sketch when Claude republishes the artifact while you're playing.
-  window.claude?.hot?.snapshot?.(() => ({ puzzleNo, draft: revealed ? null : drawn }));
-
   function start(data) {
     if (!ROUTES.length) { $("prompt").textContent = "Route data failed to load."; return; }
     const n = data && data.puzzleNo ? data.puzzleNo : puzzleFromHash();
@@ -484,5 +483,5 @@
     countdown(); setInterval(countdown, 1000);
     if (!store.seenHelp) { store.seenHelp = true; save(store); $("help").showModal(); }
   }
-  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+  start({});
 })();
