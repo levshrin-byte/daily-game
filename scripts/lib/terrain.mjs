@@ -15,7 +15,7 @@ const mem = new Map();
 let fetched = 0;
 export const stats = () => ({ fetched, inMemory: mem.size });
 
-async function tile(z, x, y) {
+export async function tile(z, x, y) {
   const key = `${z}_${x}_${y}`;
   if (mem.has(key)) return mem.get(key);
   const path = CACHE + key + ".png";

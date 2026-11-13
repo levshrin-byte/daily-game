@@ -9,7 +9,7 @@
   <meta name="description" content="A daily game: sketch the elevation profile of a real route, then see how close you got.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <!-- The Google Fonts stylesheet is added by game.js after first paint, so a slow font host can't hold up loading. -->
   <!-- build:end -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M1 28 L11 10 L16 18 L21 8 L31 28 Z' fill='%231f5f46'/></svg>">
   <link rel="stylesheet" href="style.css">
@@ -36,7 +36,7 @@
     <button id="prev" class="icon-btn" aria-label="Previous puzzle">‹</button>
     <div class="puzzle-id">
       <div><span class="marker mono" id="puzzle-no">#1</span> <span id="puzzle-date" class="puzzle-date"></span></div>
-      <div class="puzzle-sub"><span id="difficulty" class="difficulty"></span><button id="today-btn" class="link-btn" hidden>Back to today</button></div>
+      <div class="puzzle-sub"><span id="test-chip" class="test-chip" hidden>Testing</span><span id="difficulty" class="difficulty"></span><button id="today-btn" class="link-btn" hidden>Back to today</button></div>
     </div>
     <button id="next" class="icon-btn" aria-label="Next puzzle">›</button>
   </nav>
@@ -56,6 +56,13 @@
         </div>
       </div>
       <canvas id="map" role="img" aria-label="Map of today's route"></canvas>
+      <div class="map-foot">
+        <div id="map-mode" class="units" role="group" aria-label="Map layer">
+          <button type="button" data-mode="plain" aria-pressed="false">Map</button>
+          <button type="button" data-mode="relief" aria-pressed="true">Relief</button>
+        </div>
+        <p id="map-note" class="map-note">Interim: shaded relief made from elevation data. It is not satellite imagery, which can't load inside a Claude artifact.</p>
+      </div>
     </section>
 
     <section class="card draw">
@@ -83,13 +90,25 @@
           <div id="badge" class="badge" hidden></div>
         </div>
       </div>
-      <div id="breakdown" class="breakdown" aria-label="Accuracy along the route"></div>
-      <ul id="insights" class="insights"></ul>
+      <p id="takeaway" class="takeaway"></p>
+      <div id="breakdown" class="breakdown" aria-label="Accuracy along the route, start to finish"></div>
+
+      <details class="details">
+        <summary>Details</summary>
+        <div class="miss-head">Average miss per fifth, in <span id="miss-unit">m</span></div>
+        <div id="miss" class="miss"></div>
+        <ul id="insights" class="insights"></ul>
+        <p class="how">How scoring works: small misses are free, and on rugged ground a line through the middle of quick ups and downs counts as close. Bigger misses cost more, but never all at once.</p>
+      </details>
       <p id="fact" class="fact"></p>
 
-      <div class="share-card" aria-label="Your result card">
+      <div id="share-box" class="share-card" aria-label="Your result card">
         <pre id="share-preview" class="share-preview mono"></pre>
         <button id="share" class="btn primary">Copy result</button>
+      </div>
+      <div id="preview-note" class="preview-note" hidden>
+        <span>Testing preview: not saved to your stats, streak or share card.</span>
+        <button id="redo" class="btn small">Draw again</button>
       </div>
       <textarea id="share-text" class="share-text" rows="4" readonly hidden aria-label="Your result to copy"></textarea>
 
@@ -107,8 +126,8 @@
   </main>
 
   <footer class="foot">
-    <span>Elevation: AWS Terrain Tiles (SRTM, GMTED, ETOPO1 and others). Places: GeoNames (CC BY). Map: Natural Earth.</span>
-    <span id="build-tag" class="mono"></span>
+    <span>Elevation and relief: AWS Terrain Tiles (SRTM, GMTED, ETOPO1 and others). Places: GeoNames (CC BY). Map: Natural Earth.</span>
+    <button type="button" id="build-tag" class="build-tag mono"></button>
   </footer>
 
   <dialog id="help" aria-labelledby="help-title">
@@ -140,13 +159,19 @@
       <h2 id="archive-title">Past puzzles</h2>
       <button id="archive-close" class="icon-btn" aria-label="Close">✕</button>
     </div>
+    <div id="archive-tabs" class="units tabs" role="group" aria-label="List" hidden>
+      <button type="button" data-tab="past" aria-pressed="true">Past puzzles</button>
+      <button type="button" data-tab="all" aria-pressed="false">All routes</button>
+    </div>
     <p id="archive-summary" class="muted"></p>
+    <input id="route-search" class="route-search" type="search" placeholder="Search by place, country or #" aria-label="Search routes" hidden>
     <ol id="archive-list" class="archive-list"></ol>
+    <button id="test-off" class="btn ghost small" hidden>Turn off testing mode</button>
   </dialog>
   <!-- build:end -->
 
   <script src="data/routes.js"></script>
-  <script src="data/maps.js"></script>
+  <script src="data/world.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

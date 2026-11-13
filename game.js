@@ -12,18 +12,60 @@
 
   // ---------- Config ----------
   const LAUNCH = [2026, 10, 9]; // 9 Nov 2026 (month is 0-based) = puzzle #1
-  const COLS = 120;            // must match SAMPLES in scripts/bake_profiles.py
+  const COLS = 120;            // must match SAMPLES in scripts/lib/terrain.mjs
   const STORE_KEY = "elevation:v1";
   const PAD = { l: 50, r: 12, t: 14, b: 28 };
   const RANKS = [
-    [90, "Mountain goat 🐐"], [75, "Trail guide 🧭"], [55, "Day hiker 🥾"],
-    [35, "Tourist 📸"], [0, "Lost in the fog 🌫️"],
+    [92, "Mountain goat 🐐"], [80, "Trail guide 🧭"], [65, "Day hiker 🥾"],
+    [45, "Tourist 📸"], [0, "Lost in the fog 🌫️"],
   ];
+  // Scoring v2 (see scoreOf). Saved results from v1 are rescored from their saved drawings once.
+  const SCORING = 2;
+  const SCORE = { win: 4, mix: 0.4, tol: 0.01, e50: 0.09, p: 1.8 };
 
   const $ = (id) => document.getElementById(id);
   const ROUTES = window.ROUTES || [];
-  const MAPS = window.MAPS || {};
+  // The artifact build packs each profile into a short string (scripts/build.mjs): zigzag deltas in 5-bit digits.
+  const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  function unpack(str) {
+    const out = []; let acc = 0, shift = 0, prev = 0;
+    for (const ch of str) {
+      const d = B64.indexOf(ch);
+      acc += (d & 31) * 2 ** shift;
+      if (d >= 32) { shift += 5; continue; }
+      const delta = acc % 2 ? -(acc + 1) / 2 : acc / 2;
+      prev += delta; out.push(prev); acc = 0; shift = 0;
+    }
+    return out;
+  }
+  for (const r of ROUTES) if (typeof r.elev === "string") r.elev = unpack(r.elev);
+  // Route maps load on demand (data/maps/NN.json, ten routes per file), so the page itself stays small.
+  const MAPS = (window.MAPS = window.MAPS || {});
+  // Anything not needed for the first screen waits for the page's load event, so a slow or unreachable host
+  // (Google Fonts, in particular) can never hold the page in a "still loading" state.
+  const afterLoad = (fn) => (document.readyState === "complete" ? fn() : window.addEventListener("load", fn, { once: true }));
   const WORLD = window.WORLD || [];
+  const MAP_CHUNK = 10;
+  const mapLoads = {}, reliefLoads = {};
+  function loadMap(r) {
+    if (MAPS[r.id]) return Promise.resolve(MAPS[r.id]);
+    const c = Math.floor(ROUTES.indexOf(r) / MAP_CHUNK);
+    mapLoads[c] = mapLoads[c] || fetch(`data/maps/${String(c).padStart(2, "0")}.json`)
+      .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+      .then((j) => Object.assign(MAPS, j))
+      .catch((e) => { delete mapLoads[c]; throw e; });
+    return mapLoads[c].then(() => MAPS[r.id]);
+  }
+  // Interim shaded relief (scripts/bake_relief.mjs), one small JPEG per route.
+  function loadRelief(r) {
+    reliefLoads[r.id] = reliefLoads[r.id] || new Promise((ok, fail) => {
+      const img = new Image();
+      img.onload = () => ok(img);
+      img.onerror = () => { delete reliefLoads[r.id]; fail(new Error("relief")); };
+      img.src = `data/relief/${r.id}.jpg`;
+    });
+    return reliefLoads[r.id];
+  }
   // A version stamp, so the owner can tell when a phone shows a stale copy: the artifact build time, or the
   // file's Last-Modified time on the plain site.
   const updated = window.BUILD ? new Date(window.BUILD) : new Date(document.lastModified);
@@ -68,6 +110,7 @@
   }
   function save(s) { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {} }
   let store = load();
+  store.previews = store.previews || {};
 
   // ---------- Units ----------
   // Everything is stored in metres and km; only what's shown on screen is converted.
@@ -88,10 +131,22 @@
   const today = dayNumber(new Date());
   let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0, justScored = null;
 
-  // Puzzle links use the hash (#p12).
+  // Testing mode (for the owner): previews any of the routes, including future days, without touching
+  // results, stats, streaks or share cards. Turned on by tapping the build stamp in the footer five times, or
+  // by opening the page with #test. Previews use #t12; normal puzzle links use #p12.
+  let testMode = !!store.testMode, preview = false;
+  const saved = () => (preview ? store.previews : store.results);
   function puzzleFromHash() {
+    if (location.hash === "#test") { setTestMode(true); return { n: today, preview: false }; }
+    const t = /^#t(\d+)$/.exec(location.hash);
+    if (t && testMode) return { n: Math.min(ROUTES.length, Math.max(1, +t[1])), preview: true };
     const m = /^#p(\d+)$/.exec(location.hash);
-    return m ? Math.min(today, Math.max(1, +m[1])) : today;
+    return { n: m ? Math.min(today, Math.max(1, +m[1])) : today, preview: false };
+  }
+  function setTestMode(on) {
+    testMode = on; store.testMode = on; save(store);
+    $("test-chip").hidden = !on;
+    if (!on && preview) loadPuzzle(today);
   }
 
   // ---------- Axis ----------
@@ -138,11 +193,24 @@
     const { ctx, w, h } = fitCanvas(canvas);
     const m = MAPS[route.id];
     ctx.fillStyle = css("--water"); ctx.fillRect(0, 0, w, h);
-    if (!m) return;
+    if (!m) {
+      ctx.font = `600 13px ${FONT_BODY()}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      haloText(ctx, mapFailed[route.id] ? "The map didn't load. Reload the page to try again." : "Loading map…", w / 2, h / 2, "center");
+      locator(ctx, w);
+      return;
+    }
     const s = w / m.w;
+    const relief = mapMode === "relief" ? reliefImg[route.id] : null;
 
     tracePolys(ctx, m.land, s);
-    ctx.fillStyle = css("--land"); ctx.fill("evenodd");
+    ctx.fillStyle = css(mapMode === "relief" ? "--relief-land" : "--land"); ctx.fill("evenodd");
+    if (relief) {
+      // Hillshade blended over the land colour (mid-grey = no change), clipped to the coastline.
+      ctx.save(); ctx.clip("evenodd");
+      ctx.globalCompositeOperation = "soft-light";
+      ctx.drawImage(relief, 0, 0, w, h); ctx.drawImage(relief, 0, 0, w, h);
+      ctx.restore();
+    }
     ctx.strokeStyle = css("--border"); ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke();
     tracePolys(ctx, m.water, s);
     ctx.fillStyle = css("--water"); ctx.fill("evenodd");
@@ -210,6 +278,25 @@
 
     scaleBar(ctx, m, s, h);
     locator(ctx, w);
+    if (mapMode === "relief") {
+      ctx.font = `600 11px ${FONT_BODY()}`; ctx.textBaseline = "bottom";
+      haloText(ctx, relief ? "Shaded relief · interim" : reliefFailed[route.id] ? "Relief didn't load" : "Loading relief…", w - 8, h - 6, "right");
+    }
+  }
+  // Which map layer to show: the plain vector map, or the interim shaded relief on top of it.
+  let mapMode = store.mapMode === "plain" ? "plain" : "relief";
+  const reliefImg = {}, reliefFailed = {}, mapFailed = {};
+  function fetchMapData(r) {
+    if (!MAPS[r.id]) loadMap(r).then(() => { if (route === r) drawMap(); }, () => { mapFailed[r.id] = true; if (route === r) drawMap(); });
+    if (mapMode === "relief" && !reliefImg[r.id]) afterLoad(() => {
+      loadRelief(r).then((img) => { reliefImg[r.id] = img; if (route === r) drawMap(); }, () => { reliefFailed[r.id] = true; if (route === r) drawMap(); });
+    });
+  }
+  function setMapMode(mode) {
+    mapMode = mode; store.mapMode = mode; save(store);
+    document.querySelectorAll("#map-mode button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    $("map-note").hidden = mode !== "relief";
+    if (route) { fetchMapData(route); drawMap(); }
   }
   function box(x0, y0, x1, y1) { return { x0, y0, x1, y1 }; }
   function haloText(ctx, text, x, y, align) {
@@ -421,42 +508,72 @@
   }
 
   // ---------- Scoring ----------
-  function scoreOf(user) {
-    const span = axis.hi - axis.lo;
-    const err = user.map((v, i) => Math.abs(v - route.elev[i]) / span);
-    const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
-    const score = Math.round(100 * Math.max(0, 1 - mean(err) / 0.25));
-    const fifths = [0, 1, 2, 3, 4].map((k) => mean(err.slice(Math.floor((k * COLS) / 5), Math.floor(((k + 1) * COLS) / 5))));
-    const squares = fifths.map((e) => (e < 0.04 ? "🟩" : e < 0.09 ? "🟨" : e < 0.16 ? "🟧" : "🟥")).join("");
-    return { score, squares, fifths };
+  // Scoring v2. For each of the 120 columns we measure how far your line is from the real ground, as a share
+  // of the chart height, in a way that forgives what nobody can draw:
+  //  - Rugged ground: 60% of the error is measured against the real ground's range a few columns either side
+  //    (about ±3% of the route), so a line through the middle of quick ups and downs isn't punished for
+  //    missing every ridge and gully. The other 40% is the plain distance, so detail still pays.
+  //  - Small misses: the first 1% of the chart height in each column is free.
+  // The mean of that is turned into a score on a gentle S-curve: 100 / (1 + (error / 0.09)^1.8). Close
+  // sketches land in the 90s, a rough but sensible shape in the 70s, and a flat guess still gets a few points
+  // instead of zero. Real terrain is never smoothed; only the scoring adapts to it.
+  const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+  const curve = (e) => 100 / (1 + Math.pow(e / SCORE.e50, SCORE.p));
+  function columnErrors(user, r, ax) {
+    const real = r.elev, span = ax.hi - ax.lo, w = SCORE.win;
+    return user.map((v, i) => {
+      let lo = Infinity, hi = -Infinity;
+      for (let j = Math.max(0, i - w); j <= Math.min(COLS - 1, i + w); j++) { lo = Math.min(lo, real[j]); hi = Math.max(hi, real[j]); }
+      const outside = v < lo ? lo - v : v > hi ? v - hi : 0;
+      return Math.max(0, (SCORE.mix * Math.abs(v - real[i]) + (1 - SCORE.mix) * outside) / span - SCORE.tol);
+    });
+  }
+  const fifth = (a, k) => a.slice(Math.floor((k * COLS) / 5), Math.floor(((k + 1) * COLS) / 5));
+  function scoreOf(user, r = route, ax = axis) {
+    const err = columnErrors(user, r, ax);
+    const score = Math.round(curve(mean(err)));
+    const fifthScores = [0, 1, 2, 3, 4].map((k) => curve(mean(fifth(err, k))));
+    const squares = fifthScores.map((v) => (v >= 85 ? "🟩" : v >= 65 ? "🟨" : v >= 40 ? "🟧" : "🟥")).join("");
+    // Plain average miss per fifth in metres, for the details panel.
+    const miss = [0, 1, 2, 3, 4].map((k) => mean(fifth(user.map((v, i) => Math.abs(v - r.elev[i])), k)));
+    return { score, squares, miss };
+  }
+  // Rescore results saved under scoring v1 from their saved drawings, so averages stay comparable.
+  if (store.scoring !== SCORING) {
+    for (const [n, res] of Object.entries(store.results)) {
+      const r = routeFor(+n);
+      if (!r || !res.drawing || res.drawing.length !== COLS) continue;
+      const s2 = scoreOf(res.drawing, r, axisFor(r.elev));
+      res.v1 = res.v1 || res.score; res.score = s2.score; res.squares = s2.squares;
+    }
+    store.scoring = SCORING; save(store);
   }
 
-  // A few plain-language notes on where the sketch was right and wrong.
+  const NAMES = ["the start", "the second fifth", "the middle", "the fourth fifth", "the finish"];
+  function signedFifths(user) {
+    return [0, 1, 2, 3, 4].map((k) => mean(fifth(user.map((v, i) => v - route.elev[i]), k)));
+  }
+  // The one line under the score.
+  function takeaway(user, score) {
+    const span = axis.hi - axis.lo, signed = signedFifths(user), abs = signed.map(Math.abs);
+    const worst = abs.indexOf(Math.max(...abs));
+    if (score >= 92 || abs[worst] < 0.05 * span) return "Close all the way along. Nicely read.";
+    return `Biggest miss: ${NAMES[worst]}, ${fmtH(abs[worst])} too ${signed[worst] > 0 ? "high" : "low"} on average.`;
+  }
+  // More notes, for the details panel.
   function insights(user) {
     const real = route.elev, span = axis.hi - axis.lo, out = [];
-    const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
     const realMax = Math.max(...real), iR = real.indexOf(realMax);
     const userMax = Math.max(...user), iU = user.indexOf(userMax);
     const dPeak = userMax - realMax;
-    if (Math.abs(dPeak) < 0.06 * span) out.push(["good", `You nailed the high point: within ${fmtH(Math.abs(dPeak))} of the real ${fmtH(realMax)}.`]);
-    else out.push(["off", `Your high point was ${fmtH(Math.abs(dPeak))} too ${dPeak > 0 ? "high" : "low"}. The real top is ${fmtH(realMax)}.`]);
+    if (Math.abs(dPeak) < 0.06 * span) out.push(["good", `High point within ${fmtH(Math.abs(dPeak))} of the real ${fmtH(realMax)}.`]);
+    else out.push(["off", `Your high point was ${fmtH(Math.abs(dPeak))} too ${dPeak > 0 ? "high" : "low"} (real: ${fmtH(realMax)}).`]);
     if (Math.abs(iU - iR) > COLS * 0.2 && realMax - Math.min(...real) > 0.15 * span) {
-      out.push(["off", `The real top comes ${fmtD((Math.abs(iU - iR) / (COLS - 1)) * route.distanceKm)} ${iR > iU ? "later" : "sooner"} than yours.`]);
+      out.push(["off", `The real top is ${fmtD((Math.abs(iU - iR) / (COLS - 1)) * route.distanceKm)} ${iR > iU ? "later" : "sooner"} than yours.`]);
     }
-    const NAMES = ["the start", "the second fifth", "the middle", "the fourth fifth", "the finish"];
-    const signed = [0, 1, 2, 3, 4].map((k) => {
-      const a = Math.floor((k * COLS) / 5), b = Math.floor(((k + 1) * COLS) / 5);
-      return mean(user.slice(a, b).map((v, i) => v - real[a + i]));
-    });
-    const abs = signed.map(Math.abs);
-    const best = abs.indexOf(Math.min(...abs)), worst = abs.indexOf(Math.max(...abs));
-    if (abs[worst] > 0.06 * span) {
-      out.push(["off", `Most off: ${NAMES[worst]}, where you were ${fmtH(abs[worst])} too ${signed[worst] > 0 ? "high" : "low"} on average.`]);
-      out.push(["good", `Closest: ${NAMES[best]}${abs[best] < 0.04 * span ? ", almost spot on" : ""}.`]);
-    } else {
-      out.push(["good", "No stretch was more than " + fmtH(Math.max(abs[worst], 1)) + " off on average. Superb."]);
-    }
-    return out.slice(0, 3);
+    const abs = signedFifths(user).map(Math.abs), best = abs.indexOf(Math.min(...abs));
+    out.push(["good", `Closest stretch: ${NAMES[best]}.`]);
+    return out;
   }
 
   // ---------- Submit / reveal ----------
@@ -473,7 +590,8 @@
     const { score, squares } = scoreOf(user);
     const before = stats();
     justScored = { prevBest: before.played ? before.best : null };
-    store.results[puzzleNo] = { score, squares, drawing: user.map(Math.round), daily: puzzleNo === today, at: Date.now() };
+    if (preview) justScored = { prevBest: null };
+    saved()[puzzleNo] = { score, squares, drawing: user.map(Math.round), daily: !preview && puzzleNo === today, at: Date.now() };
     save(store);
     drawn = user;
     reveal(true);
@@ -524,8 +642,9 @@
     chip.setAttribute("aria-label", `${streak}-day streak`);
   }
   function showResult() {
-    const r = store.results[puzzleNo];
+    const r = saved()[puzzleNo];
     if (!r) return;
+    $("share-box").hidden = preview; $("preview-note").hidden = !preview;
     const fresh = justScored; justScored = null;
     $("result").hidden = false;
     $("share-text").hidden = true;
@@ -542,11 +661,13 @@
     const badgeText = !fresh ? "" : r.score >= 95 ? "Near perfect!" : fresh.prevBest != null && r.score > fresh.prevBest ? "New personal best" : "";
     badge.hidden = !badgeText; badge.textContent = badgeText;
 
-    const user = r.drawing, { fifths } = scoreOf(user);
+    const user = r.drawing, { miss } = scoreOf(user);
     const LABEL = ["Start", "", "Middle", "", "Finish"];
+    $("takeaway").textContent = takeaway(user, r.score);
     $("breakdown").innerHTML = [...r.squares].filter((ch) => ch.trim()).map((sq, k) =>
-      `<div class="seg"><span class="seg-sq">${sq}</span><span class="seg-err mono">${Math.round(fifths[k] * (axis.hi - axis.lo) * U().hPer).toLocaleString("en-US")}</span><span class="seg-l">${LABEL[k]}</span></div>`).join("") +
-      `<div class="seg-note">average miss per fifth, in ${U().h}</div>`;
+      `<div class="seg"><span class="seg-sq">${sq}</span><span class="seg-l">${LABEL[k]}</span></div>`).join("");
+    $("miss").innerHTML = miss.map((v, k) => `<div><b class="mono">${fmt(v * U().hPer)}</b><span>${LABEL[k] || "·"}</span></div>`).join("");
+    $("miss-unit").textContent = U().h;
     $("insights").innerHTML = insights(user).map(([k, t]) => `<li class="${k}">${t}</li>`).join("");
     $("fact").textContent = renderFact(route.fact);
     $("share-preview").textContent = shareText();
@@ -558,6 +679,7 @@
   }
   function shareText() {
     const r = store.results[puzzleNo];
+    if (preview || !r) return "";
     const replay = !r.daily;
     const { streak } = stats();
     const lines = [
@@ -582,33 +704,74 @@
   });
 
   // ---------- Archive ----------
+  let archiveTab = "past";
   function openArchive() {
+    $("archive-tabs").hidden = !testMode;
+    if (!testMode) archiveTab = "past";
+    document.querySelectorAll("#archive-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === archiveTab)));
+    $("route-search").hidden = archiveTab !== "all";
+    $("test-off").hidden = archiveTab !== "all";
     const list = $("archive-list"), s = stats();
-    const done = Object.keys(store.results).filter((n) => +n <= today).length;
-    $("archive-summary").textContent = `${done} of ${today} played${s.played ? ` · average ${s.avg}` : ""}`;
     const rows = [];
-    for (let n = today; n >= 1; n--) {
-      const r = routeFor(n), res = store.results[n];
-      rows.push(`<li><button class="arch-row${n === puzzleNo ? " current" : ""}" data-n="${n}">
+    if (archiveTab === "all") {
+      $("archive-title").textContent = "All routes";
+      $("archive-summary").textContent = `Testing: preview any of the ${ROUTES.length} routes. Previews don't count towards your stats, streak or share card.`;
+      for (let n = 1; n <= ROUTES.length; n++) {
+        const r = routeFor(n), res = store.previews[n];
+        const when = n === today ? " · Today" : n > today ? " · upcoming" : "";
+        rows.push(`<li><button class="arch-row${preview && n === puzzleNo ? " current" : ""}" data-t="${n}" data-q="${esc((r.from + " " + r.to + " " + r.country + " " + r.region + " " + r.id).toLowerCase())}">
+        <span class="arch-no mono">#${n}</span>
+        <span class="arch-main"><span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${when} · ${esc(r.region)}</span>
+          <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
+        <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-sq">${res.squares}</span>` : `<span class="arch-play">Preview</span><span class="arch-diff">${DIFF[r.difficulty] || ""} · ${r.kind}</span>`}</span>
+      </button></li>`);
+      }
+    } else {
+      $("archive-title").textContent = "Past puzzles";
+      const done = Object.keys(store.results).filter((n) => +n <= today).length;
+      $("archive-summary").textContent = `${done} of ${today} played${s.played ? ` · average ${s.avg}` : ""}`;
+      for (let n = today; n >= 1; n--) {
+        const r = routeFor(n), res = store.results[n];
+        rows.push(`<li><button class="arch-row${!preview && n === puzzleNo ? " current" : ""}" data-n="${n}">
         <span class="arch-no mono">#${n}</span>
         <span class="arch-main"><span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${n === today ? " · Today" : ""}</span>
           <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
         <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-sq">${res.squares}</span>` : `<span class="arch-play">Play</span><span class="arch-diff">${DIFF[r.difficulty] || ""}</span>`}</span>
       </button></li>`);
+      }
     }
     list.innerHTML = rows.join("");
-    $("archive").showModal();
+    filterRoutes();
+    if (!$("archive").open) $("archive").showModal();
     const cur = list.querySelector(".current");
     if (cur) cur.scrollIntoView({ block: "nearest" });
   }
+  function filterRoutes() {
+    const q = archiveTab === "all" ? $("route-search").value.trim().toLowerCase() : "";
+    for (const b of $("archive-list").querySelectorAll("[data-q]")) b.parentElement.hidden = !!q && !b.dataset.q.includes(q) && b.dataset.t !== q.replace(/^#/, "");
+  }
+  $("route-search").addEventListener("input", filterRoutes);
+  document.querySelectorAll("#archive-tabs button").forEach((b) => b.addEventListener("click", () => { archiveTab = b.dataset.tab; openArchive(); }));
+  $("test-off").addEventListener("click", () => { $("archive").close(); setTestMode(false); toast("Testing mode is off"); });
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   $("archive-list").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-n]");
+    const b = e.target.closest("[data-n],[data-t]");
     if (!b) return;
     $("archive").close();
-    loadPuzzle(+b.dataset.n);
+    if (b.dataset.t) loadPuzzle(+b.dataset.t, null, true); else loadPuzzle(+b.dataset.n);
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+  // Five taps on the build stamp toggle testing mode.
+  let stampTaps = [];
+  $("build-tag").addEventListener("click", () => {
+    const now = Date.now();
+    stampTaps = stampTaps.filter((t) => now - t < 3000).concat(now);
+    if (stampTaps.length >= 5) {
+      stampTaps = []; setTestMode(!testMode);
+      toast(testMode ? "Testing mode on: Past puzzles → All routes" : "Testing mode is off");
+    }
+  });
+  $("redo").addEventListener("click", () => { delete store.previews[puzzleNo]; save(store); loadPuzzle(puzzleNo, null, true); });
   $("archive-btn").addEventListener("click", openArchive);
   $("archive-btn-2").addEventListener("click", openArchive);
   $("archive-close").addEventListener("click", () => $("archive").close());
@@ -625,20 +788,22 @@
   }
 
   // ---------- Puzzle setup ----------
-  function loadPuzzle(n, draft) {
-    puzzleNo = n;
+  function loadPuzzle(n, draft, asPreview = false) {
+    puzzleNo = n; preview = asPreview;
     route = routeFor(n);
     axis = axisFor(route.elev);
     drawn = draft && draft.length === COLS ? draft.slice() : new Array(COLS).fill(null);
     revealed = false; revealProgress = 0; lastCol = null;
 
-    $("puzzle-no").textContent = `#${n}`;
+    $("puzzle-no").textContent = preview ? `Preview #${n}` : `#${n}`;
+    document.body.classList.toggle("previewing", preview);
+    $("today-btn").textContent = preview ? "Exit preview" : "Back to today";
     $("puzzle-date").textContent = fmtDate(n, { weekday: "short", month: "short", day: "numeric" });
     const d = route.difficulty || 0;
     $("difficulty").innerHTML = d ? `<span class="pips d${d}" aria-hidden="true"><i></i><i></i><i></i></span>${DIFF[d]}` : "";
-    $("today-btn").hidden = n === today;
+    $("today-btn").hidden = !preview && n === today;
     $("prev").disabled = n <= 1;
-    $("next").disabled = n >= today;
+    $("next").disabled = n >= (preview ? ROUTES.length : today);
     $("from").textContent = route.from; $("to").textContent = route.to;
     $("country").textContent = route.country ? `${route.country} · ` : "";
     showDistance();
@@ -648,20 +813,21 @@
     $("result").hidden = true;
     chart.style.cursor = "crosshair";
 
-    const hash = n === today ? "" : `#p${n}`;
+    const hash = preview ? `#t${n}` : n === today ? "" : `#p${n}`;
     if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
 
+    fetchMapData(route);
     resize();
     showCoverage();
-    const prior = store.results[n];
+    const prior = saved()[n];
     if (prior) { drawn = prior.drawing.slice(); reveal(false); }
   }
 
   $("clear").addEventListener("click", () => { drawn.fill(null); $("hint").style.opacity = 1; showCoverage(); render(); });
   $("today-btn").addEventListener("click", () => loadPuzzle(today));
   $("submit").addEventListener("click", submit);
-  $("prev").addEventListener("click", () => puzzleNo > 1 && loadPuzzle(puzzleNo - 1));
-  $("next").addEventListener("click", () => puzzleNo < today && loadPuzzle(puzzleNo + 1));
+  $("prev").addEventListener("click", () => puzzleNo > 1 && loadPuzzle(puzzleNo - 1, null, preview));
+  $("next").addEventListener("click", () => puzzleNo < (preview ? ROUTES.length : today) && loadPuzzle(puzzleNo + 1, null, preview));
   $("help-btn").addEventListener("click", () => $("help").showModal());
   $("help-close").addEventListener("click", () => $("help").close());
   // Two-tap reset (confirm() dialogs don't work inside artifacts).
@@ -684,16 +850,27 @@
   }
   document.querySelectorAll("#units button").forEach((b) => b.addEventListener("click", () => setUnits(b.dataset.u)));
   setUnits(units);
-  window.addEventListener("hashchange", () => { const n = puzzleFromHash(); if (n !== puzzleNo) loadPuzzle(n); });
+  window.addEventListener("hashchange", () => { const h = puzzleFromHash(); if (h.n !== puzzleNo || h.preview !== preview) loadPuzzle(h.n, null, h.preview); });
+  document.querySelectorAll("#map-mode button").forEach((b) => b.addEventListener("click", () => setMapMode(b.dataset.mode)));
   window.addEventListener("resize", resize);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", resize);
   new MutationObserver(resize).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   if (document.fonts) document.fonts.ready.then(resize);
 
+  function loadFonts() {
+    if (document.querySelector("link[data-fonts]")) return;
+    const l = document.createElement("link");
+    l.rel = "stylesheet"; l.dataset.fonts = "1";
+    l.href = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap";
+    (document.head || document.documentElement).appendChild(l);
+  }
   function start(data) {
     if (!ROUTES.length) { $("prompt").textContent = "Route data failed to load."; return; }
-    const n = data && data.puzzleNo ? data.puzzleNo : puzzleFromHash();
-    loadPuzzle(n, data && data.draft);
+    const h = puzzleFromHash();
+    setTestMode(testMode);
+    setMapMode(mapMode);
+    loadPuzzle(h.n, data && data.draft, h.preview);
+    afterLoad(loadFonts);
     showStreakChip();
     countdown(); setInterval(countdown, 1000);
     if (!store.seenHelp) { store.seenHelp = true; save(store); $("help").showModal(); }

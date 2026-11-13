@@ -13,6 +13,7 @@ That covers puzzles #1 to #399 (2026-11-09 to 2027-12-12). After that the list r
 | Route endpoints, towns on maps, country of each end | [GeoNames](https://www.geonames.org/) via the `all-the-cities` package | CC BY 4.0 |
 | Coastlines, borders, land/sea test | [Natural Earth](https://www.naturalearthdata.com/) 1:10m via `world-atlas` | Public domain |
 | Lakes on maps | `@geo-maps/earth-lakes-1km` (derived from Natural Earth) | Public domain / see package |
+| Shaded relief on maps (interim) | Computed from the same AWS Terrain Tiles | As for elevation profiles |
 
 No terrain is invented, smoothed into shape or edited by hand. Each value is a bilinear interpolation of four real DEM pixels.
 
@@ -72,3 +73,29 @@ Distances: 3.6 km to 897.2 km (median 173.6 km). Countries at either end: 103.
 - Large lakes appear at their bed depth in some sources (ETOPO1), so routes over them are dropped rather than shown wrongly.
 - The land/sea test uses 1:10m coastlines, so the first or last sample of a coastal route can sit just offshore and show as sea level.
 - Generated facts are computed from the profile and GeoNames, not written by hand.
+
+## Terrain audit (are the sharp ups and downs real?)
+
+`npm run verify:terrain` re-reads routes from the source DEM two zoom levels finer and 10× denser:
+
+- `scripts/verify_terrain.mjs` compares Athens–Delphi and the 12 most jagged routes against the finer read. Run on 2026-11-13: baked values matched the finer read within 0.3–1.4% of the chart height on average, peaks matched within ~50 m, and the slice averages were just as jagged as the baked samples (Athens–Delphi: 87 m vs 82 m average step). No spikes.
+- `scripts/verify_spikes.mjs` checks every one-sample spike or dip in all routes (a sample that stands out from both neighbours by over 15% of the chart). Run on 2026-11-13: 95 found, 94 confirmed by the finer read, 1 borderline (`horizonte-paraipaba` #40: 651 m baked, 573 m finer, neighbours 286/495 m, so still a real hill).
+
+Verdict: the drastic ups and downs are real terrain (for Athens–Delphi: the Parnitha foothills, the Boeotian plain, Helicon and the slopes of Parnassus), not sampling artifacts. Profiles are left as they are; the scoring forgives them instead (see `scoreOf` in game.js).
+
+## Maps and imagery
+
+| Layer | Source | Status |
+|---|---|---|
+| Vector map (coastlines, borders, lakes, towns) | Natural Earth, GeoNames, baked by `scripts/bake_maps.mjs` into `data/maps/NN.json` (10 routes per file, loaded on demand) | Live |
+| Shaded relief (**interim**) | Hillshade computed from AWS Terrain Tiles by `scripts/bake_relief.mjs` into `data/relief/<id>.jpg` (320×240, ~14 KB each, loaded on demand) | Live, labelled "interim" in the game |
+| Satellite imagery | none | **Blocked**: not possible inside a Claude artifact |
+| OpenStreetMap tiles | tile.openstreetmap.org | **Blocked**: not possible inside a Claude artifact |
+
+Why satellite and OSM tiles are blocked: the artifact page runs under a Content Security Policy that only lets it load scripts from a few CDNs and stylesheets/fonts from Google Fonts. Images, fetch and XHR to any other host are blocked silently. So no live tile layer (OSM, Esri, EOX, NASA GIBS or any other) can load in the published artifact, whatever its licence. Images published as files alongside the artifact do load, which is how the relief works.
+
+What a future hosted version (its own web page, outside the artifact) could do:
+
+- **OpenStreetMap standard tiles** (`tile.openstreetmap.org`): allowed for light use under the [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/) with visible "© OpenStreetMap contributors" attribution, a valid Referer, no bulk downloading or prefetching, and caching that respects the headers. Data is ODbL. Fine for a small game; heavy traffic should move to a paid or self-hosted tile service.
+- **Free satellite imagery**: [EOX Sentinel-2 cloudless](https://s2maps.eu): the 2016 layer is CC BY 4.0; later years are CC BY-NC-SA 4.0 (non-commercial only, which is ambiguous if the game ever earns money). Attribution: "Sentinel-2 cloudless – https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data)". [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api) is public domain with no key, but only ~250 m per pixel for true colour, too coarse for short routes. Esri World Imagery is free only under Esri's own terms (an ArcGIS account and attribution), so it would need checking first.
+- Satellite imagery shows mountains plainly, so it makes the game easier, as the relief layer does. The player can switch back to the plain map.
