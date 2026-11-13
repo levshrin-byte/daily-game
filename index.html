@@ -25,7 +25,7 @@
     </div>
     <div class="top-actions">
       <span id="streak-chip" class="streak-chip mono" hidden title="Daily streak"></span>
-      <button id="archive-btn" class="icon-btn" aria-label="Past puzzles">
+      <button id="archive-btn" class="icon-btn" aria-label="Calendar and route previews">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
       </button>
       <button id="help-btn" class="icon-btn" aria-label="How to play">?</button>
@@ -36,10 +36,19 @@
     <button id="prev" class="icon-btn" aria-label="Previous puzzle">‹</button>
     <div class="puzzle-id">
       <div><span class="marker mono" id="puzzle-no">#1</span> <span id="puzzle-date" class="puzzle-date"></span></div>
-      <div class="puzzle-sub"><span id="test-chip" class="test-chip" hidden>Testing</span><span id="difficulty" class="difficulty"></span><button id="today-btn" class="link-btn" hidden>Back to today</button></div>
+      <div class="puzzle-sub"><span id="day-sub">Three routes today</span><button id="today-btn" class="link-btn" hidden>Back to today</button></div>
     </div>
     <button id="next" class="icon-btn" aria-label="Next puzzle">›</button>
   </nav>
+  <div id="tiers" class="tiers" role="group" aria-label="Difficulty">
+    <button type="button" data-tier="0"><span class="t-name"><span class="pips d1" aria-hidden="true"><i></i><i></i><i></i></span>Easy</span><span class="t-state"></span></button>
+    <button type="button" data-tier="1"><span class="t-name"><span class="pips d2" aria-hidden="true"><i></i><i></i><i></i></span>Medium</span><span class="t-state"></span></button>
+    <button type="button" data-tier="2"><span class="t-name"><span class="pips d3" aria-hidden="true"><i></i><i></i><i></i></span>Hard</span><span class="t-state"></span></button>
+  </div>
+  <div id="preview-bar" class="preview-bar" hidden>
+    <span class="preview-label"><span class="test-chip">Testing</span> <span id="preview-what"></span></span>
+    <button type="button" id="exit-preview" class="btn small">Exit preview</button>
+  </div>
 
   <main>
     <section class="card route">
@@ -77,6 +86,7 @@
       </div>
       <div class="coverage" aria-hidden="true"><div id="coverage-bar"></div></div>
       <div class="draw-actions">
+        <button id="undo" class="btn ghost" aria-label="Undo last stroke"><span aria-hidden="true">↶</span> Undo</button>
         <button id="clear" class="btn ghost">Clear</button>
         <button id="submit" class="btn primary">Submit</button>
       </div>
@@ -92,6 +102,7 @@
       </div>
       <p id="takeaway" class="takeaway"></p>
       <div id="breakdown" class="breakdown" aria-label="Accuracy along the route, start to finish"></div>
+      <div id="day-next" class="day-next"></div>
 
       <details class="details">
         <summary>Details</summary>
@@ -108,7 +119,7 @@
       </div>
       <div id="preview-note" class="preview-note" hidden>
         <span>Testing preview: not saved to your stats, streak or share card.</span>
-        <button id="redo" class="btn small">Draw again</button>
+        <div class="preview-actions"><button id="redo" class="btn small">Draw again</button><button id="exit-preview-2" class="btn small">Exit preview</button></div>
       </div>
       <textarea id="share-text" class="share-text" rows="4" readonly hidden aria-label="Your result to copy"></textarea>
 
@@ -120,7 +131,7 @@
       </div>
       <div class="result-actions">
         <span id="countdown" class="countdown mono"></span>
-        <button id="archive-btn-2" class="btn small">Past puzzles</button>
+        <button id="archive-btn-2" class="btn small">Past days</button>
       </div>
     </section>
   </main>
@@ -142,12 +153,13 @@
       <g class="demo-pins"><circle cx="10" cy="110" r="8" class="demo-a"/><text x="10" y="113.5">A</text><circle cx="290" cy="110" r="8" class="demo-b"/><text x="290" y="113.5">B</text></g>
     </svg>
     <ol class="steps">
-      <li><b>Look at the line.</b> Each day brings a straight line between two real places.</li>
-      <li><b>Draw the ground.</b> Drag across the chart to sketch how high the land is, from <b>A</b> on the left to <b>B</b> on the right.</li>
+      <li><b>Pick a route.</b> Each day brings three straight lines between real places: <b>Easy</b>, <b>Medium</b> and <b>Hard</b>.</li>
+      <li><b>Draw the ground.</b> Drag across the chart to sketch how high the land is, from <b>A</b> on the left to <b>B</b> on the right. Taps and tiny touches are ignored, and <b>Undo</b> takes back your last stroke.</li>
       <li><b>See how close you got.</b> Submit to reveal the real profile and your score out of 100.</li>
     </ol>
     <p class="legend-line">Each square is a fifth of the route: <span class="nowrap">🟩 spot on</span> <span class="nowrap">🟨 close</span> <span class="nowrap">🟧 off</span> <span class="nowrap">🟥 way off</span></p>
-    <p class="muted">A new route comes out at midnight. Mondays are easiest and the routes get harder towards the weekend. Play past days from the calendar.</p>
+    <p class="muted">New routes come out at midnight. Your streak counts the days you play at least one of them. Play past days from the calendar.</p>
+    <button id="help-preview" class="btn ghost small wide">Preview any route (testing)</button>
     <div class="dialog-actions">
       <button id="reset" class="btn ghost small">Reset my progress</button>
       <button id="help-close" class="btn primary" autofocus>Let's go</button>
@@ -156,21 +168,21 @@
 
   <dialog id="archive" aria-labelledby="archive-title">
     <div class="archive-head">
-      <h2 id="archive-title">Past puzzles</h2>
+      <h2 id="archive-title">Past days</h2>
       <button id="archive-close" class="icon-btn" aria-label="Close">✕</button>
     </div>
-    <div id="archive-tabs" class="units tabs" role="group" aria-label="List" hidden>
-      <button type="button" data-tab="past" aria-pressed="true">Past puzzles</button>
-      <button type="button" data-tab="all" aria-pressed="false">All routes</button>
+    <div id="archive-tabs" class="units tabs" role="group" aria-label="List">
+      <button type="button" data-tab="past" aria-pressed="true">Days</button>
+      <button type="button" data-tab="all" aria-pressed="false">All routes · testing</button>
     </div>
     <p id="archive-summary" class="muted"></p>
     <input id="route-search" class="route-search" type="search" placeholder="Search by place, country or #" aria-label="Search routes" hidden>
     <ol id="archive-list" class="archive-list"></ol>
-    <button id="test-off" class="btn ghost small" hidden>Turn off testing mode</button>
   </dialog>
   <!-- build:end -->
 
   <script src="data/routes.js"></script>
+  <script src="data/days.js"></script>
   <script src="data/world.js"></script>
   <script src="game.js"></script>
 </body>

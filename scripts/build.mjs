@@ -41,6 +41,7 @@ const out = [
   between(html, "<!-- build:artifact-body"),
   inlineScript(`window.BUILD = ${JSON.stringify(stamp)};`),
   inlineScript(routesJs),
+  inlineScript(read("data/days.js")),
   inlineScript(read("data/world.js")),
   inlineScript(read("game.js")),
 ].join("\n");

@@ -12,10 +12,12 @@ Don't deploy anywhere public (no GitHub Pages, no hosting) and don't buy a domai
 2. `npm run build`, which writes `dist/elevation.html` (the page: CSS, game code and the packed route list inlined,
    about 290 KB) and `dist/files.json` (the supporting files: `data/maps/*.json` and `data/relief/*.jpg`, which the
    game fetches on demand).
-3. `npm run check`, which plays a round at iPhone size in light and dark mode on both the plain site and the
-   artifact bundle with Google Fonts made to hang: checks first paint and the load event (< 1.5 s), draws with a real
-   touch drag, checks tap targets (≥ 44 px) and off-screen buttons, opens the details, replays puzzle #1 from the
-   archive, and previews route #300 in testing mode (it must not touch results or the share card). Screenshots go to
+3. `npm run check`, which plays at iPhone size in light and dark mode on both the plain site and the artifact
+   bundle (with Google Fonts made to hang, and on the bundle with `history.replaceState` made to throw, as in a
+   sandboxed frame): first paint and load event (< 1.5 s); taps, wobbles and two-finger touches must draw nothing;
+   a shaky real drag draws; Undo/Clear; switching Easy/Medium/Hard keeps drafts; submit, share card, "Next" route;
+   tap targets (≥ 44 px); calendar replay of day 1 Easy; a preview via Help → "Preview any route" (must not touch
+   results, streak or the share card); and the migration of one-a-day results. Screenshots go to
    `.cache/screens/` (or `$SCREENS`). Look at them yourself before publishing.
 4. Publish `dist/elevation.html` with the Artifact tool **to the existing artifact URL** above, so the owner's
    link keeps working (from a new session: `action: "read"` that URL first, then publish with it as `url`).
@@ -42,9 +44,16 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
 - Uncaught errors appear in a red bar at the top of the page, which is the only way the owner sees them. Keep it.
 - `localStorage` is best effort: every read and write sits in try/catch.
 - Colours are CSS tokens in `style.css`, with dark-mode overrides. Don't hard-code colours.
-- **Testing mode** (for the owner): five taps on the footer build stamp, or opening `#test`, adds an "All routes"
-  tab to the calendar to preview any route, including future days, at `#t<n>`. Previews live in `store.previews`
-  and never touch results, stats, streaks or share cards. It is hidden, not secret.
+- **Three routes a day** (Easy, Medium, Hard): `data/days.js` (`window.DAYS`, from `scripts/plan_days.mjs`). Results
+  live in `store.days` keyed `<day><e|m|h>` (e.g. `12m`); one streak counts days with at least one route finished
+  on the day; the share card covers the whole day. Links: `#p12m`. Old one-a-day results (`store.results`, kept as
+  a backup) were moved to the slot where their route now plays (days 1-5 kept their routes).
+- **Route previews** (for the owner): the calendar always has an "All routes · testing" tab, also reachable from
+  Help → "Preview any route (testing)", five taps on the build stamp, or `#test`. Previews open at `#t<route no.>`,
+  live in `store.previews` and never touch results, stats, streaks or share cards.
+- **Drawing input** is deliberate (`INPUT` in game.js): a stroke counts only after a real drag, one finger at a
+  time, with light smoothing of the finger's height. Never smooth the terrain itself.
+- Never let `history.replaceState` (or any other nice-to-have browser API) abort loading a puzzle: wrap it.
 - **Route data must be real.** Every profile comes from the AWS Terrain Tiles DEM; never invent, smooth into
   shape or hand-edit terrain. Routes that fail the checks are dropped, not fixed up. See `DATA.md`.
 
@@ -59,6 +68,9 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
 - `scripts/bake_profiles.mjs` → `data/routes.js` and `DATA.md`: full-resolution profiles, a second read at
   another zoom to cross-check, sea masking, difficulty, data-driven facts and the **daily schedule** (the
   array order is the puzzle order, kept in `scripts/schedule.json`).
+- `scripts/plan_days.mjs` → `data/days.js`, `scripts/days.json` (append-only, like schedule.json): three routes a
+  day, tiers by thirds of the difficulty score (`scripts/lib/difficulty.mjs`); rewrites each route's `difficulty`
+  to its slot. Part of `npm run bake`.
 - `scripts/bake_maps.mjs` → `data/maps/NN.json` (ten routes per file, in ROUTES order) and `data/world.js` (locator):
   per-route vector maps (Natural Earth, GeoNames), drawn by `game.js`.
 - `scripts/bake_relief.mjs` → `data/relief/<id>.jpg`: **interim** shaded relief from the same DEM, shown under the map

@@ -85,23 +85,29 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  // ROUTES is baked in daily order (scripts/bake_profiles.mjs balances difficulty by weekday and spreads
-  // regions out). After the list runs out it repeats, reshuffled once per cycle.
-  function routeFor(n) {
-    const cycle = Math.floor((n - 1) / ROUTES.length);
-    if (cycle === 0) return ROUTES[n - 1];
+  // Three puzzles a day: DAYS[n - 1] is [easy, medium, hard] as indices into ROUTES (scripts/plan_days.mjs).
+  // After the plan runs out the days repeat, reshuffled once per cycle. Without a plan (an old data file),
+  // day n falls back to the old one-a-day order.
+  const DAYS = window.DAYS || [];
+  const TIERS = ["Easy", "Medium", "Hard"], TK = "emh";
+  function dayIndices(n) {
+    if (!DAYS.length) { const i = (n - 1) % ROUTES.length; return [i, i, i]; }
+    const cycle = Math.floor((n - 1) / DAYS.length);
+    if (cycle === 0) return DAYS[n - 1];
     const rand = mulberry32(20261109 + cycle * 7919);
-    const order = ROUTES.map((_, i) => i);
+    const order = DAYS.map((_, i) => i);
     for (let i = order.length - 1; i > 0; i--) {
       const j = Math.floor(rand() * (i + 1));
       [order[i], order[j]] = [order[j], order[i]];
     }
-    return ROUTES[order[(n - 1) % ROUTES.length]];
+    return DAYS[order[(n - 1) % DAYS.length]];
   }
+  const routeOf = (n, t) => ROUTES[dayIndices(n)[t]];
+  // Where a route (1-based route number) plays in the first cycle: { n, t }.
+  const slotOf = (no) => { for (let d = 0; d < DAYS.length; d++) { const t = DAYS[d].indexOf(no - 1); if (t >= 0) return { n: d + 1, t }; } return null; };
 
   function puzzleDate(n) { return new Date(LAUNCH[0], LAUNCH[1], LAUNCH[2] + n - 1); }
   const fmtDate = (n, opts = { month: "short", day: "numeric" }) => puzzleDate(n).toLocaleDateString("en-US", opts);
-  const DIFF = ["", "Easy", "Medium", "Hard"];
 
   // ---------- Storage (best effort: may be blocked or empty) ----------
   function load() {
@@ -111,6 +117,9 @@
   function save(s) { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {} }
   let store = load();
   store.previews = store.previews || {};
+  store.days = store.days || {};       // results by day and difficulty: { "12e": {...}, "12m": {...}, "12h": {...} }
+  store.drafts = store.drafts || {};   // unfinished drawings, so switching routes never loses one
+  const keyOf = (n, t) => `${n}${TK[t]}`;
 
   // ---------- Units ----------
   // Everything is stored in metres and km; only what's shown on screen is converted.
@@ -129,24 +138,27 @@
 
   // ---------- State ----------
   const today = dayNumber(new Date());
-  let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0, justScored = null;
+  // day and tier (0 easy, 1 medium, 2 hard) of the puzzle on screen; in a preview, `preview` is the route number.
+  let day, tier, route, axis, drawn, revealed, revealProgress = 0, justScored = null;
 
-  // Testing mode (for the owner): previews any of the routes, including future days, without touching
-  // results, stats, streaks or share cards. Turned on by tapping the build stamp in the footer five times, or
-  // by opening the page with #test. Previews use #t12; normal puzzle links use #p12.
-  let testMode = !!store.testMode, preview = false;
-  const saved = () => (preview ? store.previews : store.results);
+  // Route previews (for testing): any route, including future days, from the calendar's "All routes" tab.
+  // Previews are saved apart, in store.previews by route number, and never touch results, stats, streaks or
+  // share cards. Links: #t57 previews route 57; #p12m is day 12's medium route.
+  let preview = 0;
+  const curKey = () => (preview ? `t${preview}` : keyOf(day, tier));
+  const savedResult = () => (preview ? store.previews[preview] : store.days[keyOf(day, tier)]);
+  const firstOpen = (n) => { const t = [0, 1, 2].find((k) => !store.days[keyOf(n, k)]); return t == null ? 0 : t; };
   function puzzleFromHash() {
-    if (location.hash === "#test") { setTestMode(true); return { n: today, preview: false }; }
     const t = /^#t(\d+)$/.exec(location.hash);
-    if (t && testMode) return { n: Math.min(ROUTES.length, Math.max(1, +t[1])), preview: true };
-    const m = /^#p(\d+)$/.exec(location.hash);
-    return { n: m ? Math.min(today, Math.max(1, +m[1])) : today, preview: false };
+    if (t) return { preview: Math.min(ROUTES.length, Math.max(1, +t[1])) };
+    const m = /^#p(\d+)([emh])?$/.exec(location.hash);
+    const n = m ? Math.min(today, Math.max(1, +m[1])) : today;
+    return { n, t: m && m[2] ? TK.indexOf(m[2]) : firstOpen(n), openAll: location.hash === "#test" };
   }
-  function setTestMode(on) {
-    testMode = on; store.testMode = on; save(store);
-    $("test-chip").hidden = !on;
-    if (!on && preview) loadPuzzle(today);
+  // The page may run where the history API is blocked (a sandboxed frame): links are a nice-to-have, never
+  // a reason for a puzzle to fail to load.
+  function setHash(hash) {
+    try { if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search); } catch {}
   }
 
   // ---------- Axis ----------
@@ -449,37 +461,104 @@
   }
 
   // ---------- Drawing input ----------
+  // Drawing has to be deliberate, so stray touches can't spoil a sketch:
+  //  - Nothing is drawn when a finger lands. A stroke only counts once it has moved at least INPUT.travel px
+  //    and INPUT.across px sideways; taps, dots and tiny wobbles are ignored completely.
+  //  - Once it counts, the stroke is drawn from where the finger first landed, so nothing is lost.
+  //  - One finger at a time: a second finger (or a palm) never draws, and two fingers landing together cancel
+  //    a stroke that hasn't started yet (that's a pinch or a scroll, not drawing).
+  //  - Light smoothing of the finger's height (an exponential moving average, in screen pixels) keeps a shaky
+  //    finger from making spikes. This is input handling only: the real terrain is never smoothed.
+  //  - Every stroke (and Clear) can be undone, one step at a time.
+  const INPUT = { travel: 14, across: 9, smooth: 0.45 };
+  let stroke = null, undoStack = [];
   function pointerPos(e) {
     const r = chart.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
-  function paint(e) {
-    const p = pointerPos(e);
-    const col = clamp(colAt(p.x), 0, COLS - 1);
-    const m = clamp(elevAt(p.y), axis.lo, axis.hi);
-    if (lastCol && lastCol.col !== col) {
-      const a = lastCol, dir = Math.sign(col - a.col);
-      for (let i = a.col + dir; i !== col; i += dir) drawn[i] = a.m + ((m - a.m) * (i - a.col)) / (col - a.col);
+  function paintTo(x, y) {
+    const col = clamp(colAt(x), 0, COLS - 1);
+    const m = clamp(elevAt(y), axis.lo, axis.hi);
+    const last = stroke.last;
+    if (last && last.col !== col) {
+      const dir = Math.sign(col - last.col);
+      for (let i = last.col + dir; i !== col; i += dir) drawn[i] = last.m + ((m - last.m) * (i - last.col)) / (col - last.col);
     }
     drawn[col] = m;
-    lastCol = { col, m };
-    $("hint").style.opacity = 0;
-    showCoverage();
+    stroke.last = { col, m };
     // Your finger hides the line, so show where it is.
     $("readout").textContent = `${fmtH(m)} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
-    render();
   }
+  function pushUndo() { undoStack.push(drawn.slice()); if (undoStack.length > 60) undoStack.shift(); }
   chart.addEventListener("pointerdown", (e) => {
-    if (revealed) return;
+    if (revealed || (e.pointerType === "mouse" && e.button !== 0)) return;
     e.preventDefault();
-    chart.setPointerCapture(e.pointerId);
-    lastCol = null;
-    paint(e);
+    if (stroke) {                                   // a second finger
+      if (!stroke.live) { try { chart.releasePointerCapture(stroke.id); } catch {} stroke = null; }
+      return;
+    }
+    const p = pointerPos(e);
+    try { chart.setPointerCapture(e.pointerId); } catch {}
+    stroke = { id: e.pointerId, x0: p.x, y0: p.y, px: p.x, py: p.y, travel: 0, live: false, sy: p.y, last: null };
   });
-  chart.addEventListener("pointermove", (e) => { if (!revealed && chart.hasPointerCapture(e.pointerId)) paint(e); });
-  const endStroke = () => { lastCol = null; $("readout").textContent = ""; };
+  chart.addEventListener("pointermove", (e) => {
+    if (!stroke || e.pointerId !== stroke.id || revealed) return;
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for (const ev of evs.length ? evs : [e]) {
+      const p = pointerPos(ev);
+      stroke.travel += Math.hypot(p.x - stroke.px, p.y - stroke.py);
+      stroke.px = p.x; stroke.py = p.y;
+      if (!stroke.live) {
+        if (stroke.travel < INPUT.travel || Math.abs(p.x - stroke.x0) < INPUT.across) continue;
+        // It's a real drag: start the stroke where the finger landed.
+        stroke.live = true; pushUndo();
+        paintTo(stroke.x0, stroke.y0);
+        $("hint").style.opacity = 0;
+      }
+      stroke.sy += INPUT.smooth * (p.y - stroke.sy);
+      paintTo(p.x, stroke.sy);
+    }
+    if (stroke.live) { showCoverage(); render(); }
+  });
+  function endStroke(e) {
+    if (!stroke || e.pointerId !== stroke.id) return;
+    const was = stroke; stroke = null;
+    $("readout").textContent = "";
+    if (was.live) { saveDraft(); showTools(); }
+    else if (e.type === "pointerup" && !drawn.some((v) => v != null) && !revealed) toast("Drag across the chart to draw");
+  }
   chart.addEventListener("pointerup", endStroke);
   chart.addEventListener("pointercancel", endStroke);
+  chart.addEventListener("lostpointercapture", endStroke);
+
+  function undo() {
+    if (revealed || !undoStack.length) return;
+    drawn = undoStack.pop();
+    afterEdit();
+  }
+  function clearDrawing() {
+    if (revealed || !drawn.some((v) => v != null)) return;
+    pushUndo(); drawn.fill(null);
+    afterEdit();
+    toast("Cleared. Undo brings it back");
+  }
+  function afterEdit() {
+    $("hint").style.opacity = drawn.some((v) => v != null) ? 0 : 1;
+    saveDraft(); showCoverage(); showTools(); render();
+  }
+  function showTools() {
+    const any = drawn.some((v) => v != null);
+    $("undo").disabled = revealed || !undoStack.length;
+    $("clear").disabled = revealed || !any;
+  }
+  // Unfinished drawings, kept per puzzle (and in storage for daily puzzles) so switching routes loses nothing.
+  const drafts = {};
+  function saveDraft() {
+    if (revealed || !route) return;
+    const k = curKey(), any = drawn.some((v) => v != null);
+    drafts[k] = { drawn: drawn.slice(), undo: undoStack.slice() };
+    if (!preview) { if (any) store.drafts[k] = drawn.map((v) => (v == null ? null : Math.round(v))); else delete store.drafts[k]; save(store); }
+  }
 
   // How much of the route is drawn; Submit needs 60%.
   function showCoverage() {
@@ -539,14 +618,28 @@
     return { score, squares, miss };
   }
   // Rescore results saved under scoring v1 from their saved drawings, so averages stay comparable.
+  // (Old results are keyed by puzzle number, when puzzle n was ROUTES[n - 1].)
+  store.results = store.results || {};
   if (store.scoring !== SCORING) {
     for (const [n, res] of Object.entries(store.results)) {
-      const r = routeFor(+n);
+      const r = ROUTES[(+n - 1) % ROUTES.length];
       if (!r || !res.drawing || res.drawing.length !== COLS) continue;
       const s2 = scoreOf(res.drawing, r, axisFor(r.elev));
       res.v1 = res.v1 || res.score; res.score = s2.score; res.squares = s2.squares;
     }
     store.scoring = SCORING; save(store);
+  }
+  // Three a day (iteration 3): each one-a-day result moves to the day and difficulty where its route now
+  // plays. Days 1-5 kept their original route in the slot matching its difficulty, so a result from day n
+  // lands on day n. The old results stay in store.results as a backup and are not counted again.
+  if (!store.threeADay) {
+    for (const [n, res] of Object.entries(store.results)) {
+      const slot = slotOf(+n);
+      if (!slot || !res.drawing) continue;
+      const k = keyOf(slot.n, slot.t);
+      if (!store.days[k]) store.days[k] = { ...res, daily: !!res.daily && slot.n === +n, from: +n };
+    }
+    store.threeADay = true; delete store.testMode; save(store);
   }
 
   const NAMES = ["the start", "the second fifth", "the middle", "the fourth fifth", "the finish"];
@@ -586,29 +679,33 @@
     if (revealed) return;
     const coverage = drawn.filter((v) => v != null).length / COLS;
     if (coverage < 0.6) { toast("Draw across more of the route first"); return; }
+    stroke = null;
     const user = filled();
     const { score, squares } = scoreOf(user);
     const before = stats();
-    justScored = { prevBest: before.played ? before.best : null };
-    if (preview) justScored = { prevBest: null };
-    saved()[puzzleNo] = { score, squares, drawing: user.map(Math.round), daily: !preview && puzzleNo === today, at: Date.now() };
+    justScored = { prevBest: !preview && before.played ? before.best : null };
+    const res = { score, squares, drawing: user.map(Math.round), at: Date.now() };
+    if (preview) store.previews[preview] = res;
+    else store.days[keyOf(day, tier)] = { ...res, daily: day === today };
+    delete store.drafts[curKey()]; delete drafts[curKey()];
     save(store);
     drawn = user;
     reveal(true);
   }
   function reveal(animate) {
-    revealed = true;
-    $("submit").disabled = true; $("clear").disabled = true;
+    revealed = true; undoStack = [];
+    $("submit").disabled = true; showTools();
     $("hint").style.opacity = 0;
     showCoverage();
+    showTiers();
     $("prompt").textContent = "Here's the real ground.";
     chart.style.cursor = "default";
     if (!animate || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       revealProgress = 1; render(); showResult(); return;
     }
-    const t0 = performance.now(), dur = 1400, n = puzzleNo;
+    const t0 = performance.now(), dur = 1400, k = curKey();
     const tick = (t) => {
-      if (n !== puzzleNo) return; // switched puzzles mid-animation
+      if (k !== curKey()) return; // switched puzzles mid-animation
       const p = Math.min(1, (t - t0) / dur);
       revealProgress = 1 - Math.pow(1 - p, 2);
       render();
@@ -618,12 +715,14 @@
   }
 
   // ---------- Results ----------
-  // The streak counts daily puzzles finished on their own day, in a row. It survives until the end of
-  // today, so a streak from yesterday still shows before you've played today.
+  // Three puzzles a day, one streak: a day counts towards the streak when you finish at least one of its
+  // three routes on that day. The streak survives until the end of today, so yesterday's streak still shows
+  // before you've played today. Played / Average / Best count every puzzle you've finished.
+  const dayResults = (n) => [0, 1, 2].map((t) => store.days[keyOf(n, t)] || null);
   function stats() {
-    const all = Object.entries(store.results);
+    const all = Object.entries(store.days);
     const scores = all.map(([, r]) => r.score);
-    const dailies = new Set(all.filter(([, r]) => r.daily).map(([n]) => +n));
+    const dailies = new Set(all.filter(([, r]) => r.daily).map(([k]) => parseInt(k, 10)));
     let streak = 0;
     for (let n = dailies.has(today) ? today : today - 1; dailies.has(n); n--) streak++;
     let maxStreak = 0, run = 0, prev = null;
@@ -642,9 +741,9 @@
     chip.setAttribute("aria-label", `${streak}-day streak`);
   }
   function showResult() {
-    const r = saved()[puzzleNo];
+    const r = savedResult();
     if (!r) return;
-    $("share-box").hidden = preview; $("preview-note").hidden = !preview;
+    $("share-box").hidden = !!preview; $("preview-note").hidden = !preview;
     const fresh = justScored; justScored = null;
     $("result").hidden = false;
     $("share-text").hidden = true;
@@ -670,6 +769,7 @@
     $("miss-unit").textContent = U().h;
     $("insights").innerHTML = insights(user).map(([k, t]) => `<li class="${k}">${t}</li>`).join("");
     $("fact").textContent = renderFact(route.fact);
+    showDayNext();
     $("share-preview").textContent = shareText();
     const s = stats();
     $("st-played").textContent = s.played; $("st-avg").textContent = s.avg;
@@ -677,17 +777,31 @@
     showStreakChip();
     if (fresh) setTimeout(() => $("result").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
   }
+  // Under a daily result: a button to the next route of the day you haven't played, or the day's total.
+  function showDayNext() {
+    const box = $("day-next");
+    if (preview) { box.innerHTML = ""; return; }
+    const res = dayResults(day), next = [1, 2, 0].map((k) => (tier + k) % 3).find((t) => !res[t]);
+    box.innerHTML = next != null
+      ? `<button class="btn primary wide" data-go="${next}">Next: ${TIERS[next]} route →</button>`
+      : `<p class="day-done">Day complete: <b class="mono">${res.reduce((a, r) => a + r.score, 0)}</b>/300 across all three routes.</p>`;
+  }
+  $("day-next").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-go]");
+    if (b) { loadPuzzle({ n: day, t: +b.dataset.go }); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  });
+  // One card per day, covering its three routes. It shows only squares and scores (never heights or places),
+  // so it gives nothing away. Previews have no card.
   function shareText() {
-    const r = store.results[puzzleNo];
-    if (preview || !r) return "";
-    const replay = !r.daily;
+    if (preview) return "";
+    const res = dayResults(day);
+    if (!res.some(Boolean)) return "";
     const { streak } = stats();
-    const lines = [
-      `Elevation #${puzzleNo} · ${fmtDate(puzzleNo)} ⛰️${replay ? " (replay)" : ""}`,
-      `${r.squares} ${r.score}/100`,
-      `${DIFF[route.difficulty] || ""}${route.difficulty ? " · " : ""}${fmtD(route.distanceKm)}`,
-    ];
-    if (!replay && streak >= 2) lines.push(`🔥 ${streak}-day streak`);
+    const lines = [`Elevation #${day} · ${fmtDate(day)} ⛰️`];
+    res.forEach((r, t) => lines.push(`${TIERS[t].padEnd(6, " ")} ${r ? `${r.squares} ${r.score}${r.daily ? "" : " ↺"}` : "⬜⬜⬜⬜⬜ –"}`));
+    const done = res.filter(Boolean);
+    if (done.length === 3) lines.push(`Total ${done.reduce((a, r) => a + r.score, 0)}/300`);
+    if (res.some((r) => r && r.daily) && streak >= 2) lines.push(`🔥 ${streak}-day streak`);
     return lines.join("\n");
   }
   $("share").addEventListener("click", () => {
@@ -703,140 +817,175 @@
     } catch { fallback(); }
   });
 
-  // ---------- Archive ----------
+  // ---------- Calendar: past days, and all routes for previews ----------
   let archiveTab = "past";
-  function openArchive() {
-    $("archive-tabs").hidden = !testMode;
-    if (!testMode) archiveTab = "past";
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  function openArchive(tab) {
+    if (tab) archiveTab = tab;
     document.querySelectorAll("#archive-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === archiveTab)));
     $("route-search").hidden = archiveTab !== "all";
-    $("test-off").hidden = archiveTab !== "all";
     const list = $("archive-list"), s = stats();
     const rows = [];
     if (archiveTab === "all") {
       $("archive-title").textContent = "All routes";
-      $("archive-summary").textContent = `Testing: preview any of the ${ROUTES.length} routes. Previews don't count towards your stats, streak or share card.`;
-      for (let n = 1; n <= ROUTES.length; n++) {
-        const r = routeFor(n), res = store.previews[n];
-        const when = n === today ? " · Today" : n > today ? " · upcoming" : "";
-        rows.push(`<li><button class="arch-row${preview && n === puzzleNo ? " current" : ""}" data-t="${n}" data-q="${esc((r.from + " " + r.to + " " + r.country + " " + r.region + " " + r.id).toLowerCase())}">
-        <span class="arch-no mono">#${n}</span>
-        <span class="arch-main"><span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${when} · ${esc(r.region)}</span>
-          <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
-        <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-sq">${res.squares}</span>` : `<span class="arch-play">Preview</span><span class="arch-diff">${DIFF[r.difficulty] || ""} · ${r.kind}</span>`}</span>
-      </button></li>`);
+      $("archive-summary").textContent = `Testing: preview any of the ${ROUTES.length} routes, including future days. Previews never count towards your stats, streak or share card.`;
+      const days = DAYS.length || ROUTES.length;
+      for (let n = 1; n <= days; n++) {
+        dayIndices(n).forEach((i, t) => {
+          if (!DAYS.length && t) return;
+          const r = ROUTES[i], no = i + 1, res = store.previews[no];
+          const when = n === today ? " · Today" : n > today ? "" : " · past";
+          rows.push(`<li><button class="arch-row${preview === no ? " current" : ""}" data-t="${no}" data-q="${esc(`${r.from} ${r.to} ${r.country} ${r.region} ${r.id} ${TIERS[t]} day ${n}`.toLowerCase())}" data-day="${n}">
+          <span class="arch-no mono">${n}${TK[t].toUpperCase()}</span>
+          <span class="arch-main"><span class="arch-date">Day ${n} · ${fmtDate(n, { month: "short", day: "numeric" })}${when} · ${TIERS[t]}</span>
+            <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
+          <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-diff">tested</span>` : `<span class="arch-play">Preview</span>`}</span>
+        </button></li>`);
+        });
       }
     } else {
-      $("archive-title").textContent = "Past puzzles";
-      const done = Object.keys(store.results).filter((n) => +n <= today).length;
-      $("archive-summary").textContent = `${done} of ${today} played${s.played ? ` · average ${s.avg}` : ""}`;
+      $("archive-title").textContent = "Past days";
+      const done = Object.keys(store.days).filter((k) => parseInt(k, 10) <= today).length;
+      $("archive-summary").textContent = `${done} of ${today * 3} routes played${s.played ? ` · average ${s.avg}` : ""}`;
       for (let n = today; n >= 1; n--) {
-        const r = routeFor(n), res = store.results[n];
-        rows.push(`<li><button class="arch-row${!preview && n === puzzleNo ? " current" : ""}" data-n="${n}">
-        <span class="arch-no mono">#${n}</span>
-        <span class="arch-main"><span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${n === today ? " · Today" : ""}</span>
-          <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
-        <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-sq">${res.squares}</span>` : `<span class="arch-play">Play</span><span class="arch-diff">${DIFF[r.difficulty] || ""}</span>`}</span>
-      </button></li>`);
+        const res = dayResults(n);
+        const cells = [0, 1, 2].map((t) => {
+          const r = res[t], cur = !preview && n === day && t === tier;
+          return `<button class="arch-cell${r ? " done" : ""}${cur ? " current" : ""}" data-n="${n}" data-tier="${t}" aria-label="Day ${n} ${TIERS[t]}${r ? `, scored ${r.score}` : ", not played"}">
+            <span class="arch-diff">${TIERS[t]}</span>${r ? `<b class="mono">${r.score}</b>` : `<span class="arch-play">Play</span>`}</button>`;
+        }).join("");
+        rows.push(`<li class="arch-day${!preview && n === day ? " current" : ""}"><div class="arch-day-head"><span class="arch-no mono">#${n}</span>
+          <span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${n === today ? " · Today" : ""}</span></div>
+          <div class="arch-cells">${cells}</div></li>`);
       }
     }
     list.innerHTML = rows.join("");
     filterRoutes();
-    if (!$("archive").open) $("archive").showModal();
+    try { if (!$("archive").open) $("archive").showModal(); } catch { $("archive").setAttribute("open", ""); }
     const cur = list.querySelector(".current");
     if (cur) cur.scrollIntoView({ block: "nearest" });
   }
   function filterRoutes() {
-    const q = archiveTab === "all" ? $("route-search").value.trim().toLowerCase() : "";
-    for (const b of $("archive-list").querySelectorAll("[data-q]")) b.parentElement.hidden = !!q && !b.dataset.q.includes(q) && b.dataset.t !== q.replace(/^#/, "");
+    const q = archiveTab === "all" ? $("route-search").value.trim().toLowerCase().replace(/^#/, "") : "";
+    for (const b of $("archive-list").querySelectorAll("[data-q]")) b.parentElement.hidden = !!q && !b.dataset.q.includes(q) && b.dataset.day !== q;
   }
+  function closeDialog(d) { try { d.close(); } catch { d.removeAttribute("open"); } }
   $("route-search").addEventListener("input", filterRoutes);
-  document.querySelectorAll("#archive-tabs button").forEach((b) => b.addEventListener("click", () => { archiveTab = b.dataset.tab; openArchive(); }));
-  $("test-off").addEventListener("click", () => { $("archive").close(); setTestMode(false); toast("Testing mode is off"); });
-  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  document.querySelectorAll("#archive-tabs button").forEach((b) => b.addEventListener("click", () => openArchive(b.dataset.tab)));
   $("archive-list").addEventListener("click", (e) => {
     const b = e.target.closest("[data-n],[data-t]");
     if (!b) return;
-    $("archive").close();
-    if (b.dataset.t) loadPuzzle(+b.dataset.t, null, true); else loadPuzzle(+b.dataset.n);
+    closeDialog($("archive"));
+    if (b.dataset.t) loadPuzzle({ preview: +b.dataset.t }); else loadPuzzle({ n: +b.dataset.n, t: +b.dataset.tier });
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
-  // Five taps on the build stamp toggle testing mode.
+  // The old hidden switch still works: five taps on the build stamp open the route list.
   let stampTaps = [];
   $("build-tag").addEventListener("click", () => {
     const now = Date.now();
-    stampTaps = stampTaps.filter((t) => now - t < 3000).concat(now);
-    if (stampTaps.length >= 5) {
-      stampTaps = []; setTestMode(!testMode);
-      toast(testMode ? "Testing mode on: Past puzzles → All routes" : "Testing mode is off");
-    }
+    stampTaps = stampTaps.filter((t) => now - t < 4000).concat(now);
+    if (stampTaps.length >= 5) { stampTaps = []; openArchive("all"); }
   });
-  $("redo").addEventListener("click", () => { delete store.previews[puzzleNo]; save(store); loadPuzzle(puzzleNo, null, true); });
-  $("archive-btn").addEventListener("click", openArchive);
-  $("archive-btn-2").addEventListener("click", openArchive);
-  $("archive-close").addEventListener("click", () => $("archive").close());
+  $("help-preview").addEventListener("click", () => { closeDialog($("help")); openArchive("all"); });
+  $("redo").addEventListener("click", () => { delete store.previews[preview]; save(store); loadPuzzle({ preview }); });
+  const exitPreview = () => { loadPuzzle({ n: today, t: firstOpen(today) }); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  $("exit-preview").addEventListener("click", exitPreview);
+  $("exit-preview-2").addEventListener("click", exitPreview);
+  $("archive-btn").addEventListener("click", () => openArchive());
+  $("archive-btn-2").addEventListener("click", () => openArchive("past"));
+  $("archive-close").addEventListener("click", () => closeDialog($("archive")));
   // Tapping the dark area around a dialog closes it.
-  for (const d of [$("archive"), $("help")]) d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+  for (const d of [$("archive"), $("help")]) d.addEventListener("click", (e) => { if (e.target === d) closeDialog(d); });
 
   function countdown() {
     const now = new Date();
     const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const s = Math.max(0, Math.floor((next - now) / 1000));
     const pad = (v) => String(v).padStart(2, "0");
-    $("countdown").textContent = `Next route in ${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
-    if (dayNumber(new Date()) !== today) $("countdown").textContent = "A new route is out. Reload to play it.";
+    $("countdown").textContent = `New routes in ${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+    if (dayNumber(new Date()) !== today) $("countdown").textContent = "New routes are out. Reload to play them.";
   }
 
   // ---------- Puzzle setup ----------
-  function loadPuzzle(n, draft, asPreview = false) {
-    puzzleNo = n; preview = asPreview;
-    route = routeFor(n);
+  // The day's three difficulty tabs, each with its score once played.
+  function showTiers() {
+    $("tiers").hidden = !!preview; $("preview-bar").hidden = !preview;
+    if (preview) return;
+    const res = dayResults(day);
+    document.querySelectorAll("#tiers button").forEach((b) => {
+      const t = +b.dataset.tier, r = res[t];
+      b.setAttribute("aria-pressed", String(t === tier));
+      b.classList.toggle("done", !!r);
+      b.querySelector(".t-state").textContent = r ? `✓ ${r.score}` : t === tier ? "Playing" : started(keyOf(day, t)) ? "Started" : "Play";
+    });
+    const n = res.filter(Boolean).length;
+    $("day-sub").textContent = n === 3 ? `All three done · ${res.reduce((a, r) => a + r.score, 0)}/300` : `${n} of 3 routes played`;
+  }
+  const started = (k) => (drafts[k] ? drafts[k].drawn : store.drafts[k] || []).some((v) => v != null);
+  // where: { n, t } for a daily puzzle, or { preview: routeNumber }.
+  function loadPuzzle(where) {
+    if (route && !revealed) saveDraft();
+    stroke = null;
+    preview = where.preview || 0;
+    if (preview) {
+      route = ROUTES[preview - 1];
+      const slot = slotOf(preview);
+      day = slot ? slot.n : today; tier = slot ? slot.t : 0;
+    } else { day = where.n; tier = where.t; route = routeOf(day, tier); }
     axis = axisFor(route.elev);
-    drawn = draft && draft.length === COLS ? draft.slice() : new Array(COLS).fill(null);
-    revealed = false; revealProgress = 0; lastCol = null;
+    const k = curKey(), mem = drafts[k], kept = !preview && store.drafts[k];
+    drawn = mem ? mem.drawn.slice() : kept && kept.length === COLS ? kept.slice() : new Array(COLS).fill(null);
+    undoStack = mem ? mem.undo.slice() : [];
+    revealed = false; revealProgress = 0;
 
-    $("puzzle-no").textContent = preview ? `Preview #${n}` : `#${n}`;
-    document.body.classList.toggle("previewing", preview);
-    $("today-btn").textContent = preview ? "Exit preview" : "Back to today";
-    $("puzzle-date").textContent = fmtDate(n, { weekday: "short", month: "short", day: "numeric" });
-    const d = route.difficulty || 0;
-    $("difficulty").innerHTML = d ? `<span class="pips d${d}" aria-hidden="true"><i></i><i></i><i></i></span>${DIFF[d]}` : "";
-    $("today-btn").hidden = !preview && n === today;
-    $("prev").disabled = n <= 1;
-    $("next").disabled = n >= (preview ? ROUTES.length : today);
+    $("puzzle-no").textContent = `#${day}`;
+    document.body.classList.toggle("previewing", !!preview);
+    $("preview-what").textContent = preview ? `Route ${preview}: day ${day}, ${TIERS[tier]}${day > today ? " (upcoming)" : ""}` : "";
+    $("puzzle-date").textContent = fmtDate(day, { weekday: "short", month: "short", day: "numeric" });
+    $("today-btn").hidden = !!preview || day === today;
+    $("prev").disabled = preview ? preview <= 1 : day <= 1;
+    $("next").disabled = preview ? preview >= ROUTES.length : day >= today;
+    $("prev").setAttribute("aria-label", preview ? "Previous route" : "Previous day");
+    $("next").setAttribute("aria-label", preview ? "Next route" : "Next day");
     $("from").textContent = route.from; $("to").textContent = route.to;
     $("country").textContent = route.country ? `${route.country} · ` : "";
     showDistance();
     $("prompt").textContent = "Sketch how high the ground is along the line, from A to B.";
-    $("submit").disabled = false; $("clear").disabled = false;
+    $("submit").disabled = false;
     $("hint").style.opacity = drawn.some((v) => v != null) ? 0 : 1;
     $("result").hidden = true;
     chart.style.cursor = "crosshair";
+    showTiers(); showTools();
 
-    const hash = preview ? `#t${n}` : n === today ? "" : `#p${n}`;
-    if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
-
+    setHash(preview ? `#t${preview}` : day === today && tier === firstOpen(today) ? "" : `#p${day}${TK[tier]}`);
     fetchMapData(route);
     resize();
     showCoverage();
-    const prior = saved()[n];
+    const prior = savedResult();
     if (prior) { drawn = prior.drawing.slice(); reveal(false); }
   }
 
-  $("clear").addEventListener("click", () => { drawn.fill(null); $("hint").style.opacity = 1; showCoverage(); render(); });
-  $("today-btn").addEventListener("click", () => loadPuzzle(today));
+  document.querySelectorAll("#tiers button").forEach((b) => b.addEventListener("click", () => { if (+b.dataset.tier !== tier) loadPuzzle({ n: day, t: +b.dataset.tier }); }));
+  $("undo").addEventListener("click", undo);
+  $("clear").addEventListener("click", clearDrawing);
+  $("today-btn").addEventListener("click", () => loadPuzzle({ n: today, t: firstOpen(today) }));
   $("submit").addEventListener("click", submit);
-  $("prev").addEventListener("click", () => puzzleNo > 1 && loadPuzzle(puzzleNo - 1, null, preview));
-  $("next").addEventListener("click", () => puzzleNo < (preview ? ROUTES.length : today) && loadPuzzle(puzzleNo + 1, null, preview));
-  $("help-btn").addEventListener("click", () => $("help").showModal());
-  $("help-close").addEventListener("click", () => $("help").close());
+  const step = (d) => {
+    if (preview) { const no = preview + d; if (no >= 1 && no <= ROUTES.length) loadPuzzle({ preview: no }); return; }
+    const n = day + d; if (n >= 1 && n <= today) loadPuzzle({ n, t: tier });
+  };
+  $("prev").addEventListener("click", () => step(-1));
+  $("next").addEventListener("click", () => step(1));
+  $("help-btn").addEventListener("click", () => { try { $("help").showModal(); } catch { $("help").setAttribute("open", ""); } });
+  $("help-close").addEventListener("click", () => closeDialog($("help")));
   // Two-tap reset (confirm() dialogs don't work inside artifacts).
   $("reset").addEventListener("click", (e) => {
     const btn = e.currentTarget;
     if (btn.dataset.armed) {
-      store = { results: {}, seenHelp: true }; save(store);
+      store = { results: {}, days: {}, drafts: {}, previews: {}, seenHelp: true, scoring: SCORING, threeADay: true, units, mapMode }; save(store);
+      for (const k of Object.keys(drafts)) delete drafts[k];
       btn.textContent = "Progress cleared"; delete btn.dataset.armed;
-      loadPuzzle(puzzleNo);
+      loadPuzzle({ n: today, t: 0 }); showStreakChip();
       return;
     }
     btn.dataset.armed = "1"; btn.textContent = "Tap again to erase everything";
@@ -850,7 +999,11 @@
   }
   document.querySelectorAll("#units button").forEach((b) => b.addEventListener("click", () => setUnits(b.dataset.u)));
   setUnits(units);
-  window.addEventListener("hashchange", () => { const h = puzzleFromHash(); if (h.n !== puzzleNo || h.preview !== preview) loadPuzzle(h.n, null, h.preview); });
+  window.addEventListener("hashchange", () => {
+    const h = puzzleFromHash();
+    if (h.openAll) return openArchive("all");
+    if (h.preview ? h.preview !== preview : preview || h.n !== day || h.t !== tier) loadPuzzle(h);
+  });
   document.querySelectorAll("#map-mode button").forEach((b) => b.addEventListener("click", () => setMapMode(b.dataset.mode)));
   window.addEventListener("resize", resize);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", resize);
@@ -864,16 +1017,16 @@
     l.href = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap";
     (document.head || document.documentElement).appendChild(l);
   }
-  function start(data) {
+  function start() {
     if (!ROUTES.length) { $("prompt").textContent = "Route data failed to load."; return; }
     const h = puzzleFromHash();
-    setTestMode(testMode);
     setMapMode(mapMode);
-    loadPuzzle(h.n, data && data.draft, h.preview);
+    loadPuzzle(h);
     afterLoad(loadFonts);
     showStreakChip();
     countdown(); setInterval(countdown, 1000);
-    if (!store.seenHelp) { store.seenHelp = true; save(store); $("help").showModal(); }
+    if (h.openAll) openArchive("all");
+    else if (!store.seenHelp) { store.seenHelp = true; save(store); try { $("help").showModal(); } catch {} }
   }
-  start({});
+  start();
 })();

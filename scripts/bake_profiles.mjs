@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { profile, SAMPLES, stats } from "./lib/terrain.mjs";
 import { landAt, nearestCity, regionOf, countryName, cities } from "./lib/geo.mjs";
+import { difficultyScore } from "./lib/difficulty.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const routes = JSON.parse(readFileSync(ROOT + "scripts/routes.json", "utf8"));
@@ -57,22 +58,6 @@ async function bake(r) {
   return { ok: true, r, main, elev, sea, land, agree, span, max, min, relief };
 }
 
-// How hard a profile is to sketch: big swings and lots of detail make it harder; a plateau far above sea
-// level is harder than one near it.
-function difficultyScore(b) {
-  const { elev, span } = b;
-  const smooth = elev.map((_, i) => mean(elev.slice(Math.max(0, i - 7), i + 8)));
-  const detail = mean(elev.map((e, i) => Math.abs(e - smooth[i]))) / span;
-  let turns = 0, dir = 0, ref = elev[0];
-  for (const e of elev) {
-    if (dir >= 0 && e < ref - 0.1 * span) { if (dir > 0) turns++; dir = -1; ref = e; }
-    else if (dir <= 0 && e > ref + 0.1 * span) { if (dir < 0) turns++; dir = 1; ref = e; }
-    else if ((dir > 0 && e > ref) || (dir < 0 && e < ref)) ref = e;
-  }
-  const height = mean(elev) / span;                   // how far up the chart the ground sits
-  return turns * 1.2 + detail * 60 + (b.relief / span) * 3 + height * 2;
-}
-
 function seaRanges(sea) {
   const out = []; let s = -1;
   sea.forEach((v, i) => { if (v && s < 0) s = i; if (!v && s >= 0) { out.push([s, i - 1]); s = -1; } });
@@ -114,9 +99,9 @@ for (const r of routes) {
   if (ok.length % 50 === 0) console.error(`${ok.length} baked, ${dropped.length} dropped, tiles fetched ${stats().fetched}`);
 }
 
-const scores = ok.map(difficultyScore);
+const scores = ok.map((b) => difficultyScore(b.elev));
 const sorted = [...scores].sort((x, y) => x - y);
-const cut1 = sorted[Math.floor(sorted.length * (2 / 7))], cut2 = sorted[Math.floor(sorted.length * (5 / 7))];
+const cut1 = sorted[Math.floor(sorted.length / 3)], cut2 = sorted[Math.floor((sorted.length * 2) / 3)];
 
 const baked = ok.map((b, k) => {
   const { r, main, elev } = b;
