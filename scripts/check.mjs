@@ -35,7 +35,10 @@ for (const [label, path] of [["site", "/"]]) {
     await page.goto(base + path);
     await page.waitForTimeout(500);
     if (await page.locator("#help[open]").count()) await page.click("#help-close");
+    // Exercise both unit settings: metric in light mode, feet/miles in dark mode.
+    await page.click(`#units button[data-u="${scheme === "dark" ? "imperial" : "metric"}"]`);
 
+    await page.locator("#chart").scrollIntoViewIfNeeded();
     const box = await page.locator("#chart").boundingBox();
     await page.mouse.move(box.x + 52, box.y + 180);
     await page.mouse.down();
@@ -53,7 +56,7 @@ for (const [label, path] of [["site", "/"]]) {
     }));
     const shot = join(OUT, `${label}-${scheme}.png`);
     await page.screenshot({ path: shot, fullPage: true });
-    const ok = !errors.length && !info.overflow && !info.errorBar && info.score !== "";
+    const ok = !errors.length && !info.overflow && !info.errorBar && info.squares !== "";  // squares appear only after a scored round
     failed ||= !ok;
     console.log(`${ok ? "PASS" : "FAIL"} ${label}/${scheme}: ${info.route}, score ${info.score} ${info.squares}${info.overflow ? ", SIDEWAYS SCROLL" : ""}${errors.length ? ", errors: " + errors.join(" | ") : ""}  → ${shot}`);
     await ctx.close();

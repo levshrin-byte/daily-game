@@ -20,7 +20,7 @@ const lakes = require("@geo-maps/earth-lakes-1km")().geometries
 const cities = require("all-the-cities");
 const world110 = feature(require("world-atlas/land-110m.json"), require("world-atlas/land-110m.json").objects.land);
 
-const W = 1000, H = 600;          // map units (the canvas scales these)
+const W = 1000, H = 750;          // map units (the canvas scales these)
 const MIN_SPAN_KM = 30;           // smallest map width, so tiny routes keep some context
 
 const merc = ([lon, lat]) => {
@@ -107,7 +107,8 @@ function bake(r) {
   };
 
   const land = shapes(countries, countryBoxes, 0);
-  const water = shapes(lakes, lakeBoxes, 30);
+  // The lake data has ~1 km cells, so on small maps tiny lakes turn into blocky triangles; keep only sizable ones.
+  const water = shapes(lakes, lakeBoxes, 2500);
 
   // A handful of well-known places for orientation, spread out and away from the pins.
   const a = toMap([r.a[1], r.a[0]]), b = toMap([r.b[1], r.b[0]]);

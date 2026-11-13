@@ -62,6 +62,19 @@
   function save(s) { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {} }
   let store = load();
 
+  // ---------- Units ----------
+  // Everything is stored in metres and km; only what's shown on screen is converted.
+  const UNITS = {
+    metric: { h: "m", d: "km", hPer: 1, dPer: 1 },
+    imperial: { h: "ft", d: "mi", hPer: 3.28084, dPer: 0.621371 },
+  };
+  let units = UNITS[store.units] ? store.units
+    : /^en-(US|LR|MM)\b/i.test(navigator.language || "") ? "imperial" : "metric";
+  const U = () => UNITS[units];
+  const fmtH = (m) => `${fmt(m * U().hPer)} ${U().h}`;
+  const fmtD = (km) => `${fmt(km * U().dPer)} ${U().d}`;
+  const shortH = (v) => (Math.abs(v) >= 1000 ? `${v / 1000}k ${U().h}` : `${v} ${U().h}`);
+
   // ---------- State ----------
   const today = dayNumber(new Date());
   let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0;
@@ -80,7 +93,12 @@
     const lo = min < -50 ? -500 : 0;
     return { lo, hi };
   }
-  function tickStep(span) { return span <= 1500 ? 250 : span <= 3000 ? 500 : span <= 5500 ? 1000 : 1500; }
+  // Tick spacing in the units on screen, so gridlines land on round numbers of m or ft.
+  function tickStep(span) {
+    return units === "imperial"
+      ? (span <= 4000 ? 1000 : span <= 10000 ? 2000 : span <= 18000 ? 4000 : 5000)
+      : (span <= 1500 ? 250 : span <= 3000 ? 500 : span <= 5500 ? 1000 : 1500);
+  }
 
   // ---------- Helpers ----------
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -116,49 +134,100 @@
 
     tracePolys(ctx, m.land, s);
     ctx.fillStyle = css("--land"); ctx.fill("evenodd");
-    ctx.strokeStyle = css("--border"); ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = css("--border"); ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke();
     tracePolys(ctx, m.water, s);
     ctx.fillStyle = css("--water"); ctx.fill("evenodd");
+    ctx.strokeStyle = css("--water-edge"); ctx.lineWidth = 1; ctx.stroke();
 
-    // Nearby places
-    ctx.font = `500 11px ${FONT_BODY()}`; ctx.textBaseline = "middle";
+    // Labels are placed so they never overlap: endpoint names first, then towns where they fit.
+    const [ax, ay] = m.a.map((v) => v * s), [bx, by] = m.b.map((v) => v * s);
+    const taken = [
+      box(ax - 15, ay - 15, ax + 15, ay + 15), box(bx - 15, by - 15, bx + 15, by + 15),
+      box(w - 116, 0, w, 68),          // world locator
+      box(0, h - 40, 130, h),          // scale bar
+    ];
+    const free = (b) => b.x0 >= 2 && b.x1 <= w - 2 && b.y0 >= 2 && b.y1 <= h - 2 &&
+      !taken.some((t) => b.x0 < t.x1 && b.x1 > t.x0 && b.y0 < t.y1 && b.y1 > t.y0);
+    const clearOfRoute = (b) => {
+      for (let t = 0; t <= 1; t += 0.02) {
+        const x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
+        if (x > b.x0 - 3 && x < b.x1 + 3 && y > b.y0 - 3 && y < b.y1 + 3) return false;
+      }
+      return true;
+    };
+    // Candidate spots for a label of width tw next to a point: right, left, below, above.
+    const spots = (x, y, tw, gap, th) => [
+      { x: x + gap, y, align: "left", b: box(x + gap - 2, y - th / 2, x + gap + tw + 2, y + th / 2) },
+      { x: x - gap, y, align: "right", b: box(x - gap - tw - 2, y - th / 2, x - gap + 2, y + th / 2) },
+      { x, y: y + gap + 4, align: "center", b: box(x - tw / 2 - 2, y + gap + 4 - th / 2, x + tw / 2 + 2, y + gap + 4 + th / 2) },
+      { x, y: y - gap - 4, align: "center", b: box(x - tw / 2 - 2, y - gap - 4 - th / 2, x + tw / 2 + 2, y - gap - 4 + th / 2) },
+    ];
+    const labels = [];
+    ctx.font = `700 13px ${FONT_BODY()}`;
+    for (const [x, y, ox, oy, text] of [[ax, ay, bx, by, route.from], [bx, by, ax, ay, route.to]]) {
+      const c = spots(x, y, ctx.measureText(text).width, 19, 16);
+      // Prefer the side facing away from the other end of the line.
+      const order = Math.abs(x - ox) >= Math.abs(y - oy) ? (x >= ox ? [0, 2, 3, 1] : [1, 2, 3, 0]) : (y >= oy ? [2, 0, 1, 3] : [3, 0, 1, 2]);
+      const pick = order.map((i) => c[i]).find((o) => free(o.b) && clearOfRoute(o.b)) || order.map((i) => c[i]).find((o) => free(o.b)) || c[order[0]];
+      taken.push(pick.b); labels.push({ ...pick, text, font: `700 13px ${FONT_BODY()}` });
+    }
+    ctx.font = `600 12px ${FONT_BODY()}`;
+    const dots = [];
     for (const [name, x, y] of m.places) {
       const px = x * s, py = y * s;
-      ctx.fillStyle = css("--muted");
-      ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI * 2); ctx.fill();
-      const right = px < w - 90;
-      ctx.textAlign = right ? "left" : "right";
-      ctx.fillText(name, px + (right ? 6 : -6), py);
+      const dot = box(px - 4, py - 4, px + 4, py + 4);
+      if (!free(dot)) continue;
+      const pick = spots(px, py, ctx.measureText(name).width, 7, 15).slice(0, 2).find((o) => free(o.b) && clearOfRoute(o.b));
+      if (!pick) continue;
+      taken.push(dot, pick.b); dots.push([px, py]); labels.push({ ...pick, text: name, font: `600 12px ${FONT_BODY()}` });
     }
 
-    // Route line and pins
-    const [ax, ay] = m.a.map((v) => v * s), [bx, by] = m.b.map((v) => v * s);
-    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2.5; ctx.setLineDash([7, 6]);
+    for (const [px, py] of dots) {
+      ctx.fillStyle = css("--map-ink"); ctx.strokeStyle = css("--halo"); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, py, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+
+    // Route line (with a halo so it stands out) and pins
+    ctx.lineCap = "round";
+    ctx.strokeStyle = css("--halo"); ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    ctx.strokeStyle = css("--route"); ctx.lineWidth = 3.5; ctx.setLineDash([9, 7]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
     pin(ctx, ax, ay, "A", css("--pin-a"));
     pin(ctx, bx, by, "B", css("--pin-b"));
 
+    ctx.textBaseline = "middle";
+    for (const l of labels) { ctx.font = l.font; haloText(ctx, l.text, l.x, l.y, l.align); }
+
     scaleBar(ctx, m, s, h);
     locator(ctx, w);
   }
+  function box(x0, y0, x1, y1) { return { x0, y0, x1, y1 }; }
+  function haloText(ctx, text, x, y, align) {
+    ctx.textAlign = align; ctx.lineJoin = "round";
+    ctx.strokeStyle = css("--halo"); ctx.lineWidth = 3.5; ctx.strokeText(text, x, y);
+    ctx.fillStyle = css("--map-ink"); ctx.fillText(text, x, y);
+  }
   function pin(ctx, x, y, label, color) {
-    ctx.fillStyle = color; ctx.strokeStyle = css("--surface"); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#fff"; ctx.font = `700 12px ${FONT_BODY()}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = color; ctx.strokeStyle = css("--halo"); ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = css("--pin-ink"); ctx.font = `700 13px ${FONT_BODY()}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(label, x, y + 0.5);
   }
   function scaleBar(ctx, m, s, h) {
-    const kmPerPx = m.kmPerUnit / s;
-    const target = 90 * kmPerPx;
+    const perPx = (m.kmPerUnit / s) * U().dPer;   // km or miles per pixel
+    const target = 100 * perPx;
     const nice = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000].reduce((best, v) => (v <= target ? v : best), 1);
-    const px = nice / kmPerPx, x = 12, y = h - 14;
-    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x, y); ctx.lineTo(x + px, y); ctx.lineTo(x + px, y - 4); ctx.stroke();
-    ctx.fillStyle = css("--ink"); ctx.font = `700 11px ${FONT_MONO()}`; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
-    ctx.fillText(`${nice} km`, x + 4, y - 4);
+    const px = nice / perPx, x = 12, y = h - 14;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = css("--halo"); ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x, y); ctx.lineTo(x + px, y); ctx.lineTo(x + px, y - 5); ctx.stroke();
+    ctx.strokeStyle = css("--map-ink"); ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.font = `700 12px ${FONT_MONO()}`; ctx.textBaseline = "bottom";
+    haloText(ctx, `${nice} ${U().d}`, x + 4, y - 6, "left");
   }
   function locator(ctx, w) {
-    const iw = 84, ih = 42, x0 = w - iw - 8, y0 = 8, s = iw / 360;
+    const iw = 104, ih = 52, x0 = w - iw - 8, y0 = 8, s = iw / 360;
     ctx.fillStyle = css("--surface"); ctx.strokeStyle = css("--line"); ctx.lineWidth = 1;
     ctx.fillRect(x0, y0, iw, ih); ctx.strokeRect(x0 + 0.5, y0 + 0.5, iw - 1, ih - 1);
     ctx.save(); ctx.translate(x0, y0);
@@ -170,8 +239,8 @@
     }
     ctx.fillStyle = css("--border"); ctx.fill();
     const lon = (route.a[1] + route.b[1]) / 2, lat = (route.a[0] + route.b[0]) / 2;
-    ctx.fillStyle = css("--pin-b");
-    ctx.beginPath(); ctx.arc((lon + 180) * s, (90 - lat) * s * (ih / iw) * 2, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = css("--pin-b"); ctx.strokeStyle = css("--surface"); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc((lon + 180) * s, (90 - lat) * s * (ih / iw) * 2, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
 
@@ -200,15 +269,15 @@
 
     // Grid and y labels
     ctx.font = `500 11px ${FONT_MONO()}`; ctx.textBaseline = "middle";
-    const step = tickStep(axis.hi - axis.lo);
-    for (let m = Math.ceil(axis.lo / step) * step; m <= axis.hi; m += step) {
-      const y = yOf(m);
-      ctx.strokeStyle = m === 0 ? c.sea : c.grid; ctx.lineWidth = 1;
-      ctx.setLineDash(m === 0 && axis.lo < 0 ? [4, 4] : []);
+    const k = U().hPer, step = tickStep((axis.hi - axis.lo) * k);
+    for (let v = Math.ceil((axis.lo * k) / step) * step; v <= axis.hi * k; v += step) {
+      const y = yOf(v / k);
+      ctx.strokeStyle = v === 0 ? c.sea : c.grid; ctx.lineWidth = 1;
+      ctx.setLineDash(v === 0 && axis.lo < 0 ? [4, 4] : []);
       ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = c.muted; ctx.textAlign = "right";
-      ctx.fillText(m === 0 && axis.lo < 0 ? "sea" : m >= 1000 ? `${m / 1000}k m` : `${m} m`, PAD.l - 6, y);
+      ctx.fillText(v === 0 && axis.lo < 0 ? "sea" : shortH(v), PAD.l - 6, y);
     }
     // x labels
     ctx.textBaseline = "top";
@@ -218,7 +287,7 @@
       ctx.fillStyle = i === 0 ? c.pinA : i === 4 ? c.pinB : c.muted;
       ctx.font = `${end ? 700 : 500} 11px ${end ? FONT_BODY() : FONT_MONO()}`;
       ctx.textAlign = i === 0 ? "left" : i === 4 ? "right" : "center";
-      ctx.fillText(i === 0 ? "A" : i === 4 ? "B" : `${fmt((route.distanceKm * i) / 4)} km`, x, H - PAD.b + 9);
+      ctx.fillText(i === 0 ? "A" : i === 4 ? "B" : fmtD((route.distanceKm * i) / 4), x, H - PAD.b + 9);
     }
 
     const real = route.elev;
@@ -271,7 +340,7 @@
     cctx.fillStyle = color; cctx.font = `700 12px ${FONT_MONO()}`;
     cctx.textBaseline = dir < 0 ? "bottom" : "top";
     cctx.textAlign = x > W - 80 ? "right" : x < PAD.l + 50 ? "left" : "center";
-    cctx.fillText(`${sym} ${fmt(route.elev[i])} m`, x, clamp(y + dir * 6, PAD.t + 14, H - PAD.b - 2));
+    cctx.fillText(`${sym} ${fmtH(route.elev[i])}`, x, clamp(y + dir * 6, PAD.t + 14, H - PAD.b - 2));
   }
 
   // ---------- Drawing input ----------
@@ -291,7 +360,7 @@
     lastCol = { col, m };
     $("hint").style.opacity = 0;
     // Your finger hides the line, so show where it is.
-    $("readout").textContent = `${fmt(m)} m · ${fmt((route.distanceKm * col) / (COLS - 1))} km`;
+    $("readout").textContent = `${fmtH(m)} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
     render();
   }
   chart.addEventListener("pointerdown", (e) => {
@@ -437,7 +506,7 @@
     $("prev").disabled = n <= 1;
     $("next").disabled = n >= today;
     $("from").textContent = route.from; $("to").textContent = route.to;
-    $("distance").textContent = `${fmt(route.distanceKm)} km`;
+    showDistance();
     $("prompt").textContent = "Sketch how high the ground is along the line, from A to B.";
     $("submit").disabled = false; $("clear").disabled = false;
     $("hint").style.opacity = drawn.some((v) => v != null) ? 0 : 1;
@@ -470,6 +539,14 @@
     btn.dataset.armed = "1"; btn.textContent = "Tap again to erase everything";
     setTimeout(() => { delete btn.dataset.armed; btn.textContent = "Reset my progress"; }, 4000);
   });
+  function showDistance() { $("distance").textContent = fmtD(route.distanceKm); }
+  function setUnits(u) {
+    units = u; store.units = u; save(store);
+    document.querySelectorAll("#units button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.u === u)));
+    if (route) { showDistance(); resize(); }
+  }
+  document.querySelectorAll("#units button").forEach((b) => b.addEventListener("click", () => setUnits(b.dataset.u)));
+  setUnits(units);
   window.addEventListener("hashchange", () => { const n = puzzleFromHash(); if (n !== puzzleNo) loadPuzzle(n); });
   window.addEventListener("resize", resize);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", resize);

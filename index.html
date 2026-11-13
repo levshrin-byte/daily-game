@@ -34,7 +34,13 @@
         <span class="arrow" aria-hidden="true">→</span>
         <span class="pin pin-b">B</span><strong id="to">—</strong>
       </div>
-      <div class="route-meta"><span id="distance" class="mono"></span> in a straight line</div>
+      <div class="route-meta">
+        <span><span id="distance" class="mono"></span> in a straight line</span>
+        <div id="units" class="units" role="group" aria-label="Units">
+          <button type="button" data-u="metric" aria-pressed="true">m</button>
+          <button type="button" data-u="imperial" aria-pressed="false">ft</button>
+        </div>
+      </div>
       <canvas id="map" role="img" aria-label="Map of today's route"></canvas>
     </section>
 
