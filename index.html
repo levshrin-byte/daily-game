@@ -3,15 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- build:artifact-head (scripts/build.mjs copies everything up to build:end into the artifact) -->
   <title>Elevation</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
   <meta name="description" content="A daily game: sketch the elevation profile of a real route, then see how close you got.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <!-- build:end -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M1 28 L11 10 L16 18 L21 8 L31 28 Z' fill='%231f5f46'/></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- build:artifact-body -->
   <div id="error-bar" class="error-bar" hidden></div>
 
   <header class="top">
@@ -19,13 +23,23 @@
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M1 28 L11 10 L16 18 L21 8 L31 28 Z"/></svg>
       <h1>Elevation</h1>
     </div>
-    <nav class="puzzle-nav" aria-label="Puzzle">
-      <button id="prev" class="icon-btn" aria-label="Previous puzzle">‹</button>
-      <span id="puzzle-no" class="marker">#1</span>
-      <button id="next" class="icon-btn" aria-label="Next puzzle">›</button>
+    <div class="top-actions">
+      <span id="streak-chip" class="streak-chip mono" hidden title="Daily streak"></span>
+      <button id="archive-btn" class="icon-btn" aria-label="Past puzzles">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      </button>
       <button id="help-btn" class="icon-btn" aria-label="How to play">?</button>
-    </nav>
+    </div>
   </header>
+
+  <nav class="puzzle-bar" aria-label="Puzzle">
+    <button id="prev" class="icon-btn" aria-label="Previous puzzle">‹</button>
+    <div class="puzzle-id">
+      <div><span class="marker mono" id="puzzle-no">#1</span> <span id="puzzle-date" class="puzzle-date"></span></div>
+      <div class="puzzle-sub"><span id="difficulty" class="difficulty"></span><button id="today-btn" class="link-btn" hidden>Back to today</button></div>
+    </div>
+    <button id="next" class="icon-btn" aria-label="Next puzzle">›</button>
+  </nav>
 
   <main>
     <section class="card route">
@@ -35,7 +49,7 @@
         <span class="pin pin-b">B</span><strong id="to">—</strong>
       </div>
       <div class="route-meta">
-        <span><span id="distance" class="mono"></span> in a straight line</span>
+        <span><span id="country"></span><span id="distance" class="mono"></span> in a straight line</span>
         <div id="units" class="units" role="group" aria-label="Units">
           <button type="button" data-u="metric" aria-pressed="true">m</button>
           <button type="button" data-u="imperial" aria-pressed="false">ft</button>
@@ -51,9 +65,10 @@
       </div>
       <div class="canvas-wrap">
         <canvas id="chart" aria-label="Elevation drawing area"></canvas>
-        <div id="hint" class="hint">Drag your finger across to draw</div>
+        <div id="hint" class="hint"><span class="finger" aria-hidden="true"></span>Drag from A to B to draw</div>
         <div id="toast" class="toast" role="status" aria-live="polite"></div>
       </div>
+      <div class="coverage" aria-hidden="true"><div id="coverage-bar"></div></div>
       <div class="draw-actions">
         <button id="clear" class="btn ghost">Clear</button>
         <button id="submit" class="btn primary">Submit</button>
@@ -65,42 +80,70 @@
         <div class="score"><span id="score" class="mono">0</span><small>/100</small></div>
         <div class="score-side">
           <div id="rank" class="rank"></div>
-          <div id="squares" class="squares"></div>
+          <div id="badge" class="badge" hidden></div>
         </div>
       </div>
+      <div id="breakdown" class="breakdown" aria-label="Accuracy along the route"></div>
+      <ul id="insights" class="insights"></ul>
       <p id="fact" class="fact"></p>
+
+      <div class="share-card" aria-label="Your result card">
+        <pre id="share-preview" class="share-preview mono"></pre>
+        <button id="share" class="btn primary">Copy result</button>
+      </div>
+      <textarea id="share-text" class="share-text" rows="4" readonly hidden aria-label="Your result to copy"></textarea>
+
       <div class="stats">
         <div><b id="st-played" class="mono">0</b><span>Played</span></div>
         <div><b id="st-avg" class="mono">0</b><span>Average</span></div>
-        <div><b id="st-best" class="mono">0</b><span>Best</span></div>
         <div><b id="st-streak" class="mono">0</b><span>Streak</span></div>
+        <div><b id="st-max" class="mono">0</b><span>Best streak</span></div>
       </div>
       <div class="result-actions">
-        <button id="share" class="btn primary">Copy result</button>
         <span id="countdown" class="countdown mono"></span>
+        <button id="archive-btn-2" class="btn small">Past puzzles</button>
       </div>
-      <textarea id="share-text" class="share-text" rows="4" readonly hidden aria-label="Your result to copy"></textarea>
     </section>
   </main>
 
   <footer class="foot">
-    Elevation: AWS Terrain Tiles (SRTM and others). Map: Natural Earth, GeoNames.
+    <span>Elevation: AWS Terrain Tiles (SRTM, GMTED, ETOPO1 and others). Places: GeoNames (CC BY). Map: Natural Earth.</span>
     <span id="build-tag" class="mono"></span>
   </footer>
 
-  <dialog id="help">
-    <h2>How to play</h2>
-    <ol>
-      <li>Every day brings a new straight line between two real places.</li>
-      <li>Drag across the chart to sketch how high the ground is along that line, from <b>A</b> on the left to <b>B</b> on the right.</li>
-      <li>Submit to see the real profile. The closer your line, the higher your score out of 100.</li>
+  <dialog id="help" aria-labelledby="help-title">
+    <h2 id="help-title">How to play</h2>
+    <svg class="demo" viewBox="0 0 300 120" aria-hidden="true">
+      <line class="demo-grid" x1="10" y1="100" x2="290" y2="100"/>
+      <line class="demo-grid" x1="10" y1="60" x2="290" y2="60"/>
+      <line class="demo-grid" x1="10" y1="20" x2="290" y2="20"/>
+      <path class="demo-diff" d="M10 92 L60 80 L110 40 L150 30 L200 62 L250 72 L290 88 L290 96 L250 80 L200 66 L160 22 L120 52 L70 86 L10 96 Z"/>
+      <path class="demo-real" pathLength="1" d="M10 96 L40 92 L70 86 L95 70 L120 52 L140 34 L160 22 L180 44 L200 66 L225 74 L250 80 L270 86 L290 96"/>
+      <path class="demo-user" pathLength="1" d="M10 92 L60 80 L110 40 L150 30 L200 62 L250 72 L290 88"/>
+      <g class="demo-pins"><circle cx="10" cy="110" r="8" class="demo-a"/><text x="10" y="113.5">A</text><circle cx="290" cy="110" r="8" class="demo-b"/><text x="290" y="113.5">B</text></g>
+    </svg>
+    <ol class="steps">
+      <li><b>Look at the line.</b> Each day brings a straight line between two real places.</li>
+      <li><b>Draw the ground.</b> Drag across the chart to sketch how high the land is, from <b>A</b> on the left to <b>B</b> on the right.</li>
+      <li><b>See how close you got.</b> Submit to reveal the real profile and your score out of 100.</li>
     </ol>
-    <p class="muted">Each square in your result covers a fifth of the route: 🟩 spot on, 🟨 close, 🟧 off, 🟥 way off.</p>
+    <p class="legend-line">Each square is a fifth of the route: <span class="nowrap">🟩 spot on</span> <span class="nowrap">🟨 close</span> <span class="nowrap">🟧 off</span> <span class="nowrap">🟥 way off</span></p>
+    <p class="muted">A new route comes out at midnight. Mondays are easiest and the routes get harder towards the weekend. Play past days from the calendar.</p>
     <div class="dialog-actions">
       <button id="reset" class="btn ghost small">Reset my progress</button>
-      <button id="help-close" class="btn primary">Let's go</button>
+      <button id="help-close" class="btn primary" autofocus>Let's go</button>
     </div>
   </dialog>
+
+  <dialog id="archive" aria-labelledby="archive-title">
+    <div class="archive-head">
+      <h2 id="archive-title">Past puzzles</h2>
+      <button id="archive-close" class="icon-btn" aria-label="Close">✕</button>
+    </div>
+    <p id="archive-summary" class="muted"></p>
+    <ol id="archive-list" class="archive-list"></ol>
+  </dialog>
+  <!-- build:end -->
 
   <script src="data/routes.js"></script>
   <script src="data/maps.js"></script>

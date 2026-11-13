@@ -24,9 +24,10 @@
   const ROUTES = window.ROUTES || [];
   const MAPS = window.MAPS || {};
   const WORLD = window.WORLD || [];
-  // The host's Last-Modified time doubles as a version stamp, so you can tell when a phone shows a stale copy.
-  const updated = new Date(document.lastModified);
-  if (!isNaN(updated)) $("build-tag").textContent = "updated " + updated.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  // A version stamp, so the owner can tell when a phone shows a stale copy: the artifact build time, or the
+  // file's Last-Modified time on the plain site.
+  const updated = window.BUILD ? new Date(window.BUILD) : new Date(document.lastModified);
+  if (!isNaN(updated)) $("build-tag").textContent = "build " + updated.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   // ---------- Daily selection ----------
   function dayNumber(date) {
@@ -42,9 +43,11 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  // Shuffle the route list once per full cycle, so the order differs each time around.
+  // ROUTES is baked in daily order (scripts/bake_profiles.mjs balances difficulty by weekday and spreads
+  // regions out). After the list runs out it repeats, reshuffled once per cycle.
   function routeFor(n) {
     const cycle = Math.floor((n - 1) / ROUTES.length);
+    if (cycle === 0) return ROUTES[n - 1];
     const rand = mulberry32(20261109 + cycle * 7919);
     const order = ROUTES.map((_, i) => i);
     for (let i = order.length - 1; i > 0; i--) {
@@ -53,6 +56,10 @@
     }
     return ROUTES[order[(n - 1) % ROUTES.length]];
   }
+
+  function puzzleDate(n) { return new Date(LAUNCH[0], LAUNCH[1], LAUNCH[2] + n - 1); }
+  const fmtDate = (n, opts = { month: "short", day: "numeric" }) => puzzleDate(n).toLocaleDateString("en-US", opts);
+  const DIFF = ["", "Easy", "Medium", "Hard"];
 
   // ---------- Storage (best effort: may be blocked or empty) ----------
   function load() {
@@ -73,11 +80,13 @@
   const U = () => UNITS[units];
   const fmtH = (m) => `${fmt(m * U().hPer)} ${U().h}`;
   const fmtD = (km) => `${fmt(km * U().dPer)} ${U().d}`;
+  // Generated facts carry {h:metres} and {d:km} so they read in the player's units.
+  const renderFact = (t) => t.replace(/\{h:(-?[\d.]+)\}/g, (_, v) => fmtH(+v)).replace(/\{d:(-?[\d.]+)\}/g, (_, v) => fmtD(+v));
   const shortH = (v) => (Math.abs(v) >= 1000 ? `${v / 1000}k ${U().h}` : `${v} ${U().h}`);
 
   // ---------- State ----------
   const today = dayNumber(new Date());
-  let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0;
+  let puzzleNo, route, axis, drawn, revealed, lastCol, revealProgress = 0, justScored = null;
 
   // Puzzle links use the hash (#p12).
   function puzzleFromHash() {
@@ -294,6 +303,15 @@
     const upto = Math.floor(revealProgress * (COLS - 1));
     const user = revealed ? filled() : null;
 
+    // Open sea under the line, once the answer is showing.
+    if (revealProgress > 0 && route.sea) {
+      ctx.fillStyle = css("--water");
+      for (const [s0, s1] of route.sea) {
+        if (s0 > upto) continue;
+        const x0 = xOf(Math.max(0, s0 - 0.5)), x1 = xOf(Math.min(COLS - 1, Math.min(s1, upto) + 0.5));
+        ctx.fillRect(x0, yOf(0), x1 - x0, Math.max(4, yOf(axis.lo) - yOf(0)));
+      }
+    }
     if (revealProgress > 0) {
       ctx.fillStyle = c.diff;
       ctx.beginPath();
@@ -359,6 +377,7 @@
     drawn[col] = m;
     lastCol = { col, m };
     $("hint").style.opacity = 0;
+    showCoverage();
     // Your finger hides the line, so show where it is.
     $("readout").textContent = `${fmtH(m)} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
     render();
@@ -374,6 +393,15 @@
   const endStroke = () => { lastCol = null; $("readout").textContent = ""; };
   chart.addEventListener("pointerup", endStroke);
   chart.addEventListener("pointercancel", endStroke);
+
+  // How much of the route is drawn; Submit needs 60%.
+  function showCoverage() {
+    const cov = revealed ? 1 : drawn.filter((v) => v != null).length / COLS;
+    const bar = $("coverage-bar");
+    bar.style.width = `${Math.round(cov * 100)}%`;
+    bar.classList.toggle("ready", cov >= 0.6);
+    $("submit").classList.toggle("ready", !revealed && cov >= 0.6);
+  }
 
   // Fill gaps by linear interpolation; extend the ends flat.
   function filled() {
@@ -398,11 +426,37 @@
     const err = user.map((v, i) => Math.abs(v - route.elev[i]) / span);
     const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
     const score = Math.round(100 * Math.max(0, 1 - mean(err) / 0.25));
-    const squares = [0, 1, 2, 3, 4].map((k) => {
-      const e = mean(err.slice(Math.floor((k * COLS) / 5), Math.floor(((k + 1) * COLS) / 5)));
-      return e < 0.04 ? "🟩" : e < 0.09 ? "🟨" : e < 0.16 ? "🟧" : "🟥";
-    }).join("");
-    return { score, squares };
+    const fifths = [0, 1, 2, 3, 4].map((k) => mean(err.slice(Math.floor((k * COLS) / 5), Math.floor(((k + 1) * COLS) / 5))));
+    const squares = fifths.map((e) => (e < 0.04 ? "🟩" : e < 0.09 ? "🟨" : e < 0.16 ? "🟧" : "🟥")).join("");
+    return { score, squares, fifths };
+  }
+
+  // A few plain-language notes on where the sketch was right and wrong.
+  function insights(user) {
+    const real = route.elev, span = axis.hi - axis.lo, out = [];
+    const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+    const realMax = Math.max(...real), iR = real.indexOf(realMax);
+    const userMax = Math.max(...user), iU = user.indexOf(userMax);
+    const dPeak = userMax - realMax;
+    if (Math.abs(dPeak) < 0.06 * span) out.push(["good", `You nailed the high point: within ${fmtH(Math.abs(dPeak))} of the real ${fmtH(realMax)}.`]);
+    else out.push(["off", `Your high point was ${fmtH(Math.abs(dPeak))} too ${dPeak > 0 ? "high" : "low"}. The real top is ${fmtH(realMax)}.`]);
+    if (Math.abs(iU - iR) > COLS * 0.2 && realMax - Math.min(...real) > 0.15 * span) {
+      out.push(["off", `The real top comes ${fmtD((Math.abs(iU - iR) / (COLS - 1)) * route.distanceKm)} ${iR > iU ? "later" : "sooner"} than yours.`]);
+    }
+    const NAMES = ["the start", "the second fifth", "the middle", "the fourth fifth", "the finish"];
+    const signed = [0, 1, 2, 3, 4].map((k) => {
+      const a = Math.floor((k * COLS) / 5), b = Math.floor(((k + 1) * COLS) / 5);
+      return mean(user.slice(a, b).map((v, i) => v - real[a + i]));
+    });
+    const abs = signed.map(Math.abs);
+    const best = abs.indexOf(Math.min(...abs)), worst = abs.indexOf(Math.max(...abs));
+    if (abs[worst] > 0.06 * span) {
+      out.push(["off", `Most off: ${NAMES[worst]}, where you were ${fmtH(abs[worst])} too ${signed[worst] > 0 ? "high" : "low"} on average.`]);
+      out.push(["good", `Closest: ${NAMES[best]}${abs[best] < 0.04 * span ? ", almost spot on" : ""}.`]);
+    } else {
+      out.push(["good", "No stretch was more than " + fmtH(Math.max(abs[worst], 1)) + " off on average. Superb."]);
+    }
+    return out.slice(0, 3);
   }
 
   // ---------- Submit / reveal ----------
@@ -417,6 +471,8 @@
     if (coverage < 0.6) { toast("Draw across more of the route first"); return; }
     const user = filled();
     const { score, squares } = scoreOf(user);
+    const before = stats();
+    justScored = { prevBest: before.played ? before.best : null };
     store.results[puzzleNo] = { score, squares, drawing: user.map(Math.round), daily: puzzleNo === today, at: Date.now() };
     save(store);
     drawn = user;
@@ -426,6 +482,7 @@
     revealed = true;
     $("submit").disabled = true; $("clear").disabled = true;
     $("hint").style.opacity = 0;
+    showCoverage();
     $("prompt").textContent = "Here's the real ground.";
     chart.style.cursor = "default";
     if (!animate || matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -443,35 +500,73 @@
   }
 
   // ---------- Results ----------
+  // The streak counts daily puzzles finished on their own day, in a row. It survives until the end of
+  // today, so a streak from yesterday still shows before you've played today.
   function stats() {
     const all = Object.entries(store.results);
     const scores = all.map(([, r]) => r.score);
     const dailies = new Set(all.filter(([, r]) => r.daily).map(([n]) => +n));
     let streak = 0;
     for (let n = dailies.has(today) ? today : today - 1; dailies.has(n); n--) streak++;
+    let maxStreak = 0, run = 0, prev = null;
+    for (const n of [...dailies].sort((x, y) => x - y)) { run = prev === n - 1 ? run + 1 : 1; maxStreak = Math.max(maxStreak, run); prev = n; }
     return {
       played: scores.length,
       avg: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
       best: scores.length ? Math.max(...scores) : 0,
-      streak,
+      streak, maxStreak,
     };
+  }
+  function showStreakChip() {
+    const { streak } = stats(), chip = $("streak-chip");
+    chip.hidden = streak < 1;
+    chip.textContent = `🔥 ${streak}`;
+    chip.setAttribute("aria-label", `${streak}-day streak`);
   }
   function showResult() {
     const r = store.results[puzzleNo];
     if (!r) return;
+    const fresh = justScored; justScored = null;
     $("result").hidden = false;
     $("share-text").hidden = true;
-    $("score").textContent = r.score;
     $("rank").textContent = RANKS.find(([min]) => r.score >= min)[1];
-    $("squares").textContent = r.squares;
-    $("fact").textContent = route.fact;
+    // Count the score up on a fresh result; show it straight away when revisiting.
+    const el = $("score");
+    if (fresh && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const t0 = performance.now();
+      const tick = (t) => { const p = Math.min(1, (t - t0) / 700); el.textContent = Math.round(r.score * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    } else el.textContent = r.score;
+
+    const badge = $("badge");
+    const badgeText = !fresh ? "" : r.score >= 95 ? "Near perfect!" : fresh.prevBest != null && r.score > fresh.prevBest ? "New personal best" : "";
+    badge.hidden = !badgeText; badge.textContent = badgeText;
+
+    const user = r.drawing, { fifths } = scoreOf(user);
+    const LABEL = ["Start", "", "Middle", "", "Finish"];
+    $("breakdown").innerHTML = [...r.squares].filter((ch) => ch.trim()).map((sq, k) =>
+      `<div class="seg"><span class="seg-sq">${sq}</span><span class="seg-err mono">${Math.round(fifths[k] * (axis.hi - axis.lo) * U().hPer).toLocaleString("en-US")}</span><span class="seg-l">${LABEL[k]}</span></div>`).join("") +
+      `<div class="seg-note">average miss per fifth, in ${U().h}</div>`;
+    $("insights").innerHTML = insights(user).map(([k, t]) => `<li class="${k}">${t}</li>`).join("");
+    $("fact").textContent = renderFact(route.fact);
+    $("share-preview").textContent = shareText();
     const s = stats();
     $("st-played").textContent = s.played; $("st-avg").textContent = s.avg;
-    $("st-best").textContent = s.best; $("st-streak").textContent = s.streak;
+    $("st-streak").textContent = s.streak; $("st-max").textContent = s.maxStreak;
+    showStreakChip();
+    if (fresh) setTimeout(() => $("result").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
   }
   function shareText() {
     const r = store.results[puzzleNo];
-    return `Elevation #${puzzleNo} ⛰️ ${r.score}/100\n${route.from} → ${route.to}\n${r.squares}`;
+    const replay = !r.daily;
+    const { streak } = stats();
+    const lines = [
+      `Elevation #${puzzleNo} · ${fmtDate(puzzleNo)} ⛰️${replay ? " (replay)" : ""}`,
+      `${r.squares} ${r.score}/100`,
+      `${DIFF[route.difficulty] || ""}${route.difficulty ? " · " : ""}${fmtD(route.distanceKm)}`,
+    ];
+    if (!replay && streak >= 2) lines.push(`🔥 ${streak}-day streak`);
+    return lines.join("\n");
   }
   $("share").addEventListener("click", () => {
     const text = shareText();
@@ -482,9 +577,44 @@
     };
     try {
       if (!navigator.clipboard) return fallback();
-      navigator.clipboard.writeText(text).then(() => toast("Copied! Paste it anywhere"), fallback);
+      navigator.clipboard.writeText(text).then(() => { toast("Copied! Paste it anywhere"); $("share").textContent = "Copied ✓"; setTimeout(() => ($("share").textContent = "Copy result"), 2000); }, fallback);
     } catch { fallback(); }
   });
+
+  // ---------- Archive ----------
+  function openArchive() {
+    const list = $("archive-list"), s = stats();
+    const done = Object.keys(store.results).filter((n) => +n <= today).length;
+    $("archive-summary").textContent = `${done} of ${today} played${s.played ? ` · average ${s.avg}` : ""}`;
+    const rows = [];
+    for (let n = today; n >= 1; n--) {
+      const r = routeFor(n), res = store.results[n];
+      rows.push(`<li><button class="arch-row${n === puzzleNo ? " current" : ""}" data-n="${n}">
+        <span class="arch-no mono">#${n}</span>
+        <span class="arch-main"><span class="arch-date">${fmtDate(n, { weekday: "short", month: "short", day: "numeric" })}${n === today ? " · Today" : ""}</span>
+          <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
+        <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-sq">${res.squares}</span>` : `<span class="arch-play">Play</span><span class="arch-diff">${DIFF[r.difficulty] || ""}</span>`}</span>
+      </button></li>`);
+    }
+    list.innerHTML = rows.join("");
+    $("archive").showModal();
+    const cur = list.querySelector(".current");
+    if (cur) cur.scrollIntoView({ block: "nearest" });
+  }
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  $("archive-list").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-n]");
+    if (!b) return;
+    $("archive").close();
+    loadPuzzle(+b.dataset.n);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  $("archive-btn").addEventListener("click", openArchive);
+  $("archive-btn-2").addEventListener("click", openArchive);
+  $("archive-close").addEventListener("click", () => $("archive").close());
+  // Tapping the dark area around a dialog closes it.
+  for (const d of [$("archive"), $("help")]) d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+
   function countdown() {
     const now = new Date();
     const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -503,9 +633,14 @@
     revealed = false; revealProgress = 0; lastCol = null;
 
     $("puzzle-no").textContent = `#${n}`;
+    $("puzzle-date").textContent = fmtDate(n, { weekday: "short", month: "short", day: "numeric" });
+    const d = route.difficulty || 0;
+    $("difficulty").innerHTML = d ? `<span class="pips d${d}" aria-hidden="true"><i></i><i></i><i></i></span>${DIFF[d]}` : "";
+    $("today-btn").hidden = n === today;
     $("prev").disabled = n <= 1;
     $("next").disabled = n >= today;
     $("from").textContent = route.from; $("to").textContent = route.to;
+    $("country").textContent = route.country ? `${route.country} · ` : "";
     showDistance();
     $("prompt").textContent = "Sketch how high the ground is along the line, from A to B.";
     $("submit").disabled = false; $("clear").disabled = false;
@@ -517,11 +652,13 @@
     if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
 
     resize();
+    showCoverage();
     const prior = store.results[n];
     if (prior) { drawn = prior.drawing.slice(); reveal(false); }
   }
 
-  $("clear").addEventListener("click", () => { drawn.fill(null); $("hint").style.opacity = 1; render(); });
+  $("clear").addEventListener("click", () => { drawn.fill(null); $("hint").style.opacity = 1; showCoverage(); render(); });
+  $("today-btn").addEventListener("click", () => loadPuzzle(today));
   $("submit").addEventListener("click", submit);
   $("prev").addEventListener("click", () => puzzleNo > 1 && loadPuzzle(puzzleNo - 1));
   $("next").addEventListener("click", () => puzzleNo < today && loadPuzzle(puzzleNo + 1));
@@ -557,6 +694,7 @@
     if (!ROUTES.length) { $("prompt").textContent = "Route data failed to load."; return; }
     const n = data && data.puzzleNo ? data.puzzleNo : puzzleFromHash();
     loadPuzzle(n, data && data.draft);
+    showStreakChip();
     countdown(); setInterval(countdown, 1000);
     if (!store.seenHelp) { store.seenHelp = true; save(store); $("help").showModal(); }
   }

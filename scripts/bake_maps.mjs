@@ -11,7 +11,8 @@ import bboxClip from "@turf/bbox-clip";
 
 const require = createRequire(import.meta.url);
 const ROOT = new URL("..", import.meta.url).pathname;
-const routes = JSON.parse(readFileSync(ROOT + "scripts/routes.json", "utf8"));
+// Maps for exactly the routes that passed the profile checks (run bake_profiles.mjs first).
+const routes = (() => { const window = {}; new Function("window", readFileSync(ROOT + "data/routes.js", "utf8"))(window); return window.ROUTES; })();
 const countries = feature(require("world-atlas/countries-10m.json"), require("world-atlas/countries-10m.json").objects.countries).features;
 // The lakes dataset is one big MultiPolygon; split it so each lake can be skipped cheaply.
 const lakes = require("@geo-maps/earth-lakes-1km")().geometries

@@ -3,7 +3,11 @@
   "private": true,
   "description": "Daily elevation-profile sketching game",
   "scripts": {
+    "gen:routes": "node scripts/generate_routes.mjs",
+    "bake:profiles": "node scripts/bake_profiles.mjs",
     "bake:maps": "node scripts/bake_maps.mjs",
+    "bake": "node scripts/bake_profiles.mjs && node scripts/bake_maps.mjs",
+    "build": "node scripts/build.mjs",
     "serve": "python3 -m http.server 8000",
     "check": "node scripts/check.mjs"
   },
@@ -11,6 +15,7 @@
     "@geo-maps/earth-lakes-1km": "0.6.0",
     "@turf/bbox-clip": "7.4.0",
     "all-the-cities": "3.1.0",
+    "pngjs": "^7.0.0",
     "topojson-client": "3.1.0",
     "world-atlas": "2.0.2"
   }
