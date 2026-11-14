@@ -1,0 +1,5636 @@
+[
+ {
+  "id": "denver-kc",
+  "from": "Denver",
+  "to": "Kansas City",
+  "a": [
+   39.7392,
+   -104.9903
+  ],
+  "b": [
+   39.0997,
+   -94.5786
+  ],
+  "fact": "Denver sits a mile up; from there it's a long, gentle slide all the way across the Great Plains.",
+  "source": "curated"
+ },
+ {
+  "id": "badwater-whitney",
+  "from": "Badwater Basin",
+  "to": "Mount Whitney",
+  "a": [
+   36.2299,
+   -116.7677
+  ],
+  "b": [
+   36.5785,
+   -118.2923
+  ],
+  "fact": "The lowest point in North America to the highest point in the contiguous US, in about 135 km as the crow flies.",
+  "source": "curated"
+ },
+ {
+  "id": "bedoin-ventoux",
+  "from": "Bédoin",
+  "to": "Mont Ventoux",
+  "a": [
+   44.125,
+   5.1797
+  ],
+  "b": [
+   44.1741,
+   5.2789
+  ],
+  "fact": "The 'Giant of Provence' is a Tour de France legend: one relentless climb, with no real downhill on the way up.",
+  "source": "curated"
+ },
+ {
+  "id": "deadsea-jerusalem",
+  "from": "Dead Sea shore",
+  "to": "Jerusalem",
+  "a": [
+   31.76,
+   35.55
+  ],
+  "b": [
+   31.7683,
+   35.2137
+  ],
+  "fact": "Starts more than 400 m below sea level, at the lowest land on Earth, and climbs over 1,100 m in roughly 30 km.",
+  "source": "curated"
+ },
+ {
+  "id": "seattle-rainier",
+  "from": "Seattle",
+  "to": "Mount Rainier",
+  "a": [
+   47.6062,
+   -122.3321
+  ],
+  "b": [
+   46.8523,
+   -121.7603
+  ],
+  "fact": "From sea level, foothills and forest until the volcano rears up at the very end.",
+  "source": "curated"
+ },
+ {
+  "id": "lima-huancayo",
+  "from": "Lima",
+  "to": "Huancayo",
+  "a": [
+   -12.0464,
+   -77.0428
+  ],
+  "b": [
+   -12.0651,
+   -75.2049
+  ],
+  "fact": "From the Pacific coast straight over the Andes. The railway along this route was long one of the highest in the world.",
+  "source": "curated"
+ },
+ {
+  "id": "kathmandu-everest",
+  "from": "Kathmandu",
+  "to": "Mount Everest",
+  "a": [
+   27.7172,
+   85.324
+  ],
+  "b": [
+   27.9881,
+   86.925
+  ],
+  "fact": "Rows of deep river valleys and ridges, each one higher than the last, until the top of the world.",
+  "source": "curated"
+ },
+ {
+  "id": "geneva-montblanc",
+  "from": "Geneva",
+  "to": "Mont Blanc",
+  "a": [
+   46.2044,
+   6.1432
+  ],
+  "b": [
+   45.8326,
+   6.8652
+  ],
+  "fact": "Lake Geneva to the roof of Western Europe. Chamonix sits in the deep valley just before the final wall.",
+  "source": "curated"
+ },
+ {
+  "id": "zurich-milan",
+  "from": "Zürich",
+  "to": "Milan",
+  "a": [
+   47.3769,
+   8.5417
+  ],
+  "b": [
+   45.4642,
+   9.19
+  ],
+  "fact": "A straight line across the Swiss Alps, past the Gotthard region, then down to the flat Po plain.",
+  "source": "curated"
+ },
+ {
+  "id": "amsterdam-berlin",
+  "from": "Amsterdam",
+  "to": "Berlin",
+  "a": [
+   52.3676,
+   4.9041
+  ],
+  "b": [
+   52.52,
+   13.405
+  ],
+  "fact": "Trick question! The North European Plain barely rises above 100 m along the whole way.",
+  "source": "curated"
+ },
+ {
+  "id": "grandcanyon-rim2rim",
+  "from": "Grand Canyon North Rim",
+  "to": "South Rim",
+  "a": [
+   36.1983,
+   -112.0524
+  ],
+  "b": [
+   36.0544,
+   -112.1401
+  ],
+  "fact": "Down nearly 1,800 m to the Colorado River, then back up. The North Rim is about 300 m higher than the South.",
+  "source": "curated"
+ },
+ {
+  "id": "sf-tahoe",
+  "from": "San Francisco",
+  "to": "Lake Tahoe",
+  "a": [
+   37.7749,
+   -122.4194
+  ],
+  "b": [
+   39.0968,
+   -120.0324
+  ],
+  "fact": "Across the bay, over the flat Central Valley, then up the long western slope of the Sierra Nevada.",
+  "source": "curated"
+ },
+ {
+  "id": "la-vegas",
+  "from": "Los Angeles",
+  "to": "Las Vegas",
+  "a": [
+   34.0522,
+   -118.2437
+  ],
+  "b": [
+   36.1699,
+   -115.1398
+  ],
+  "fact": "Over the San Gabriel Mountains, then across the high Mojave Desert to the Las Vegas valley.",
+  "source": "curated"
+ },
+ {
+  "id": "hilo-maunakea",
+  "from": "Hilo",
+  "to": "Mauna Kea",
+  "a": [
+   19.7071,
+   -155.0816
+  ],
+  "b": [
+   19.8207,
+   -155.4681
+  ],
+  "fact": "A smooth shield-volcano ramp from the ocean to about 4,200 m. Measured from the sea floor, it's taller than Everest.",
+  "source": "curated"
+ },
+ {
+  "id": "tokyo-fuji",
+  "from": "Tokyo",
+  "to": "Mount Fuji",
+  "a": [
+   35.6762,
+   139.6503
+  ],
+  "b": [
+   35.3606,
+   138.7274
+  ],
+  "fact": "The Kantō Plain, a band of hills and mountains, then Fuji's famous symmetric cone.",
+  "source": "curated"
+ },
+ {
+  "id": "capetown-table",
+  "from": "Cape Town",
+  "to": "Table Mountain",
+  "a": [
+   -33.9249,
+   18.4241
+  ],
+  "b": [
+   -33.9628,
+   18.4098
+  ],
+  "fact": "Just 4 km from the city centre to a flat-topped summit over 1,000 m high.",
+  "source": "curated"
+ },
+ {
+  "id": "moshi-kilimanjaro",
+  "from": "Moshi",
+  "to": "Kilimanjaro",
+  "a": [
+   -3.3349,
+   37.3404
+  ],
+  "b": [
+   -3.0758,
+   37.3533
+  ],
+  "fact": "From farmland at the foot to Uhuru Peak, the highest point in Africa, in under 30 km.",
+  "source": "curated"
+ },
+ {
+  "id": "puerto-teide",
+  "from": "Puerto de la Cruz",
+  "to": "Mount Teide",
+  "a": [
+   28.4142,
+   -16.5481
+  ],
+  "b": [
+   28.2724,
+   -16.6425
+  ],
+  "fact": "From an Atlantic beach to Spain's highest peak, a volcano rising over 3,700 m from the sea.",
+  "source": "curated"
+ },
+ {
+  "id": "slc-denver",
+  "from": "Salt Lake City",
+  "to": "Denver",
+  "a": [
+   40.7608,
+   -111.891
+  ],
+  "b": [
+   39.7392,
+   -104.9903
+  ],
+  "fact": "Wasatch, Uintas, high basins, then the Front Range. The Rockies come in waves.",
+  "source": "curated"
+ },
+ {
+  "id": "mexicocity-veracruz",
+  "from": "Mexico City",
+  "to": "Veracruz",
+  "a": [
+   19.4326,
+   -99.1332
+  ],
+  "b": [
+   19.1738,
+   -96.1342
+  ],
+  "fact": "Off the high central plateau, past the volcanic belt, then a dramatic plunge to the Gulf of Mexico.",
+  "source": "curated"
+ },
+ {
+  "id": "innsbruck-venice",
+  "from": "Innsbruck",
+  "to": "Venice",
+  "a": [
+   47.2692,
+   11.4041
+  ],
+  "b": [
+   45.4408,
+   12.3155
+  ],
+  "fact": "From an Alpine valley, through the Dolomites, and down to a city that's barely above the water.",
+  "source": "curated"
+ },
+ {
+  "id": "interlaken-jungfrau",
+  "from": "Interlaken",
+  "to": "Jungfrau",
+  "a": [
+   46.6863,
+   7.8632
+  ],
+  "b": [
+   46.5367,
+   7.9629
+  ],
+  "fact": "From a lakeside town to the 4,000 m-class giants of the Bernese Oberland in about 18 km, one of the steepest walls in the Alps.",
+  "source": "curated"
+ },
+ {
+  "id": "cosprings-pikes",
+  "from": "Colorado Springs",
+  "to": "Pikes Peak",
+  "a": [
+   38.8339,
+   -104.8214
+  ],
+  "b": [
+   38.8409,
+   -105.0423
+  ],
+  "fact": "The view from the top inspired 'America the Beautiful'. It's a 2,400 m rise from the city in under 20 km.",
+  "source": "curated"
+ },
+ {
+  "id": "edinburgh-glasgow",
+  "from": "Edinburgh",
+  "to": "Glasgow",
+  "a": [
+   55.9533,
+   -3.1883
+  ],
+  "b": [
+   55.8642,
+   -4.2518
+  ],
+  "fact": "Scotland's Central Belt: some gentle hills, but nothing dramatic. Did you over-draw it?",
+  "source": "curated"
+ },
+ {
+  "id": "chicago-stlouis",
+  "from": "Chicago",
+  "to": "St. Louis",
+  "a": [
+   41.8781,
+   -87.6298
+  ],
+  "b": [
+   38.627,
+   -90.1994
+  ],
+  "fact": "Illinois prairie: one of the flattest long stretches in the US, drifting slowly down toward the Mississippi.",
+  "source": "curated"
+ },
+ {
+  "id": "vancouver-whistler",
+  "from": "Vancouver",
+  "to": "Whistler",
+  "a": [
+   49.2827,
+   -123.1207
+  ],
+  "b": [
+   50.1163,
+   -122.9574
+  ],
+  "fact": "Straight over the Coast Mountains instead of along the Sea-to-Sky Highway, and it's rugged the whole way.",
+  "source": "curated"
+ },
+ {
+  "id": "lhasa-kathmandu",
+  "from": "Lhasa",
+  "to": "Kathmandu",
+  "a": [
+   29.65,
+   91.1
+  ],
+  "b": [
+   27.7172,
+   85.324
+  ],
+  "fact": "Hundreds of km on the Tibetan Plateau above 4,000 m, then a cliff-like drop through the Himalaya into Nepal.",
+  "source": "curated"
+ },
+ {
+  "id": "rio-cristo",
+  "from": "Copacabana",
+  "to": "Christ the Redeemer",
+  "a": [
+   -22.9711,
+   -43.1822
+  ],
+  "b": [
+   -22.9519,
+   -43.2105
+  ],
+  "fact": "From the beach, Corcovado's granite rises almost straight up to the statue on Corcovado, less than 4 km away.",
+  "source": "curated"
+ },
+ {
+  "id": "barcelona-andorra",
+  "from": "Barcelona",
+  "to": "Andorra la Vella",
+  "a": [
+   41.3874,
+   2.1686
+  ],
+  "b": [
+   42.5063,
+   1.5218
+  ],
+  "fact": "From the Mediterranean, over Catalan hills, and up into the Pyrenees microstate.",
+  "source": "curated"
+ },
+ {
+  "id": "boston-washington",
+  "from": "Boston",
+  "to": "Mount Washington",
+  "a": [
+   42.3601,
+   -71.0589
+  ],
+  "b": [
+   44.2706,
+   -71.3033
+  ],
+  "fact": "Rolling New England hills, then the White Mountains. Mount Washington is famous for its extreme weather.",
+  "source": "curated"
+ },
+ {
+  "id": "nairobi-mombasa",
+  "from": "Nairobi",
+  "to": "Mombasa",
+  "a": [
+   -1.2921,
+   36.8219
+  ],
+  "b": [
+   -4.0435,
+   39.6682
+  ],
+  "fact": "A long, gentle descent from the Kenyan highlands at 1,700 m across the savanna to the Indian Ocean.",
+  "source": "curated"
+ },
+ {
+  "id": "delhi-shimla",
+  "from": "Delhi",
+  "to": "Shimla",
+  "a": [
+   28.6139,
+   77.209
+  ],
+  "b": [
+   31.1048,
+   77.1734
+  ],
+  "fact": "Flat as a table across the Indo-Gangetic Plain for 250 km, then the Himalayan foothills hit all at once.",
+  "source": "curated"
+ },
+ {
+  "id": "calgary-banff",
+  "from": "Calgary",
+  "to": "Banff",
+  "a": [
+   51.0447,
+   -114.0719
+  ],
+  "b": [
+   51.1784,
+   -115.5708
+  ],
+  "fact": "The prairies end abruptly at the Rocky Mountain front, and you're among the peaks.",
+  "source": "curated"
+ },
+ {
+  "id": "athens-delphi",
+  "from": "Athens",
+  "to": "Delphi",
+  "a": [
+   37.9838,
+   23.7275
+  ],
+  "b": [
+   38.4824,
+   22.501
+  ],
+  "fact": "Past Mount Parnitha and across the Boeotian plain to the sanctuary on the slopes of Parnassus.",
+  "source": "curated"
+ },
+ {
+  "id": "padang-jambi-city",
+  "from": "Padang",
+  "to": "Jambi City",
+  "a": [
+   -0.9492,
+   100.3543
+  ],
+  "b": [
+   -1.6,
+   103.6167
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "caltagirone-mazara-del-vallo",
+  "from": "Caltagirone",
+  "to": "Mazara del Vallo",
+  "a": [
+   37.2379,
+   14.5155
+  ],
+  "b": [
+   37.6553,
+   12.5899
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "colombo-kegalle",
+  "from": "Colombo",
+  "to": "Kegalle",
+  "a": [
+   6.9355,
+   79.8487
+  ],
+  "b": [
+   7.2523,
+   80.3436
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "lae-goroka",
+  "from": "Lae",
+  "to": "Goroka",
+  "a": [
+   -6.7233,
+   146.9961
+  ],
+  "b": [
+   -6.085,
+   145.3867
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "marolambo-mahanoro",
+  "from": "Marolambo",
+  "to": "Mahanoro",
+  "a": [
+   -20.05,
+   48.1167
+  ],
+  "b": [
+   -19.9,
+   48.8
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "antananarivo-mahanoro",
+  "from": "Antananarivo",
+  "to": "Mahanoro",
+  "a": [
+   -18.9137,
+   47.5361
+  ],
+  "b": [
+   -19.9,
+   48.8
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "queens-selden",
+  "from": "Queens",
+  "to": "Selden",
+  "a": [
+   40.6815,
+   -73.8365
+  ],
+  "b": [
+   40.8665,
+   -73.0357
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nagano-kishiwada",
+  "from": "Nagano",
+  "to": "Kishiwada",
+  "a": [
+   36.65,
+   138.1833
+  ],
+  "b": [
+   34.4667,
+   135.3667
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santo-domingo-santiago-de-los-caballeros",
+  "from": "Santo Domingo",
+  "to": "Santiago de los Caballeros",
+  "a": [
+   18.4719,
+   -69.8923
+  ],
+  "b": [
+   19.4517,
+   -70.697
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sokaraja-semarang",
+  "from": "Sokaraja",
+  "to": "Semarang",
+  "a": [
+   -7.4581,
+   109.2881
+  ],
+  "b": [
+   -6.9931,
+   110.4208
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "wigan-scarborough",
+  "from": "Wigan",
+  "to": "Scarborough",
+  "a": [
+   53.543,
+   -2.6371
+  ],
+  "b": [
+   54.2797,
+   -0.4044
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nuwara-eliya-point-pedro",
+  "from": "Nuwara Eliya",
+  "to": "Point Pedro",
+  "a": [
+   6.9708,
+   80.7829
+  ],
+  "b": [
+   9.8167,
+   80.2333
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "salvaleon-de-higuey-santo-domingo",
+  "from": "Salvaleón de Higüey",
+  "to": "Santo Domingo",
+  "a": [
+   18.615,
+   -68.708
+  ],
+  "b": [
+   18.4719,
+   -69.8923
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "devinuwara-gampola",
+  "from": "Devinuwara",
+  "to": "Gampola",
+  "a": [
+   5.9283,
+   80.5888
+  ],
+  "b": [
+   7.1643,
+   80.5696
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "joetsu-ojiya",
+  "from": "Jōetsu",
+  "to": "Ojiya",
+  "a": [
+   37.1483,
+   138.2364
+  ],
+  "b": [
+   37.3,
+   138.8
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "port-moresby-popondetta",
+  "from": "Port Moresby",
+  "to": "Popondetta",
+  "a": [
+   -9.4772,
+   147.1509
+  ],
+  "b": [
+   -8.7654,
+   148.2325
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "port-alberni-north-cowichan",
+  "from": "Port Alberni",
+  "to": "North Cowichan",
+  "a": [
+   49.2413,
+   -124.8028
+  ],
+  "b": [
+   48.8413,
+   -123.686
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "taipei-kaohsiung",
+  "from": "Taipei",
+  "to": "Kaohsiung",
+  "a": [
+   25.0478,
+   121.5319
+  ],
+  "b": [
+   22.6163,
+   120.3133
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nantwich-blackpool",
+  "from": "Nantwich",
+  "to": "Blackpool",
+  "a": [
+   53.0688,
+   -2.5205
+  ],
+  "b": [
+   53.8167,
+   -3.05
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "port-alberni-vernon",
+  "from": "Port Alberni",
+  "to": "Vernon",
+  "a": [
+   49.2413,
+   -124.8028
+  ],
+  "b": [
+   50.0261,
+   -126.3616
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rio-grande-ushuaia",
+  "from": "Río Grande",
+  "to": "Ushuaia",
+  "a": [
+   -53.7877,
+   -67.7095
+  ],
+  "b": [
+   -54.8108,
+   -68.3159
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "palopo-makassar",
+  "from": "Palopo",
+  "to": "Makassar",
+  "a": [
+   -2.9925,
+   120.1969
+  ],
+  "b": [
+   -5.1486,
+   119.4319
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cardiff-merthyr-tydfil",
+  "from": "Cardiff",
+  "to": "Merthyr Tydfil",
+  "a": [
+   51.48,
+   -3.18
+  ],
+  "b": [
+   51.7479,
+   -3.3778
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "vacoas-triolet",
+  "from": "Vacoas",
+  "to": "Triolet",
+  "a": [
+   -20.2981,
+   57.4783
+  ],
+  "b": [
+   -20.0576,
+   57.5502
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bentota-kalmunai",
+  "from": "Bentota",
+  "to": "Kalmunai",
+  "a": [
+   6.426,
+   79.9958
+  ],
+  "b": [
+   7.409,
+   81.8347
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ambatolampy-toamasina",
+  "from": "Ambatolampy",
+  "to": "Toamasina",
+  "a": [
+   -19.3833,
+   47.4167
+  ],
+  "b": [
+   -18.1492,
+   49.4023
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "trapani-catania",
+  "from": "Trapani",
+  "to": "Catania",
+  "a": [
+   38.0176,
+   12.5362
+  ],
+  "b": [
+   37.4922,
+   15.0704
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "yokohama-ashikaga",
+  "from": "Yokohama",
+  "to": "Ashikaga",
+  "a": [
+   35.4333,
+   139.65
+  ],
+  "b": [
+   36.3333,
+   139.45
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santiago-de-los-caballeros-port-au-prince",
+  "from": "Santiago de los Caballeros",
+  "to": "Port-au-Prince",
+  "a": [
+   19.4517,
+   -70.697
+  ],
+  "b": [
+   18.5435,
+   -72.3388
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "strovolos-limassol",
+  "from": "Stróvolos",
+  "to": "Limassol",
+  "a": [
+   35.1487,
+   33.3338
+  ],
+  "b": [
+   34.6841,
+   33.0379
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-bartolome-de-tirajana-galdar",
+  "from": "San Bartolomé de Tirajana",
+  "to": "Gáldar",
+  "a": [
+   27.9248,
+   -15.5733
+  ],
+  "b": [
+   28.147,
+   -15.6502
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tolanaro-vangaindrano",
+  "from": "Tôlanaro",
+  "to": "Vangaindrano",
+  "a": [
+   -25.0325,
+   46.9833
+  ],
+  "b": [
+   -23.35,
+   47.6
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "vernon-oak-bay",
+  "from": "Vernon",
+  "to": "Oak Bay",
+  "a": [
+   50.0261,
+   -126.3616
+  ],
+  "b": [
+   48.4496,
+   -123.3026
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dunedin-timaru",
+  "from": "Dunedin",
+  "to": "Timaru",
+  "a": [
+   -45.8742,
+   170.5036
+  ],
+  "b": [
+   -44.3967,
+   171.2536
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "timaru-blenheim",
+  "from": "Timaru",
+  "to": "Blenheim",
+  "a": [
+   -44.3967,
+   171.2536
+  ],
+  "b": [
+   -41.516,
+   173.9528
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "antananarivo-mananara",
+  "from": "Antananarivo",
+  "to": "Mananara",
+  "a": [
+   -18.9137,
+   47.5361
+  ],
+  "b": [
+   -16.1686,
+   49.7662
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "boyolangu-bangil",
+  "from": "Boyolangu",
+  "to": "Bangil",
+  "a": [
+   -8.1181,
+   111.8935
+  ],
+  "b": [
+   -7.5994,
+   112.8186
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "buenos-aires-san-pedro",
+  "from": "Buenos Aires",
+  "to": "San Pedro",
+  "a": [
+   -34.6131,
+   -58.3772
+  ],
+  "b": [
+   -33.6792,
+   -59.6663
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sivas-giresun",
+  "from": "Sivas",
+  "to": "Giresun",
+  "a": [
+   39.7483,
+   37.0161
+  ],
+  "b": [
+   40.917,
+   38.3874
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "zarqa-eilat",
+  "from": "Zarqa",
+  "to": "Eilat",
+  "a": [
+   32.0727,
+   36.088
+  ],
+  "b": [
+   29.5581,
+   34.9482
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cabimas-el-tocuyo",
+  "from": "Cabimas",
+  "to": "El Tocuyo",
+  "a": [
+   10.3991,
+   -71.4521
+  ],
+  "b": [
+   9.7871,
+   -69.7929
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "salqin-tartouss",
+  "from": "Salqīn",
+  "to": "Tartouss",
+  "a": [
+   36.1386,
+   36.4524
+  ],
+  "b": [
+   34.889,
+   35.8866
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "maracaibo-el-banco",
+  "from": "Maracaibo",
+  "to": "El Banco",
+  "a": [
+   10.6666,
+   -71.6124
+  ],
+  "b": [
+   9.0011,
+   -73.9758
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fall-river-woonsocket",
+  "from": "Fall River",
+  "to": "Woonsocket",
+  "a": [
+   41.7015,
+   -71.1551
+  ],
+  "b": [
+   42.0029,
+   -71.5148
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "copiapo-antofagasta",
+  "from": "Copiapó",
+  "to": "Antofagasta",
+  "a": [
+   -27.3668,
+   -70.3314
+  ],
+  "b": [
+   -23.6524,
+   -70.3954
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "talcahuano-rengo",
+  "from": "Talcahuano",
+  "to": "Rengo",
+  "a": [
+   -36.7249,
+   -73.1168
+  ],
+  "b": [
+   -34.4064,
+   -70.8583
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "palermo-catania",
+  "from": "Palermo",
+  "to": "Catania",
+  "a": [
+   38.132,
+   13.3356
+  ],
+  "b": [
+   37.4922,
+   15.0704
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "onega-severodvinsk",
+  "from": "Onega",
+  "to": "Severodvinsk",
+  "a": [
+   63.9069,
+   38.1111
+  ],
+  "b": [
+   64.5635,
+   39.8302
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "lake-elsinore-san-diego",
+  "from": "Lake Elsinore",
+  "to": "San Diego",
+  "a": [
+   33.6681,
+   -117.3273
+  ],
+  "b": [
+   32.7157,
+   -117.1647
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "belek-mut",
+  "from": "Belek",
+  "to": "Mut",
+  "a": [
+   36.8628,
+   31.0556
+  ],
+  "b": [
+   36.6439,
+   33.4389
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tonekabon-tehran",
+  "from": "Tonekābon",
+  "to": "Tehran",
+  "a": [
+   36.8163,
+   50.8738
+  ],
+  "b": [
+   35.6944,
+   51.4215
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pyongyang-hungnam",
+  "from": "Pyongyang",
+  "to": "Hŭngnam",
+  "a": [
+   39.0339,
+   125.7543
+  ],
+  "b": [
+   39.8317,
+   127.6186
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nanyamba-mtwara",
+  "from": "Nanyamba",
+  "to": "Mtwara",
+  "a": [
+   -10.6833,
+   39.8333
+  ],
+  "b": [
+   -10.2667,
+   40.1833
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "buenaventura-bogota",
+  "from": "Buenaventura",
+  "to": "Bogotá",
+  "a": [
+   3.8801,
+   -77.0312
+  ],
+  "b": [
+   4.6097,
+   -74.0817
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-francisco-salinas",
+  "from": "San Francisco",
+  "to": "Salinas",
+  "a": [
+   37.7749,
+   -122.4194
+  ],
+  "b": [
+   36.6777,
+   -121.6555
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "palamos-agen",
+  "from": "Palamós",
+  "to": "Agen",
+  "a": [
+   41.8484,
+   3.1291
+  ],
+  "b": [
+   44.202,
+   0.6206
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "monrovia-bensonville",
+  "from": "Monrovia",
+  "to": "Bensonville",
+  "a": [
+   6.3005,
+   -10.7969
+  ],
+  "b": [
+   6.4472,
+   -10.6128
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "puerto-vallarta-victoria-de-durango",
+  "from": "Puerto Vallarta",
+  "to": "Victoria de Durango",
+  "a": [
+   20.617,
+   -105.2302
+  ],
+  "b": [
+   24.0203,
+   -104.6576
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "gadag-kannangad",
+  "from": "Gadag",
+  "to": "Kānnangād",
+  "a": [
+   15.4298,
+   75.6297
+  ],
+  "b": [
+   12.3081,
+   75.1063
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "grants-pass-eureka",
+  "from": "Grants Pass",
+  "to": "Eureka",
+  "a": [
+   42.4393,
+   -123.3307
+  ],
+  "b": [
+   40.8021,
+   -124.1637
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chikmagalur-iringal",
+  "from": "Chikmagalūr",
+  "to": "Iringal",
+  "a": [
+   13.3223,
+   75.774
+  ],
+  "b": [
+   11.5593,
+   75.6166
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "guatemala-city-acajutla",
+  "from": "Guatemala City",
+  "to": "Acajutla",
+  "a": [
+   14.6407,
+   -90.5133
+  ],
+  "b": [
+   13.5928,
+   -89.8275
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fortaleza-aquiraz",
+  "from": "Fortaleza",
+  "to": "Aquiraz",
+  "a": [
+   -3.7172,
+   -38.5431
+  ],
+  "b": [
+   -3.9014,
+   -38.3911
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "madrid-donostia-san-sebastian",
+  "from": "Madrid",
+  "to": "Donostia / San Sebastián",
+  "a": [
+   40.4165,
+   -3.7026
+  ],
+  "b": [
+   43.3128,
+   -1.975
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pavia-chiavari",
+  "from": "Pavia",
+  "to": "Chiavari",
+  "a": [
+   45.1921,
+   9.1592
+  ],
+  "b": [
+   44.3177,
+   9.3224
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cerkes-karasu",
+  "from": "Çerkeş",
+  "to": "Karasu",
+  "a": [
+   40.8116,
+   32.8936
+  ],
+  "b": [
+   41.1044,
+   30.6966
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "akouda-zaghouan",
+  "from": "Akouda",
+  "to": "Zaghouan",
+  "a": [
+   35.8691,
+   10.5653
+  ],
+  "b": [
+   36.4029,
+   10.1429
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santa-maria-atzompa-puerto-escondido",
+  "from": "Santa María Atzompa",
+  "to": "Puerto Escondido",
+  "a": [
+   17.1016,
+   -96.7769
+  ],
+  "b": [
+   15.8704,
+   -97.0773
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "si-racha-phetchabun",
+  "from": "Si Racha",
+  "to": "Phetchabun",
+  "a": [
+   13.1737,
+   100.9311
+  ],
+  "b": [
+   16.419,
+   101.1606
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "muratpasa-ankara",
+  "from": "Muratpaşa",
+  "to": "Ankara",
+  "a": [
+   36.8916,
+   30.765
+  ],
+  "b": [
+   39.9199,
+   32.8543
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shantou-dongguan",
+  "from": "Shantou",
+  "to": "Dongguan",
+  "a": [
+   23.3681,
+   116.7148
+  ],
+  "b": [
+   23.018,
+   113.7487
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bais-manapla",
+  "from": "Bais",
+  "to": "Manapla",
+  "a": [
+   9.5911,
+   123.1228
+  ],
+  "b": [
+   10.958,
+   123.123
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-pedro-tiassale",
+  "from": "San-Pédro",
+  "to": "Tiassalé",
+  "a": [
+   4.7485,
+   -6.6363
+  ],
+  "b": [
+   5.8984,
+   -4.8229
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pullman-pendleton",
+  "from": "Pullman",
+  "to": "Pendleton",
+  "a": [
+   46.7313,
+   -117.1796
+  ],
+  "b": [
+   45.6721,
+   -118.7886
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "orem-layton",
+  "from": "Orem",
+  "to": "Layton",
+  "a": [
+   40.2969,
+   -111.6946
+  ],
+  "b": [
+   41.0602,
+   -111.9711
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "puno-arequipa",
+  "from": "Puno",
+  "to": "Arequipa",
+  "a": [
+   -15.8422,
+   -70.0199
+  ],
+  "b": [
+   -16.3989,
+   -71.535
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jiazi-chaozhou",
+  "from": "Jiazi",
+  "to": "Chaozhou",
+  "a": [
+   22.8793,
+   116.0732
+  ],
+  "b": [
+   23.654,
+   116.6226
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sattenapalle-vetapalem",
+  "from": "Sattenapalle",
+  "to": "Vetapālem",
+  "a": [
+   16.3938,
+   80.1522
+  ],
+  "b": [
+   15.785,
+   80.3066
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bejar-don-benito",
+  "from": "Béjar",
+  "to": "Don Benito",
+  "a": [
+   40.3864,
+   -5.7634
+  ],
+  "b": [
+   38.9563,
+   -5.8616
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "brisbane-toowoomba",
+  "from": "Brisbane",
+  "to": "Toowoomba",
+  "a": [
+   -27.4679,
+   153.0281
+  ],
+  "b": [
+   -27.5606,
+   151.9539
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "linxia-chengguanzhen-baiyin",
+  "from": "Linxia Chengguanzhen",
+  "to": "Baiyin",
+  "a": [
+   35.6003,
+   103.2064
+  ],
+  "b": [
+   36.547,
+   104.1702
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "maubeuge-valenciennes",
+  "from": "Maubeuge",
+  "to": "Valenciennes",
+  "a": [
+   50.2788,
+   3.9727
+  ],
+  "b": [
+   50.3591,
+   3.5251
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bettiah-kathmandu",
+  "from": "Bettiah",
+  "to": "Kathmandu",
+  "a": [
+   26.8023,
+   84.5031
+  ],
+  "b": [
+   27.7017,
+   85.3206
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sao-jose-dos-campos-belo-horizonte",
+  "from": "São José dos Campos",
+  "to": "Belo Horizonte",
+  "a": [
+   -23.1794,
+   -45.8869
+  ],
+  "b": [
+   -19.9208,
+   -43.9378
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santa-tecla-tapachula",
+  "from": "Santa Tecla",
+  "to": "Tapachula",
+  "a": [
+   13.6769,
+   -89.2797
+  ],
+  "b": [
+   14.9039,
+   -92.2575
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santa-clarita-escondido",
+  "from": "Santa Clarita",
+  "to": "Escondido",
+  "a": [
+   34.3917,
+   -118.5426
+  ],
+  "b": [
+   33.1192,
+   -117.0864
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "missoula-butte",
+  "from": "Missoula",
+  "to": "Butte",
+  "a": [
+   46.8721,
+   -113.994
+  ],
+  "b": [
+   46.0038,
+   -112.5347
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tillaberi-niamey",
+  "from": "Tillabéri",
+  "to": "Niamey",
+  "a": [
+   14.2071,
+   1.4542
+  ],
+  "b": [
+   13.5137,
+   2.1098
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nesterovskaya-mingelchaur",
+  "from": "Nesterovskaya",
+  "to": "Mingelchaur",
+  "a": [
+   43.2386,
+   45.0503
+  ],
+  "b": [
+   40.764,
+   47.0595
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tashkent-kentau",
+  "from": "Tashkent",
+  "to": "Kentau",
+  "a": [
+   41.2647,
+   69.2163
+  ],
+  "b": [
+   43.5167,
+   68.5046
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ibb-sanaa",
+  "from": "Ibb",
+  "to": "Sanaa",
+  "a": [
+   13.9667,
+   44.1833
+  ],
+  "b": [
+   15.3547,
+   44.2067
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ejura-agogo",
+  "from": "Ejura",
+  "to": "Agogo",
+  "a": [
+   7.3856,
+   -1.3562
+  ],
+  "b": [
+   6.8,
+   -1.0819
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "riosucio-zipaquira",
+  "from": "Riosucio",
+  "to": "Zipaquirá",
+  "a": [
+   5.4216,
+   -75.7032
+  ],
+  "b": [
+   5.0221,
+   -74.0048
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "caracal-bals",
+  "from": "Caracal",
+  "to": "Balş",
+  "a": [
+   44.1167,
+   24.35
+  ],
+  "b": [
+   44.35,
+   24.1
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "neiva-cali",
+  "from": "Neiva",
+  "to": "Cali",
+  "a": [
+   2.9273,
+   -75.2819
+  ],
+  "b": [
+   3.4372,
+   -76.5225
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "yulinshi-wuda",
+  "from": "Yulinshi",
+  "to": "Wuda",
+  "a": [
+   38.2918,
+   109.7375
+  ],
+  "b": [
+   39.4994,
+   106.7117
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "logan-idaho-falls",
+  "from": "Logan",
+  "to": "Idaho Falls",
+  "a": [
+   41.7355,
+   -111.8344
+  ],
+  "b": [
+   43.4666,
+   -112.0341
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hoshangabad-bhopal",
+  "from": "Hoshangābād",
+  "to": "Bhopal",
+  "a": [
+   22.7475,
+   77.7274
+  ],
+  "b": [
+   23.2547,
+   77.4029
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "phitsanulok-myawadi",
+  "from": "Phitsanulok",
+  "to": "Myawadi",
+  "a": [
+   16.8248,
+   100.2586
+  ],
+  "b": [
+   16.6891,
+   98.5089
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "guatemala-city-san-miguel",
+  "from": "Guatemala City",
+  "to": "San Miguel",
+  "a": [
+   14.6407,
+   -90.5133
+  ],
+  "b": [
+   13.4833,
+   -88.1833
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "west-jordan-logan",
+  "from": "West Jordan",
+  "to": "Logan",
+  "a": [
+   40.6097,
+   -111.9391
+  ],
+  "b": [
+   41.7355,
+   -111.8344
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mildura-adelaide",
+  "from": "Mildura",
+  "to": "Adelaide",
+  "a": [
+   -34.1855,
+   142.1625
+  ],
+  "b": [
+   -34.9287,
+   138.5986
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nizhyn-pryluky",
+  "from": "Nizhyn",
+  "to": "Pryluky",
+  "a": [
+   51.048,
+   31.8869
+  ],
+  "b": [
+   50.5932,
+   32.3876
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nazret-addis-ababa",
+  "from": "Nazrēt",
+  "to": "Addis Ababa",
+  "a": [
+   8.55,
+   39.2667
+  ],
+  "b": [
+   9.025,
+   38.7469
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-cristobal-cucuta",
+  "from": "San Cristóbal",
+  "to": "Cúcuta",
+  "a": [
+   7.7669,
+   -72.225
+  ],
+  "b": [
+   7.8939,
+   -72.5078
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "saqqez-paveh",
+  "from": "Saqqez",
+  "to": "Pāveh",
+  "a": [
+   36.2499,
+   46.2735
+  ],
+  "b": [
+   35.0434,
+   46.3565
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "qingzhou-mingshui",
+  "from": "Qingzhou",
+  "to": "Mingshui",
+  "a": [
+   36.6967,
+   118.4797
+  ],
+  "b": [
+   36.7167,
+   117.5
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "phoenix-flagstaff",
+  "from": "Phoenix",
+  "to": "Flagstaff",
+  "a": [
+   33.4484,
+   -112.074
+  ],
+  "b": [
+   35.1981,
+   -111.6513
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rome-perugia",
+  "from": "Rome",
+  "to": "Perugia",
+  "a": [
+   41.8919,
+   12.5113
+  ],
+  "b": [
+   43.1122,
+   12.3888
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sarkand-huocheng",
+  "from": "Sarkand",
+  "to": "Huocheng",
+  "a": [
+   45.4113,
+   79.9155
+  ],
+  "b": [
+   44.053,
+   80.8717
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nong-kung-si-thakhek",
+  "from": "Nong Kung Si",
+  "to": "Thakhèk",
+  "a": [
+   16.65,
+   103.3
+  ],
+  "b": [
+   17.4103,
+   104.8307
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mutengene-calabar",
+  "from": "Mutengene",
+  "to": "Calabar",
+  "a": [
+   4.0913,
+   9.3144
+  ],
+  "b": [
+   4.9589,
+   8.327
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "remscheid-borken",
+  "from": "Remscheid",
+  "to": "Borken",
+  "a": [
+   51.1798,
+   7.1925
+  ],
+  "b": [
+   51.8438,
+   6.8577
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fresno-san-martin",
+  "from": "Fresno",
+  "to": "San Martín",
+  "a": [
+   5.1526,
+   -75.0362
+  ],
+  "b": [
+   3.6964,
+   -73.6996
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mabopane-tembisa",
+  "from": "Mabopane",
+  "to": "Tembisa",
+  "a": [
+   -25.4977,
+   28.1007
+  ],
+  "b": [
+   -25.9964,
+   28.2268
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ameca-victoria-de-durango",
+  "from": "Ameca",
+  "to": "Victoria de Durango",
+  "a": [
+   20.5463,
+   -104.0451
+  ],
+  "b": [
+   24.0203,
+   -104.6576
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "toledo-linares",
+  "from": "Toledo",
+  "to": "Linares",
+  "a": [
+   39.8581,
+   -4.0226
+  ],
+  "b": [
+   38.0952,
+   -3.636
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "urumqi-turpan",
+  "from": "Ürümqi",
+  "to": "Turpan",
+  "a": [
+   43.801,
+   87.6005
+  ],
+  "b": [
+   42.9477,
+   89.1789
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "al-fallujah-ramadi",
+  "from": "Al Fallūjah",
+  "to": "Ramadi",
+  "a": [
+   33.3491,
+   43.786
+  ],
+  "b": [
+   33.4206,
+   43.3078
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "quva-sarykemer",
+  "from": "Quva",
+  "to": "Sarykemer",
+  "a": [
+   40.522,
+   72.0729
+  ],
+  "b": [
+   43,
+   71.5
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "maitland-orange",
+  "from": "Maitland",
+  "to": "Orange",
+  "a": [
+   -32.7331,
+   151.5574
+  ],
+  "b": [
+   -33.284,
+   149.1002
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "canon-city-castle-rock",
+  "from": "Cañon City",
+  "to": "Castle Rock",
+  "a": [
+   38.441,
+   -105.2425
+  ],
+  "b": [
+   39.3722,
+   -104.8561
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "valle-de-la-pascua-calabozo",
+  "from": "Valle de La Pascua",
+  "to": "Calabozo",
+  "a": [
+   9.2155,
+   -66.0073
+  ],
+  "b": [
+   8.9242,
+   -67.4293
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "safaga-qina",
+  "from": "Safaga",
+  "to": "Qinā",
+  "a": [
+   26.7491,
+   33.9389
+  ],
+  "b": [
+   26.1642,
+   32.7267
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "villaquilambre-viveiro",
+  "from": "Villaquilambre",
+  "to": "Viveiro",
+  "a": [
+   42.6469,
+   -5.5583
+  ],
+  "b": [
+   43.6623,
+   -7.5934
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "las-vegas-hemet",
+  "from": "Las Vegas",
+  "to": "Hemet",
+  "a": [
+   36.175,
+   -115.1372
+  ],
+  "b": [
+   33.7476,
+   -116.9731
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tabor-dresden",
+  "from": "Tábor",
+  "to": "Dresden",
+  "a": [
+   49.4144,
+   14.6578
+  ],
+  "b": [
+   51.0509,
+   13.7383
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "wuhan-jiujiang",
+  "from": "Wuhan",
+  "to": "Jiujiang",
+  "a": [
+   30.5833,
+   114.2667
+  ],
+  "b": [
+   29.7048,
+   116.0021
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cimin-karakocan",
+  "from": "Cimin",
+  "to": "Karakoçan",
+  "a": [
+   39.7095,
+   39.7002
+  ],
+  "b": [
+   38.9518,
+   40.0271
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "horizonte-paraipaba",
+  "from": "Horizonte",
+  "to": "Paraipaba",
+  "a": [
+   -4.1,
+   -38.4833
+  ],
+  "b": [
+   -3.4394,
+   -39.1483
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chinoz-pop",
+  "from": "Chinoz",
+  "to": "Pop",
+  "a": [
+   40.9363,
+   68.7613
+  ],
+  "b": [
+   40.8736,
+   71.1089
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "alor-gajah-tangkak",
+  "from": "Alor Gajah",
+  "to": "Tangkak",
+  "a": [
+   2.3804,
+   102.2089
+  ],
+  "b": [
+   2.2673,
+   102.5453
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mexico-city-puebla",
+  "from": "Mexico City",
+  "to": "Puebla",
+  "a": [
+   19.4285,
+   -99.1277
+  ],
+  "b": [
+   19.0379,
+   -98.2035
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ballarat-melbourne",
+  "from": "Ballarat",
+  "to": "Melbourne",
+  "a": [
+   -37.5662,
+   143.8496
+  ],
+  "b": [
+   -37.814,
+   144.9633
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santiago-vina-del-mar",
+  "from": "Santiago",
+  "to": "Viña del Mar",
+  "a": [
+   -33.4569,
+   -70.6483
+  ],
+  "b": [
+   -33.0246,
+   -71.5518
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fort-beaufort-stutterheim",
+  "from": "Fort Beaufort",
+  "to": "Stutterheim",
+  "a": [
+   -32.7748,
+   26.6338
+  ],
+  "b": [
+   -32.5708,
+   27.424
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "muhoroni-nakuru",
+  "from": "Muhoroni",
+  "to": "Nakuru",
+  "a": [
+   -0.1582,
+   35.1964
+  ],
+  "b": [
+   -0.3072,
+   36.0722
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "makiyivka-syevyerodonets-k",
+  "from": "Makiyivka",
+  "to": "Syevyerodonets’k",
+  "a": [
+   48.0478,
+   37.9258
+  ],
+  "b": [
+   48.9483,
+   38.4917
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "amol-tehran",
+  "from": "Āmol",
+  "to": "Tehran",
+  "a": [
+   36.4696,
+   52.3507
+  ],
+  "b": [
+   35.6944,
+   51.4215
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "queensbury-rutland",
+  "from": "Queensbury",
+  "to": "Rutland",
+  "a": [
+   43.3773,
+   -73.6132
+  ],
+  "b": [
+   43.6106,
+   -72.9726
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hoa-binh-kaiyuan",
+  "from": "Hòa Bình",
+  "to": "Kaiyuan",
+  "a": [
+   20.8172,
+   105.3376
+  ],
+  "b": [
+   23.6977,
+   103.3037
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "xi-an-huayin",
+  "from": "Xi’an",
+  "to": "Huayin",
+  "a": [
+   34.2583,
+   108.9286
+  ],
+  "b": [
+   34.5653,
+   110.0664
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "barstow-hemet",
+  "from": "Barstow",
+  "to": "Hemet",
+  "a": [
+   34.8986,
+   -117.0228
+  ],
+  "b": [
+   33.7476,
+   -116.9731
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chisinau-ribnita",
+  "from": "Chisinau",
+  "to": "Rîbniţa",
+  "a": [
+   47.0056,
+   28.8575
+  ],
+  "b": [
+   47.7682,
+   29.01
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "zamora-celaya",
+  "from": "Zamora",
+  "to": "Celaya",
+  "a": [
+   19.9855,
+   -102.2839
+  ],
+  "b": [
+   20.5235,
+   -100.8157
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "salur-visakhapatnam",
+  "from": "Sālūr",
+  "to": "Visakhapatnam",
+  "a": [
+   18.5172,
+   83.2055
+  ],
+  "b": [
+   17.6801,
+   83.2016
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jipijapa-puyo",
+  "from": "Jipijapa",
+  "to": "Puyo",
+  "a": [
+   -1.3487,
+   -80.5787
+  ],
+  "b": [
+   -1.4837,
+   -78.0026
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "saint-petersburg-svetogorsk",
+  "from": "Saint Petersburg",
+  "to": "Svetogorsk",
+  "a": [
+   59.9386,
+   30.3141
+  ],
+  "b": [
+   61.1121,
+   28.8632
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "geneina-zalingei",
+  "from": "Geneina",
+  "to": "Zalingei",
+  "a": [
+   13.4526,
+   22.4473
+  ],
+  "b": [
+   12.9092,
+   23.4706
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "zhaotong-xichang",
+  "from": "Zhaotong",
+  "to": "Xichang",
+  "a": [
+   27.3167,
+   103.7167
+  ],
+  "b": [
+   27.8964,
+   102.2634
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "reno-galt",
+  "from": "Reno",
+  "to": "Galt",
+  "a": [
+   39.5296,
+   -119.8138
+  ],
+  "b": [
+   38.2546,
+   -121.2999
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "thivai-athens",
+  "from": "Thívai",
+  "to": "Athens",
+  "a": [
+   38.325,
+   23.3189
+  ],
+  "b": [
+   37.9838,
+   23.7278
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rajkot-mirpur-khas",
+  "from": "Rājkot",
+  "to": "Mirpur Khas",
+  "a": [
+   22.2916,
+   70.7932
+  ],
+  "b": [
+   25.5276,
+   69.0126
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "federal-way-hermiston",
+  "from": "Federal Way",
+  "to": "Hermiston",
+  "a": [
+   47.3223,
+   -122.3126
+  ],
+  "b": [
+   45.8404,
+   -119.2895
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "uberlandia-goiatuba",
+  "from": "Uberlândia",
+  "to": "Goiatuba",
+  "a": [
+   -18.9186,
+   -48.2772
+  ],
+  "b": [
+   -18.0125,
+   -49.3547
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shahrud-sari",
+  "from": "Shahrud",
+  "to": "Sari",
+  "a": [
+   36.4182,
+   54.9763
+  ],
+  "b": [
+   36.5633,
+   53.0601
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mao-massaguet",
+  "from": "Mao",
+  "to": "Massaguet",
+  "a": [
+   14.1212,
+   15.3103
+  ],
+  "b": [
+   12.4755,
+   15.4365
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "yautepec-rioverde",
+  "from": "Yautepec",
+  "to": "Rioverde",
+  "a": [
+   18.8819,
+   -99.0671
+  ],
+  "b": [
+   21.9311,
+   -99.9949
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dubbo-orange",
+  "from": "Dubbo",
+  "to": "Orange",
+  "a": [
+   -32.243,
+   148.6048
+  ],
+  "b": [
+   -33.284,
+   149.1002
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "montebelluna-herisau",
+  "from": "Montebelluna",
+  "to": "Herisau",
+  "a": [
+   45.775,
+   12.049
+  ],
+  "b": [
+   47.3862,
+   9.2792
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nyaunglebin-pyay",
+  "from": "Nyaunglebin",
+  "to": "Pyay",
+  "a": [
+   17.9536,
+   96.7225
+  ],
+  "b": [
+   18.8246,
+   95.2222
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dosquebradas-aguazul",
+  "from": "Dosquebradas",
+  "to": "Aguazul",
+  "a": [
+   4.8392,
+   -75.6673
+  ],
+  "b": [
+   5.1728,
+   -72.5471
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "gorakhpur-faisalabad",
+  "from": "Gorakhpur",
+  "to": "Faisalabad",
+  "a": [
+   29.4477,
+   75.6721
+  ],
+  "b": [
+   31.4155,
+   73.0897
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "luocheng-xichang",
+  "from": "Luocheng",
+  "to": "Xichang",
+  "a": [
+   29.3848,
+   104.0286
+  ],
+  "b": [
+   27.8964,
+   102.2634
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "enugu-idah",
+  "from": "Enugu",
+  "to": "Idah",
+  "a": [
+   6.4413,
+   7.4988
+  ],
+  "b": [
+   7.1135,
+   6.7387
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shiraz-neyriz",
+  "from": "Shiraz",
+  "to": "Neyrīz",
+  "a": [
+   29.6103,
+   52.5311
+  ],
+  "b": [
+   29.1988,
+   54.3278
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "badajoz-caldas-da-rainha",
+  "from": "Badajoz",
+  "to": "Caldas da Rainha",
+  "a": [
+   38.8779,
+   -6.9706
+  ],
+  "b": [
+   39.4033,
+   -9.1384
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "grande-prairie-prince-george",
+  "from": "Grande Prairie",
+  "to": "Prince George",
+  "a": [
+   55.1667,
+   -118.8027
+  ],
+  "b": [
+   53.9166,
+   -122.753
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kiel-hamburg",
+  "from": "Kiel",
+  "to": "Hamburg",
+  "a": [
+   54.3213,
+   10.1349
+  ],
+  "b": [
+   53.5507,
+   9.993
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kunming-gejiu",
+  "from": "Kunming",
+  "to": "Gejiu",
+  "a": [
+   25.0389,
+   102.7183
+  ],
+  "b": [
+   23.3608,
+   103.1537
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santa-teresa-del-tuy-valencia",
+  "from": "Santa Teresa del Tuy",
+  "to": "Valencia",
+  "a": [
+   10.2329,
+   -66.6647
+  ],
+  "b": [
+   10.162,
+   -68.0076
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mexico-city-cuautitlan-izcalli",
+  "from": "Mexico City",
+  "to": "Cuautitlán Izcalli",
+  "a": [
+   19.4285,
+   -99.1277
+  ],
+  "b": [
+   19.6439,
+   -99.216
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "saint-cloud-minneapolis",
+  "from": "Saint Cloud",
+  "to": "Minneapolis",
+  "a": [
+   45.5608,
+   -94.1625
+  ],
+  "b": [
+   44.98,
+   -93.2638
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "thiruvananthapuram-arantangi",
+  "from": "Thiruvananthapuram",
+  "to": "Arantāngi",
+  "a": [
+   8.4855,
+   76.9492
+  ],
+  "b": [
+   10.1723,
+   78.9912
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "egirdir-tarsus",
+  "from": "Eğirdir",
+  "to": "Tarsus",
+  "a": [
+   37.8746,
+   30.8504
+  ],
+  "b": [
+   36.9177,
+   34.8928
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kroonstad-qacha-s-nek",
+  "from": "Kroonstad",
+  "to": "Qacha’s Nek",
+  "a": [
+   -27.6504,
+   27.2349
+  ],
+  "b": [
+   -30.1154,
+   28.6894
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "den-chai-tak",
+  "from": "Den Chai",
+  "to": "Tak",
+  "a": [
+   17.9837,
+   100.0522
+  ],
+  "b": [
+   16.8697,
+   99.129
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "trossingen-freudenstadt",
+  "from": "Trossingen",
+  "to": "Freudenstadt",
+  "a": [
+   48.0767,
+   8.6441
+  ],
+  "b": [
+   48.4669,
+   8.4137
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "phuthaditjhaba-orkney",
+  "from": "Phuthaditjhaba",
+  "to": "Orkney",
+  "a": [
+   -28.5242,
+   28.8158
+  ],
+  "b": [
+   -26.9802,
+   26.6727
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "iturama-araguari",
+  "from": "Iturama",
+  "to": "Araguari",
+  "a": [
+   -19.7281,
+   -50.1956
+  ],
+  "b": [
+   -18.6472,
+   -48.1872
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "baldwin-park-mexicali",
+  "from": "Baldwin Park",
+  "to": "Mexicali",
+  "a": [
+   34.0853,
+   -117.9609
+  ],
+  "b": [
+   32.6278,
+   -115.4545
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "changchun-jishu",
+  "from": "Changchun",
+  "to": "Jishu",
+  "a": [
+   43.88,
+   125.3228
+  ],
+  "b": [
+   44.3167,
+   126.8
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bakersfield-thousand-oaks",
+  "from": "Bakersfield",
+  "to": "Thousand Oaks",
+  "a": [
+   35.3733,
+   -119.0187
+  ],
+  "b": [
+   34.1706,
+   -118.8376
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bendigo-melbourne",
+  "from": "Bendigo",
+  "to": "Melbourne",
+  "a": [
+   -36.7582,
+   144.2802
+  ],
+  "b": [
+   -37.814,
+   144.9633
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chichicastenango-sanarate",
+  "from": "Chichicastenango",
+  "to": "Sanarate",
+  "a": [
+   14.9433,
+   -91.1112
+  ],
+  "b": [
+   14.7883,
+   -90.1988
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sassuolo-campi-bisenzio",
+  "from": "Sassuolo",
+  "to": "Campi Bisenzio",
+  "a": [
+   44.5432,
+   10.7848
+  ],
+  "b": [
+   43.8245,
+   11.1303
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "villaquilambre-rio-tinto",
+  "from": "Villaquilambre",
+  "to": "Rio Tinto",
+  "a": [
+   42.6469,
+   -5.5583
+  ],
+  "b": [
+   41.1787,
+   -8.5595
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "guntur-visakhapatnam",
+  "from": "Guntur",
+  "to": "Visakhapatnam",
+  "a": [
+   16.2997,
+   80.4573
+  ],
+  "b": [
+   17.6801,
+   83.2016
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pereira-bogota",
+  "from": "Pereira",
+  "to": "Bogotá",
+  "a": [
+   4.8133,
+   -75.6961
+  ],
+  "b": [
+   4.6097,
+   -74.0817
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mazabuka-lusaka",
+  "from": "Mazabuka",
+  "to": "Lusaka",
+  "a": [
+   -15.856,
+   27.748
+  ],
+  "b": [
+   -15.4067,
+   28.2871
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sanaa-amran",
+  "from": "Sanaa",
+  "to": "‘Amrān",
+  "a": [
+   15.3547,
+   44.2067
+  ],
+  "b": [
+   15.6594,
+   43.9438
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "anjiang-fenghuang",
+  "from": "Anjiang",
+  "to": "Fenghuang",
+  "a": [
+   27.3194,
+   110.1031
+  ],
+  "b": [
+   27.9356,
+   109.5996
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rodolfo-sanchez-taboada-san-luis",
+  "from": "Rodolfo Sánchez Taboada",
+  "to": "San Luis",
+  "a": [
+   31.721,
+   -116.5718
+  ],
+  "b": [
+   32.487,
+   -114.7822
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "yaring-yala",
+  "from": "Yaring",
+  "to": "Yala",
+  "a": [
+   6.8662,
+   101.3689
+  ],
+  "b": [
+   6.54,
+   101.2813
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dashtobod-dushanbe",
+  "from": "Dashtobod",
+  "to": "Dushanbe",
+  "a": [
+   40.1269,
+   68.4944
+  ],
+  "b": [
+   38.5358,
+   68.779
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "muhldorf-zurich",
+  "from": "Mühldorf",
+  "to": "Zürich",
+  "a": [
+   48.2467,
+   12.5215
+  ],
+  "b": [
+   47.3667,
+   8.55
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dodoma-kibakwe",
+  "from": "Dodoma",
+  "to": "Kibakwe",
+  "a": [
+   -6.1722,
+   35.7395
+  ],
+  "b": [
+   -6.7167,
+   36.3667
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "warragul-traralgon",
+  "from": "Warragul",
+  "to": "Traralgon",
+  "a": [
+   -38.1591,
+   145.9312
+  ],
+  "b": [
+   -38.1953,
+   146.5415
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pirassununga-avare",
+  "from": "Pirassununga",
+  "to": "Avaré",
+  "a": [
+   -21.9961,
+   -47.4258
+  ],
+  "b": [
+   -23.0986,
+   -48.9258
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "beijing-datong",
+  "from": "Beijing",
+  "to": "Datong",
+  "a": [
+   39.9075,
+   116.3972
+  ],
+  "b": [
+   40.0936,
+   113.2914
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-miguel-santa-rosa-de-copan",
+  "from": "San Miguel",
+  "to": "Santa Rosa de Copán",
+  "a": [
+   13.4833,
+   -88.1833
+  ],
+  "b": [
+   14.7667,
+   -88.7792
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "travnik-bosanska-krupa",
+  "from": "Travnik",
+  "to": "Bosanska Krupa",
+  "a": [
+   44.2264,
+   17.6658
+  ],
+  "b": [
+   44.8825,
+   16.1514
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "memphis-collinsville",
+  "from": "Memphis",
+  "to": "Collinsville",
+  "a": [
+   35.1495,
+   -90.049
+  ],
+  "b": [
+   38.6703,
+   -89.9845
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "akbarabad-najafabad",
+  "from": "Akbarābād",
+  "to": "Najafābād",
+  "a": [
+   29.2464,
+   52.7793
+  ],
+  "b": [
+   32.6346,
+   51.3653
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bom-jesus-do-itabapoana-cachoeiro-de-itapemirim",
+  "from": "Bom Jesus do Itabapoana",
+  "to": "Cachoeiro de Itapemirim",
+  "a": [
+   -21.1339,
+   -41.6797
+  ],
+  "b": [
+   -20.8489,
+   -41.1128
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "quetta-loralai",
+  "from": "Quetta",
+  "to": "Loralai",
+  "a": [
+   30.1841,
+   67.0014
+  ],
+  "b": [
+   30.3705,
+   68.5979
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nyalikungu-geita",
+  "from": "Nyalikungu",
+  "to": "Geita",
+  "a": [
+   -3.1833,
+   33.7833
+  ],
+  "b": [
+   -2.8725,
+   32.2325
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "allen-collipulli",
+  "from": "Allen",
+  "to": "Collipulli",
+  "a": [
+   -38.9774,
+   -67.8271
+  ],
+  "b": [
+   -37.9545,
+   -72.4344
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "wolfenbuttel-apolda",
+  "from": "Wolfenbüttel",
+  "to": "Apolda",
+  "a": [
+   52.1644,
+   10.541
+  ],
+  "b": [
+   51.0262,
+   11.5164
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "marrakesh-ouarzazat",
+  "from": "Marrakesh",
+  "to": "Ouarzazat",
+  "a": [
+   31.6342,
+   -7.9999
+  ],
+  "b": [
+   30.9189,
+   -6.8934
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dix-hills-syracuse",
+  "from": "Dix Hills",
+  "to": "Syracuse",
+  "a": [
+   40.8048,
+   -73.3362
+  ],
+  "b": [
+   43.0481,
+   -76.1474
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "adana-bor",
+  "from": "Adana",
+  "to": "Bor",
+  "a": [
+   36.9862,
+   35.3253
+  ],
+  "b": [
+   37.8906,
+   34.5589
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dzhetygara-rudnyy",
+  "from": "Dzhetygara",
+  "to": "Rudnyy",
+  "a": [
+   52.1902,
+   61.1989
+  ],
+  "b": [
+   52.9729,
+   63.1168
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "maych-ew-mek-ele",
+  "from": "Maych’ew",
+  "to": "Mek'ele",
+  "a": [
+   12.7875,
+   39.5422
+  ],
+  "b": [
+   13.4967,
+   39.4753
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "beloretsk-gay",
+  "from": "Beloretsk",
+  "to": "Gay",
+  "a": [
+   53.9631,
+   58.3981
+  ],
+  "b": [
+   51.4666,
+   58.4552
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "salamanca-puebla",
+  "from": "Salamanca",
+  "to": "Puebla",
+  "a": [
+   20.572,
+   -101.1915
+  ],
+  "b": [
+   19.0379,
+   -98.2035
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hue-tam-ky",
+  "from": "Huế",
+  "to": "Tam Kỳ",
+  "a": [
+   16.4619,
+   107.5955
+  ],
+  "b": [
+   15.5736,
+   108.474
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "billings-bozeman",
+  "from": "Billings",
+  "to": "Bozeman",
+  "a": [
+   45.7833,
+   -108.5007
+  ],
+  "b": [
+   45.6797,
+   -111.0386
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "steinhagen-lohne",
+  "from": "Steinhagen",
+  "to": "Löhne",
+  "a": [
+   52,
+   8.4
+  ],
+  "b": [
+   52.1885,
+   8.6922
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cerro-de-pasco-huancayo",
+  "from": "Cerro de Pasco",
+  "to": "Huancayo",
+  "a": [
+   -10.6675,
+   -76.2567
+  ],
+  "b": [
+   -12.0651,
+   -75.2049
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "armidale-toowoomba",
+  "from": "Armidale",
+  "to": "Toowoomba",
+  "a": [
+   -30.5012,
+   151.6655
+  ],
+  "b": [
+   -27.5606,
+   151.9539
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jianshui-kunming",
+  "from": "Jianshui",
+  "to": "Kunming",
+  "a": [
+   24.2774,
+   101.224
+  ],
+  "b": [
+   25.0389,
+   102.7183
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bar-kropyvnytskyi",
+  "from": "Bar",
+  "to": "Kropyvnytskyi",
+  "a": [
+   49.0772,
+   27.6826
+  ],
+  "b": [
+   48.5132,
+   32.2597
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kyle-ciudad-acuna",
+  "from": "Kyle",
+  "to": "Ciudad Acuña",
+  "a": [
+   29.9891,
+   -97.8772
+  ],
+  "b": [
+   29.3232,
+   -100.9522
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "puerto-varas-san-carlos-de-bariloche",
+  "from": "Puerto Varas",
+  "to": "San Carlos de Bariloche",
+  "a": [
+   -41.3195,
+   -72.9854
+  ],
+  "b": [
+   -41.1456,
+   -71.3082
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kahriz-ahvaz",
+  "from": "Kahrīz",
+  "to": "Ahvaz",
+  "a": [
+   34.3838,
+   47.0553
+  ],
+  "b": [
+   31.319,
+   48.6842
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nibong-tebal-betong",
+  "from": "Nibong Tebal",
+  "to": "Betong",
+  "a": [
+   5.1659,
+   100.4779
+  ],
+  "b": [
+   5.7743,
+   101.0723
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rahim-yar-khan-nawabshah",
+  "from": "Rahim Yar Khan",
+  "to": "Nawabshah",
+  "a": [
+   28.4199,
+   70.3034
+  ],
+  "b": [
+   26.2394,
+   68.4037
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kemise-inda-silase",
+  "from": "Kemisē",
+  "to": "Inda Silasē",
+  "a": [
+   10.7167,
+   39.87
+  ],
+  "b": [
+   14.1031,
+   38.2829
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tianjin-yanzhou",
+  "from": "Tianjin",
+  "to": "Yanzhou",
+  "a": [
+   39.1422,
+   117.1767
+  ],
+  "b": [
+   35.5528,
+   116.8286
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "alessandria-steffisburg",
+  "from": "Alessandria",
+  "to": "Steffisburg",
+  "a": [
+   44.9092,
+   8.6101
+  ],
+  "b": [
+   46.7781,
+   7.6325
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "montgomery-myrtle-grove",
+  "from": "Montgomery",
+  "to": "Myrtle Grove",
+  "a": [
+   32.3668,
+   -86.3
+  ],
+  "b": [
+   30.421,
+   -87.3075
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bishkek-almaty",
+  "from": "Bishkek",
+  "to": "Almaty",
+  "a": [
+   42.87,
+   74.59
+  ],
+  "b": [
+   43.2567,
+   76.9286
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "palenque-yajalon",
+  "from": "Palenque",
+  "to": "Yajalón",
+  "a": [
+   17.5095,
+   -91.9825
+  ],
+  "b": [
+   17.1728,
+   -92.3332
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "addis-ababa-ziway",
+  "from": "Addis Ababa",
+  "to": "Ziway",
+  "a": [
+   9.025,
+   38.7469
+  ],
+  "b": [
+   7.9333,
+   38.7167
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fuding-hangzhou",
+  "from": "Fuding",
+  "to": "Hangzhou",
+  "a": [
+   27.3273,
+   120.214
+  ],
+  "b": [
+   30.2936,
+   120.1614
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mucumpiz-la-fria",
+  "from": "Mucumpiz",
+  "to": "La Fría",
+  "a": [
+   8.4167,
+   -71.1333
+  ],
+  "b": [
+   8.2152,
+   -72.2489
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "thai-nguyen-hai-duong",
+  "from": "Thái Nguyên",
+  "to": "Hải Dương",
+  "a": [
+   21.5942,
+   105.8482
+  ],
+  "b": [
+   20.941,
+   106.333
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dragash-gjilan",
+  "from": "Dragash",
+  "to": "Gjilan",
+  "a": [
+   42.0265,
+   20.6533
+  ],
+  "b": [
+   42.4605,
+   21.4699
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "wroc-aw-dvur-kralove-nad-labem",
+  "from": "Wrocław",
+  "to": "Dvůr Králové nad Labem",
+  "a": [
+   51.1,
+   17.0333
+  ],
+  "b": [
+   50.4317,
+   15.814
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mashhad-neyshabur",
+  "from": "Mashhad",
+  "to": "Neyshābūr",
+  "a": [
+   36.3156,
+   59.568
+  ],
+  "b": [
+   36.2133,
+   58.7957
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "brisbane-bundaberg",
+  "from": "Brisbane",
+  "to": "Bundaberg",
+  "a": [
+   -27.4679,
+   153.0281
+  ],
+  "b": [
+   -24.8662,
+   152.3479
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "billings-idaho-falls",
+  "from": "Billings",
+  "to": "Idaho Falls",
+  "a": [
+   45.7833,
+   -108.5007
+  ],
+  "b": [
+   43.4666,
+   -112.0341
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "guider-mboursou-lere",
+  "from": "Guider",
+  "to": "Mboursou Léré",
+  "a": [
+   9.9333,
+   13.9467
+  ],
+  "b": [
+   9.7639,
+   14.1539
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ica-cusco",
+  "from": "Ica",
+  "to": "Cusco",
+  "a": [
+   -14.0678,
+   -75.7286
+  ],
+  "b": [
+   -13.5226,
+   -71.9673
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jalgaon-ashta",
+  "from": "Jalgaon",
+  "to": "Ashta",
+  "a": [
+   21.0029,
+   75.566
+  ],
+  "b": [
+   23.0175,
+   76.7221
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "oaxaca-ometepec",
+  "from": "Oaxaca",
+  "to": "Ometepec",
+  "a": [
+   17.0654,
+   -96.7237
+  ],
+  "b": [
+   16.6901,
+   -98.408
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "lugo-reggio-nell-emilia",
+  "from": "Lugo",
+  "to": "Reggio nell'Emilia",
+  "a": [
+   44.4214,
+   11.9109
+  ],
+  "b": [
+   44.6983,
+   10.6312
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "asheville-oak-ridge",
+  "from": "Asheville",
+  "to": "Oak Ridge",
+  "a": [
+   35.6009,
+   -82.554
+  ],
+  "b": [
+   36.0104,
+   -84.2696
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shiyan-changde",
+  "from": "Shiyan",
+  "to": "Changde",
+  "a": [
+   32.6475,
+   110.7781
+  ],
+  "b": [
+   29.0321,
+   111.6984
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sidi-khaled-khenchela",
+  "from": "Sidi Khaled",
+  "to": "Khenchela",
+  "a": [
+   34.387,
+   4.9878
+  ],
+  "b": [
+   35.4358,
+   7.1433
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sinsheim-werl",
+  "from": "Sinsheim",
+  "to": "Werl",
+  "a": [
+   49.2529,
+   8.8787
+  ],
+  "b": [
+   51.5549,
+   7.914
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "allahabad-ghosi",
+  "from": "Allahābād",
+  "to": "Ghosī",
+  "a": [
+   25.4448,
+   81.8432
+  ],
+  "b": [
+   26.1059,
+   83.5393
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "rovigo-graz",
+  "from": "Rovigo",
+  "to": "Graz",
+  "a": [
+   45.0698,
+   11.7902
+  ],
+  "b": [
+   47.0667,
+   15.45
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chiang-mai-thayetmyo",
+  "from": "Chiang Mai",
+  "to": "Thayetmyo",
+  "a": [
+   18.7904,
+   98.9847
+  ],
+  "b": [
+   19.3208,
+   95.1827
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "barranquilla-maicao",
+  "from": "Barranquilla",
+  "to": "Maicao",
+  "a": [
+   10.9685,
+   -74.7813
+  ],
+  "b": [
+   11.3784,
+   -72.2395
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "gawler-adelaide",
+  "from": "Gawler",
+  "to": "Adelaide",
+  "a": [
+   -34.6025,
+   138.749
+  ],
+  "b": [
+   -34.9287,
+   138.5986
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "al-bayda-ta-izz",
+  "from": "Al Bayda",
+  "to": "Ta‘izz",
+  "a": [
+   13.9852,
+   45.5727
+  ],
+  "b": [
+   13.5795,
+   44.0209
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "owen-sound-jamestown",
+  "from": "Owen Sound",
+  "to": "Jamestown",
+  "a": [
+   44.5672,
+   -80.9435
+  ],
+  "b": [
+   42.097,
+   -79.2353
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "leon-tegucigalpa",
+  "from": "León",
+  "to": "Tegucigalpa",
+  "a": [
+   12.4379,
+   -86.878
+  ],
+  "b": [
+   14.0818,
+   -87.2068
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kolea-m-sila",
+  "from": "Kolea",
+  "to": "M’Sila",
+  "a": [
+   36.6389,
+   2.7685
+  ],
+  "b": [
+   35.7058,
+   4.5419
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ozurgeti-staryy-malgobek",
+  "from": "Ozurgeti",
+  "to": "Staryy Malgobek",
+  "a": [
+   41.9244,
+   42.0068
+  ],
+  "b": [
+   43.5444,
+   44.5959
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tai-an-zhoukou",
+  "from": "Tai’an",
+  "to": "Zhoukou",
+  "a": [
+   36.1853,
+   117.12
+  ],
+  "b": [
+   33.6333,
+   114.6333
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cucuta-magangue",
+  "from": "Cúcuta",
+  "to": "Magangué",
+  "a": [
+   7.8939,
+   -72.5078
+  ],
+  "b": [
+   9.242,
+   -74.7547
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nogales-sahuarita",
+  "from": "Nogales",
+  "to": "Sahuarita",
+  "a": [
+   31.3086,
+   -110.9422
+  ],
+  "b": [
+   31.9576,
+   -110.9557
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "goma-musanze",
+  "from": "Goma",
+  "to": "Musanze",
+  "a": [
+   -1.6741,
+   29.2284
+  ],
+  "b": [
+   -1.4998,
+   29.635
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hyderabad-nidadavole",
+  "from": "Hyderabad",
+  "to": "Nidadavole",
+  "a": [
+   17.384,
+   78.4564
+  ],
+  "b": [
+   16.9057,
+   81.6722
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "borazjan-yazd",
+  "from": "Borāzjān",
+  "to": "Yazd",
+  "a": [
+   29.2699,
+   51.2188
+  ],
+  "b": [
+   31.8972,
+   54.3675
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "wang-nam-yen-bangkok",
+  "from": "Wang Nam Yen",
+  "to": "Bangkok",
+  "a": [
+   13.5032,
+   102.1812
+  ],
+  "b": [
+   13.754,
+   100.5014
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "saltillo-san-luis-potosi",
+  "from": "Saltillo",
+  "to": "San Luis Potosí",
+  "a": [
+   25.4232,
+   -101.0053
+  ],
+  "b": [
+   22.1498,
+   -100.9792
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "spruce-grove-calgary",
+  "from": "Spruce Grove",
+  "to": "Calgary",
+  "a": [
+   53.5334,
+   -113.9187
+  ],
+  "b": [
+   51.0501,
+   -114.0853
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "abadeh-yazd",
+  "from": "Ābādeh",
+  "to": "Yazd",
+  "a": [
+   31.1608,
+   52.6506
+  ],
+  "b": [
+   31.8972,
+   54.3675
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "regente-feijo-tres-lagoas",
+  "from": "Regente Feijó",
+  "to": "Três Lagoas",
+  "a": [
+   -22.2214,
+   -51.3028
+  ],
+  "b": [
+   -20.7876,
+   -51.7034
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hunedoara-pascani",
+  "from": "Hunedoara",
+  "to": "Paşcani",
+  "a": [
+   45.75,
+   22.9
+  ],
+  "b": [
+   47.2469,
+   26.7229
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sibiu-zarnesti",
+  "from": "Sibiu",
+  "to": "Zărnești",
+  "a": [
+   45.8,
+   24.15
+  ],
+  "b": [
+   45.5609,
+   25.3179
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "zhangjiakou-taiyuan",
+  "from": "Zhangjiakou",
+  "to": "Taiyuan",
+  "a": [
+   40.81,
+   114.8794
+  ],
+  "b": [
+   37.8694,
+   112.5603
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shepparton-wodonga",
+  "from": "Shepparton",
+  "to": "Wodonga",
+  "a": [
+   -36.3805,
+   145.3987
+  ],
+  "b": [
+   -36.1218,
+   146.8881
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "delhi-chandigarh",
+  "from": "Delhi",
+  "to": "Chandigarh",
+  "a": [
+   28.6519,
+   77.2315
+  ],
+  "b": [
+   30.7363,
+   76.7884
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nairobi-moshi",
+  "from": "Nairobi",
+  "to": "Moshi",
+  "a": [
+   -1.2833,
+   36.8167
+  ],
+  "b": [
+   -3.35,
+   37.3333
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sao-joao-da-boa-vista-pitangueiras",
+  "from": "São João da Boa Vista",
+  "to": "Pitangueiras",
+  "a": [
+   -21.9692,
+   -46.7981
+  ],
+  "b": [
+   -21.0094,
+   -48.2217
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "prilep-skopje",
+  "from": "Prilep",
+  "to": "Skopje",
+  "a": [
+   41.3451,
+   21.555
+  ],
+  "b": [
+   41.9965,
+   21.4314
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "martinsburg-waldorf",
+  "from": "Martinsburg",
+  "to": "Waldorf",
+  "a": [
+   39.4562,
+   -77.9639
+  ],
+  "b": [
+   38.6246,
+   -76.9391
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ol-kalou-thika",
+  "from": "Ol Kalou",
+  "to": "Thika",
+  "a": [
+   -0.2709,
+   36.3792
+  ],
+  "b": [
+   -1.0333,
+   37.0693
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "cabrero-temuco",
+  "from": "Cabrero",
+  "to": "Temuco",
+  "a": [
+   -37.0339,
+   -72.4047
+  ],
+  "b": [
+   -38.7396,
+   -72.5984
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santiago-papasquiaro-escuinapa",
+  "from": "Santiago Papasquiaro",
+  "to": "Escuinapa",
+  "a": [
+   25.0439,
+   -105.4192
+  ],
+  "b": [
+   22.8328,
+   -105.7777
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "liaocheng-zibo",
+  "from": "Liaocheng",
+  "to": "Zibo",
+  "a": [
+   36.456,
+   115.9777
+  ],
+  "b": [
+   36.7906,
+   118.0633
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "biskra-sidi-merouane",
+  "from": "Biskra",
+  "to": "Sidi Mérouane",
+  "a": [
+   34.8504,
+   5.728
+  ],
+  "b": [
+   36.5206,
+   6.2611
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sahiwal-muktsar",
+  "from": "Sahiwal",
+  "to": "Muktsar",
+  "a": [
+   30.6659,
+   73.1019
+  ],
+  "b": [
+   30.4743,
+   74.5166
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "fontana-fresno",
+  "from": "Fontana",
+  "to": "Fresno",
+  "a": [
+   34.0922,
+   -117.4351
+  ],
+  "b": [
+   36.7477,
+   -119.7724
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ipoh-serendah",
+  "from": "Ipoh",
+  "to": "Serendah",
+  "a": [
+   4.5841,
+   101.0829
+  ],
+  "b": [
+   3.3646,
+   101.6041
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "pueblo-west-brighton",
+  "from": "Pueblo West",
+  "to": "Brighton",
+  "a": [
+   38.35,
+   -104.7228
+  ],
+  "b": [
+   39.9853,
+   -104.8205
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "aix-en-provence-echirolles",
+  "from": "Aix-en-Provence",
+  "to": "Échirolles",
+  "a": [
+   43.5283,
+   5.4497
+  ],
+  "b": [
+   45.146,
+   5.7144
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jalostotitlan-tlaquepaque",
+  "from": "Jalostotitlán",
+  "to": "Tlaquepaque",
+  "a": [
+   21.1674,
+   -102.4639
+  ],
+  "b": [
+   20.6409,
+   -103.2933
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shiqi-guangzhou",
+  "from": "Shiqi",
+  "to": "Guangzhou",
+  "a": [
+   22.5168,
+   113.3852
+  ],
+  "b": [
+   23.1167,
+   113.25
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "lice-bulan-k",
+  "from": "Lice",
+  "to": "Bulanık",
+  "a": [
+   38.4582,
+   40.6389
+  ],
+  "b": [
+   39.0866,
+   42.2716
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "dresden-most",
+  "from": "Dresden",
+  "to": "Most",
+  "a": [
+   51.0509,
+   13.7383
+  ],
+  "b": [
+   50.503,
+   13.6362
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "quilpue-mendoza",
+  "from": "Quilpué",
+  "to": "Mendoza",
+  "a": [
+   -33.0475,
+   -71.4425
+  ],
+  "b": [
+   -32.8908,
+   -68.8272
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nizhniy-novgorod-moscow",
+  "from": "Nizhniy Novgorod",
+  "to": "Moscow",
+  "a": [
+   56.3287,
+   44.002
+  ],
+  "b": [
+   55.7522,
+   37.6156
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bidar-bodhan",
+  "from": "Bīdar",
+  "to": "Bodhan",
+  "a": [
+   17.908,
+   77.5152
+  ],
+  "b": [
+   18.6621,
+   77.8858
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kermanshah-qom",
+  "from": "Kermanshah",
+  "to": "Qom",
+  "a": [
+   34.3142,
+   47.065
+  ],
+  "b": [
+   34.6401,
+   50.8764
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "forest-grove-moses-lake",
+  "from": "Forest Grove",
+  "to": "Moses Lake",
+  "a": [
+   45.5198,
+   -123.1107
+  ],
+  "b": [
+   47.1301,
+   -119.2781
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "oulad-teima-guelmim",
+  "from": "Oulad Teïma",
+  "to": "Guelmim",
+  "a": [
+   30.3947,
+   -9.209
+  ],
+  "b": [
+   28.987,
+   -10.0574
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "shepparton-mildura",
+  "from": "Shepparton",
+  "to": "Mildura",
+  "a": [
+   -36.3805,
+   145.3987
+  ],
+  "b": [
+   -34.1855,
+   142.1625
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "vanadzor-gyumri",
+  "from": "Vanadzor",
+  "to": "Gyumri",
+  "a": [
+   40.8046,
+   44.4939
+  ],
+  "b": [
+   40.7942,
+   43.8453
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "nang-rong-siem-reap",
+  "from": "Nang Rong",
+  "to": "Siem Reap",
+  "a": [
+   14.6377,
+   102.7914
+  ],
+  "b": [
+   13.3618,
+   103.8606
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kalat-shahdadpur",
+  "from": "Kalat",
+  "to": "Shahdadpur",
+  "a": [
+   29.0266,
+   66.5936
+  ],
+  "b": [
+   25.9254,
+   68.6228
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "contagem-divinopolis",
+  "from": "Contagem",
+  "to": "Divinópolis",
+  "a": [
+   -19.9317,
+   -44.0536
+  ],
+  "b": [
+   -20.1436,
+   -44.8907
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ciudad-de-huitzuco-temixco",
+  "from": "Ciudad de Huitzuco",
+  "to": "Temixco",
+  "a": [
+   18.3033,
+   -99.3338
+  ],
+  "b": [
+   18.8525,
+   -99.2254
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "baunatal-versmold",
+  "from": "Baunatal",
+  "to": "Versmold",
+  "a": [
+   51.2518,
+   9.4075
+  ],
+  "b": [
+   52.0401,
+   8.1527
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "san-salvador-de-jujuy-villamontes",
+  "from": "San Salvador de Jujuy",
+  "to": "Villamontes",
+  "a": [
+   -24.1946,
+   -65.2971
+  ],
+  "b": [
+   -21.2624,
+   -63.469
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "daegu-seoul",
+  "from": "Daegu",
+  "to": "Seoul",
+  "a": [
+   35.8703,
+   128.5911
+  ],
+  "b": [
+   37.566,
+   126.9784
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "serres-sofia",
+  "from": "Sérres",
+  "to": "Sofia",
+  "a": [
+   41.085,
+   23.5476
+  ],
+  "b": [
+   42.6975,
+   23.3241
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "doka-ad-damazin",
+  "from": "Doka",
+  "to": "Ad-Damazin",
+  "a": [
+   13.5167,
+   35.7667
+  ],
+  "b": [
+   11.7891,
+   34.3592
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "moshi-matui",
+  "from": "Moshi",
+  "to": "Matui",
+  "a": [
+   -3.35,
+   37.3333
+  ],
+  "b": [
+   -4.8,
+   38.25
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ciudad-victoria-weslaco",
+  "from": "Ciudad Victoria",
+  "to": "Weslaco",
+  "a": [
+   23.7417,
+   -99.146
+  ],
+  "b": [
+   26.1595,
+   -97.9908
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "taraz-naryn",
+  "from": "Taraz",
+  "to": "Naryn",
+  "a": [
+   42.9,
+   71.3667
+  ],
+  "b": [
+   41.4287,
+   75.9911
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kuala-lumpur-seremban",
+  "from": "Kuala Lumpur",
+  "to": "Seremban",
+  "a": [
+   3.1412,
+   101.6865
+  ],
+  "b": [
+   2.7297,
+   101.9381
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "abancay-arequipa",
+  "from": "Abancay",
+  "to": "Arequipa",
+  "a": [
+   -13.6339,
+   -72.8814
+  ],
+  "b": [
+   -16.3989,
+   -71.535
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jieshou-xuchang",
+  "from": "Jieshou",
+  "to": "Xuchang",
+  "a": [
+   33.2634,
+   115.3611
+  ],
+  "b": [
+   34.0319,
+   113.863
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "vrsac-podgorica",
+  "from": "Vršac",
+  "to": "Podgorica",
+  "a": [
+   45.1167,
+   21.3036
+  ],
+  "b": [
+   42.4411,
+   19.2636
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "azrou-chetouane",
+  "from": "Azrou",
+  "to": "Chetouane",
+  "a": [
+   33.4344,
+   -5.2213
+  ],
+  "b": [
+   34.9213,
+   -1.2951
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "irapuato-miramar",
+  "from": "Irapuato",
+  "to": "Miramar",
+  "a": [
+   20.6767,
+   -101.3563
+  ],
+  "b": [
+   22.3609,
+   -97.9
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "romulus-toledo",
+  "from": "Romulus",
+  "to": "Toledo",
+  "a": [
+   42.2223,
+   -83.3966
+  ],
+  "b": [
+   41.6639,
+   -83.5552
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ropczyce-kosice",
+  "from": "Ropczyce",
+  "to": "Košice",
+  "a": [
+   50.0523,
+   21.6089
+  ],
+  "b": [
+   48.7139,
+   21.2581
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "tupiza-villazon",
+  "from": "Tupiza",
+  "to": "Villazón",
+  "a": [
+   -21.4434,
+   -65.7188
+  ],
+  "b": [
+   -22.0866,
+   -65.5942
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "najafabad-abadan",
+  "from": "Najafābād",
+  "to": "Abadan",
+  "a": [
+   32.6346,
+   51.3653
+  ],
+  "b": [
+   30.3392,
+   48.3043
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "chickasha-lubbock",
+  "from": "Chickasha",
+  "to": "Lubbock",
+  "a": [
+   35.0526,
+   -97.9364
+  ],
+  "b": [
+   33.5779,
+   -101.8552
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "changshu-city-bengbu",
+  "from": "Changshu City",
+  "to": "Bengbu",
+  "a": [
+   31.6461,
+   120.7422
+  ],
+  "b": [
+   32.9408,
+   117.3608
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "los-angeles-barstow",
+  "from": "Los Angeles",
+  "to": "Barstow",
+  "a": [
+   34.0522,
+   -118.2437
+  ],
+  "b": [
+   34.8986,
+   -117.0228
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "turkmenabat-jizzax",
+  "from": "Türkmenabat",
+  "to": "Jizzax",
+  "a": [
+   39.0733,
+   63.5786
+  ],
+  "b": [
+   40.1234,
+   67.8284
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "yinchuan-lanzhou",
+  "from": "Yinchuan",
+  "to": "Lanzhou",
+  "a": [
+   38.4681,
+   106.2731
+  ],
+  "b": [
+   36.057,
+   103.8399
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "leipzig-braunschweig",
+  "from": "Leipzig",
+  "to": "Braunschweig",
+  "a": [
+   51.3396,
+   12.3713
+  ],
+  "b": [
+   52.2659,
+   10.5267
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sumbawanga-matai",
+  "from": "Sumbawanga",
+  "to": "Matai",
+  "a": [
+   -7.9667,
+   31.6167
+  ],
+  "b": [
+   -8.3,
+   31.5167
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "sens-nettetal",
+  "from": "Sens",
+  "to": "Nettetal",
+  "a": [
+   48.1974,
+   3.2833
+  ],
+  "b": [
+   51.3167,
+   6.2833
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "teziutlan-perote",
+  "from": "Teziutlan",
+  "to": "Perote",
+  "a": [
+   19.8173,
+   -97.3599
+  ],
+  "b": [
+   19.5623,
+   -97.2424
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "surat-thani-nakhon-si-thammarat",
+  "from": "Surat Thani",
+  "to": "Nakhon Si Thammarat",
+  "a": [
+   9.1401,
+   99.3331
+  ],
+  "b": [
+   8.4333,
+   99.9667
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mashhad-sabzevar",
+  "from": "Mashhad",
+  "to": "Sabzevar",
+  "a": [
+   36.3156,
+   59.568
+  ],
+  "b": [
+   36.2126,
+   57.6819
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jaru-ji-parana",
+  "from": "Jaru",
+  "to": "Ji Paraná",
+  "a": [
+   -10.4389,
+   -62.4664
+  ],
+  "b": [
+   -10.8853,
+   -61.9517
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "guadalajara-aguascalientes",
+  "from": "Guadalajara",
+  "to": "Aguascalientes",
+  "a": [
+   20.6668,
+   -103.3918
+  ],
+  "b": [
+   21.8823,
+   -102.2826
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "blantyre-mandimba",
+  "from": "Blantyre",
+  "to": "Mandimba",
+  "a": [
+   -15.785,
+   35.0085
+  ],
+  "b": [
+   -14.3525,
+   35.6506
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "olesa-de-montserrat-marmande",
+  "from": "Olesa de Montserrat",
+  "to": "Marmande",
+  "a": [
+   41.5437,
+   1.8941
+  ],
+  "b": [
+   44.5036,
+   0.1655
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "richmond-waynesboro",
+  "from": "Richmond",
+  "to": "Waynesboro",
+  "a": [
+   37.5538,
+   -77.4603
+  ],
+  "b": [
+   38.0685,
+   -78.8895
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "manizales-medellin",
+  "from": "Manizales",
+  "to": "Medellín",
+  "a": [
+   5.0689,
+   -75.5174
+  ],
+  "b": [
+   6.2518,
+   -75.5636
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "saharanpur-dataganj",
+  "from": "Sahāranpur",
+  "to": "Dātāganj",
+  "a": [
+   29.9679,
+   77.5452
+  ],
+  "b": [
+   28.0253,
+   79.4082
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ercis-erbil",
+  "from": "Erciş",
+  "to": "Erbil",
+  "a": [
+   39.0259,
+   43.3596
+  ],
+  "b": [
+   36.1833,
+   44.0119
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "armidale-sydney",
+  "from": "Armidale",
+  "to": "Sydney",
+  "a": [
+   -30.5012,
+   151.6655
+  ],
+  "b": [
+   -33.8678,
+   151.2073
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "huanuco-tingo-maria",
+  "from": "Huánuco",
+  "to": "Tingo María",
+  "a": [
+   -9.9306,
+   -76.2422
+  ],
+  "b": [
+   -9.2953,
+   -75.9957
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "charlotte-mauldin",
+  "from": "Charlotte",
+  "to": "Mauldin",
+  "a": [
+   35.2271,
+   -80.8431
+  ],
+  "b": [
+   34.7787,
+   -82.3101
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "bangkok-nakhon-ratchasima",
+  "from": "Bangkok",
+  "to": "Nakhon Ratchasima",
+  "a": [
+   13.754,
+   100.5014
+  ],
+  "b": [
+   14.9707,
+   102.102
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jiuquan-laojunmiao",
+  "from": "Jiuquan",
+  "to": "Laojunmiao",
+  "a": [
+   39.7432,
+   98.5174
+  ],
+  "b": [
+   39.8333,
+   97.7333
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "santiago-curico",
+  "from": "Santiago",
+  "to": "Curicó",
+  "a": [
+   -33.4569,
+   -70.6483
+  ],
+  "b": [
+   -34.9828,
+   -71.2394
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "luanshya-kolwezi",
+  "from": "Luanshya",
+  "to": "Kolwezi",
+  "a": [
+   -13.1367,
+   28.4166
+  ],
+  "b": [
+   -10.7148,
+   25.4667
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "treviglio-brescia",
+  "from": "Treviglio",
+  "to": "Brescia",
+  "a": [
+   45.5208,
+   9.591
+  ],
+  "b": [
+   45.5356,
+   10.2147
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mutengene-foumban",
+  "from": "Mutengene",
+  "to": "Foumban",
+  "a": [
+   4.0913,
+   9.3144
+  ],
+  "b": [
+   5.7266,
+   10.8986
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "korbach-bilzen",
+  "from": "Korbach",
+  "to": "Bilzen",
+  "a": [
+   51.2756,
+   8.873
+  ],
+  "b": [
+   50.8732,
+   5.5184
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "palm-desert-tustin",
+  "from": "Palm Desert",
+  "to": "Tustin",
+  "a": [
+   33.7225,
+   -116.377
+  ],
+  "b": [
+   33.7458,
+   -117.8262
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jhang-sadr-faisalabad",
+  "from": "Jhang Sadr",
+  "to": "Faisalabad",
+  "a": [
+   31.2698,
+   72.3169
+  ],
+  "b": [
+   31.4155,
+   73.0897
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "ankang-xi-an",
+  "from": "Ankang",
+  "to": "Xi’an",
+  "a": [
+   32.68,
+   109.0172
+  ],
+  "b": [
+   34.2583,
+   108.9286
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "jerada-oujda-angad",
+  "from": "Jerada",
+  "to": "Oujda-Angad",
+  "a": [
+   34.31,
+   -2.16
+  ],
+  "b": [
+   34.6814,
+   -1.9086
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "hetauda-kathmandu",
+  "from": "Hetauda",
+  "to": "Kathmandu",
+  "a": [
+   27.4284,
+   85.0322
+  ],
+  "b": [
+   27.7017,
+   85.3206
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mainz-freising",
+  "from": "Mainz",
+  "to": "Freising",
+  "a": [
+   49.9842,
+   8.2791
+  ],
+  "b": [
+   48.4035,
+   11.7488
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "mendi-mount-hagen",
+  "from": "Mendi",
+  "to": "Mount Hagen",
+  "a": [
+   -6.1475,
+   143.6563
+  ],
+  "b": [
+   -5.8575,
+   144.2306
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "oakville-rock-island",
+  "from": "Oakville",
+  "to": "Rock Island",
+  "a": [
+   38.4701,
+   -90.3046
+  ],
+  "b": [
+   41.5095,
+   -90.5787
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "kaufbeuren-besancon",
+  "from": "Kaufbeuren",
+  "to": "Besançon",
+  "a": [
+   47.8824,
+   10.6219
+  ],
+  "b": [
+   47.2488,
+   6.0182
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "calasiao-baguio",
+  "from": "Calasiao",
+  "to": "Baguio",
+  "a": [
+   16.0111,
+   120.36
+  ],
+  "b": [
+   16.4164,
+   120.5931
+  ],
+  "source": "generated"
+ },
+ {
+  "id": "newcastle-port-macquarie",
+  "from": "Newcastle",
+  "to": "Port Macquarie",
+  "a": [
+   -32.9295,
+   151.7801
+  ],
+  "b": [
+   -31.4308,
+   152.9089
+  ],
+  "source": "generated"
+ }
+]

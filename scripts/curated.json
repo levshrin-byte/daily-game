@@ -1,0 +1,478 @@
+[
+ {
+  "id": "denver-kc",
+  "from": "Denver",
+  "to": "Kansas City",
+  "a": [
+   39.7392,
+   -104.9903
+  ],
+  "b": [
+   39.0997,
+   -94.5786
+  ],
+  "fact": "Denver sits a mile up; from there it's a long, gentle slide all the way across the Great Plains."
+ },
+ {
+  "id": "badwater-whitney",
+  "from": "Badwater Basin",
+  "to": "Mount Whitney",
+  "a": [
+   36.2299,
+   -116.7677
+  ],
+  "b": [
+   36.5785,
+   -118.2923
+  ],
+  "fact": "The lowest point in North America to the highest point in the contiguous US, in about 135 km as the crow flies."
+ },
+ {
+  "id": "bedoin-ventoux",
+  "from": "Bédoin",
+  "to": "Mont Ventoux",
+  "a": [
+   44.125,
+   5.1797
+  ],
+  "b": [
+   44.1741,
+   5.2789
+  ],
+  "fact": "The 'Giant of Provence' is a Tour de France legend: one relentless climb, with no real downhill on the way up."
+ },
+ {
+  "id": "deadsea-jerusalem",
+  "from": "Dead Sea shore",
+  "to": "Jerusalem",
+  "a": [
+   31.76,
+   35.55
+  ],
+  "b": [
+   31.7683,
+   35.2137
+  ],
+  "fact": "Starts more than 400 m below sea level, at the lowest land on Earth, and climbs over 1,100 m in roughly 30 km."
+ },
+ {
+  "id": "seattle-rainier",
+  "from": "Seattle",
+  "to": "Mount Rainier",
+  "a": [
+   47.6062,
+   -122.3321
+  ],
+  "b": [
+   46.8523,
+   -121.7603
+  ],
+  "fact": "From sea level, foothills and forest until the volcano rears up at the very end."
+ },
+ {
+  "id": "lima-huancayo",
+  "from": "Lima",
+  "to": "Huancayo",
+  "a": [
+   -12.0464,
+   -77.0428
+  ],
+  "b": [
+   -12.0651,
+   -75.2049
+  ],
+  "fact": "From the Pacific coast straight over the Andes. The railway along this route was long one of the highest in the world."
+ },
+ {
+  "id": "kathmandu-everest",
+  "from": "Kathmandu",
+  "to": "Mount Everest",
+  "a": [
+   27.7172,
+   85.324
+  ],
+  "b": [
+   27.9881,
+   86.925
+  ],
+  "fact": "Rows of deep river valleys and ridges, each one higher than the last, until the top of the world."
+ },
+ {
+  "id": "geneva-montblanc",
+  "from": "Geneva",
+  "to": "Mont Blanc",
+  "a": [
+   46.2044,
+   6.1432
+  ],
+  "b": [
+   45.8326,
+   6.8652
+  ],
+  "fact": "Lake Geneva to the roof of Western Europe. Chamonix sits in the deep valley just before the final wall."
+ },
+ {
+  "id": "zurich-milan",
+  "from": "Zürich",
+  "to": "Milan",
+  "a": [
+   47.3769,
+   8.5417
+  ],
+  "b": [
+   45.4642,
+   9.19
+  ],
+  "fact": "A straight line across the Swiss Alps, past the Gotthard region, then down to the flat Po plain."
+ },
+ {
+  "id": "amsterdam-berlin",
+  "from": "Amsterdam",
+  "to": "Berlin",
+  "a": [
+   52.3676,
+   4.9041
+  ],
+  "b": [
+   52.52,
+   13.405
+  ],
+  "fact": "Trick question! The North European Plain barely rises above 100 m along the whole way."
+ },
+ {
+  "id": "grandcanyon-rim2rim",
+  "from": "Grand Canyon North Rim",
+  "to": "South Rim",
+  "a": [
+   36.1983,
+   -112.0524
+  ],
+  "b": [
+   36.0544,
+   -112.1401
+  ],
+  "fact": "Down nearly 1,800 m to the Colorado River, then back up. The North Rim is about 300 m higher than the South."
+ },
+ {
+  "id": "sf-tahoe",
+  "from": "San Francisco",
+  "to": "Lake Tahoe",
+  "a": [
+   37.7749,
+   -122.4194
+  ],
+  "b": [
+   39.0968,
+   -120.0324
+  ],
+  "fact": "Across the bay, over the flat Central Valley, then up the long western slope of the Sierra Nevada."
+ },
+ {
+  "id": "la-vegas",
+  "from": "Los Angeles",
+  "to": "Las Vegas",
+  "a": [
+   34.0522,
+   -118.2437
+  ],
+  "b": [
+   36.1699,
+   -115.1398
+  ],
+  "fact": "Over the San Gabriel Mountains, then across the high Mojave Desert to the Las Vegas valley."
+ },
+ {
+  "id": "hilo-maunakea",
+  "from": "Hilo",
+  "to": "Mauna Kea",
+  "a": [
+   19.7071,
+   -155.0816
+  ],
+  "b": [
+   19.8207,
+   -155.4681
+  ],
+  "fact": "A smooth shield-volcano ramp from the ocean to about 4,200 m. Measured from the sea floor, it's taller than Everest."
+ },
+ {
+  "id": "tokyo-fuji",
+  "from": "Tokyo",
+  "to": "Mount Fuji",
+  "a": [
+   35.6762,
+   139.6503
+  ],
+  "b": [
+   35.3606,
+   138.7274
+  ],
+  "fact": "The Kantō Plain, a band of hills and mountains, then Fuji's famous symmetric cone."
+ },
+ {
+  "id": "capetown-table",
+  "from": "Cape Town",
+  "to": "Table Mountain",
+  "a": [
+   -33.9249,
+   18.4241
+  ],
+  "b": [
+   -33.9628,
+   18.4098
+  ],
+  "fact": "Just 4 km from the city centre to a flat-topped summit over 1,000 m high."
+ },
+ {
+  "id": "moshi-kilimanjaro",
+  "from": "Moshi",
+  "to": "Kilimanjaro",
+  "a": [
+   -3.3349,
+   37.3404
+  ],
+  "b": [
+   -3.0758,
+   37.3533
+  ],
+  "fact": "From farmland at the foot to Uhuru Peak, the highest point in Africa, in under 30 km."
+ },
+ {
+  "id": "puerto-teide",
+  "from": "Puerto de la Cruz",
+  "to": "Mount Teide",
+  "a": [
+   28.4142,
+   -16.5481
+  ],
+  "b": [
+   28.2724,
+   -16.6425
+  ],
+  "fact": "From an Atlantic beach to Spain's highest peak, a volcano rising over 3,700 m from the sea."
+ },
+ {
+  "id": "slc-denver",
+  "from": "Salt Lake City",
+  "to": "Denver",
+  "a": [
+   40.7608,
+   -111.891
+  ],
+  "b": [
+   39.7392,
+   -104.9903
+  ],
+  "fact": "Wasatch, Uintas, high basins, then the Front Range. The Rockies come in waves."
+ },
+ {
+  "id": "mexicocity-veracruz",
+  "from": "Mexico City",
+  "to": "Veracruz",
+  "a": [
+   19.4326,
+   -99.1332
+  ],
+  "b": [
+   19.1738,
+   -96.1342
+  ],
+  "fact": "Off the high central plateau, past the volcanic belt, then a dramatic plunge to the Gulf of Mexico."
+ },
+ {
+  "id": "innsbruck-venice",
+  "from": "Innsbruck",
+  "to": "Venice",
+  "a": [
+   47.2692,
+   11.4041
+  ],
+  "b": [
+   45.4408,
+   12.3155
+  ],
+  "fact": "From an Alpine valley, through the Dolomites, and down to a city that's barely above the water."
+ },
+ {
+  "id": "interlaken-jungfrau",
+  "from": "Interlaken",
+  "to": "Jungfrau",
+  "a": [
+   46.6863,
+   7.8632
+  ],
+  "b": [
+   46.5367,
+   7.9629
+  ],
+  "fact": "From a lakeside town to the 4,000 m-class giants of the Bernese Oberland in about 18 km, one of the steepest walls in the Alps."
+ },
+ {
+  "id": "cosprings-pikes",
+  "from": "Colorado Springs",
+  "to": "Pikes Peak",
+  "a": [
+   38.8339,
+   -104.8214
+  ],
+  "b": [
+   38.8409,
+   -105.0423
+  ],
+  "fact": "The view from the top inspired 'America the Beautiful'. It's a 2,400 m rise from the city in under 20 km."
+ },
+ {
+  "id": "edinburgh-glasgow",
+  "from": "Edinburgh",
+  "to": "Glasgow",
+  "a": [
+   55.9533,
+   -3.1883
+  ],
+  "b": [
+   55.8642,
+   -4.2518
+  ],
+  "fact": "Scotland's Central Belt: some gentle hills, but nothing dramatic. Did you over-draw it?"
+ },
+ {
+  "id": "chicago-stlouis",
+  "from": "Chicago",
+  "to": "St. Louis",
+  "a": [
+   41.8781,
+   -87.6298
+  ],
+  "b": [
+   38.627,
+   -90.1994
+  ],
+  "fact": "Illinois prairie: one of the flattest long stretches in the US, drifting slowly down toward the Mississippi."
+ },
+ {
+  "id": "vancouver-whistler",
+  "from": "Vancouver",
+  "to": "Whistler",
+  "a": [
+   49.2827,
+   -123.1207
+  ],
+  "b": [
+   50.1163,
+   -122.9574
+  ],
+  "fact": "Straight over the Coast Mountains instead of along the Sea-to-Sky Highway, and it's rugged the whole way."
+ },
+ {
+  "id": "lhasa-kathmandu",
+  "from": "Lhasa",
+  "to": "Kathmandu",
+  "a": [
+   29.65,
+   91.1
+  ],
+  "b": [
+   27.7172,
+   85.324
+  ],
+  "fact": "Hundreds of km on the Tibetan Plateau above 4,000 m, then a cliff-like drop through the Himalaya into Nepal."
+ },
+ {
+  "id": "rio-cristo",
+  "from": "Copacabana",
+  "to": "Christ the Redeemer",
+  "a": [
+   -22.9711,
+   -43.1822
+  ],
+  "b": [
+   -22.9519,
+   -43.2105
+  ],
+  "fact": "From the beach, Corcovado's granite rises almost straight up to the statue on Corcovado, less than 4 km away."
+ },
+ {
+  "id": "barcelona-andorra",
+  "from": "Barcelona",
+  "to": "Andorra la Vella",
+  "a": [
+   41.3874,
+   2.1686
+  ],
+  "b": [
+   42.5063,
+   1.5218
+  ],
+  "fact": "From the Mediterranean, over Catalan hills, and up into the Pyrenees microstate."
+ },
+ {
+  "id": "boston-washington",
+  "from": "Boston",
+  "to": "Mount Washington",
+  "a": [
+   42.3601,
+   -71.0589
+  ],
+  "b": [
+   44.2706,
+   -71.3033
+  ],
+  "fact": "Rolling New England hills, then the White Mountains. Mount Washington is famous for its extreme weather."
+ },
+ {
+  "id": "nairobi-mombasa",
+  "from": "Nairobi",
+  "to": "Mombasa",
+  "a": [
+   -1.2921,
+   36.8219
+  ],
+  "b": [
+   -4.0435,
+   39.6682
+  ],
+  "fact": "A long, gentle descent from the Kenyan highlands at 1,700 m across the savanna to the Indian Ocean."
+ },
+ {
+  "id": "delhi-shimla",
+  "from": "Delhi",
+  "to": "Shimla",
+  "a": [
+   28.6139,
+   77.209
+  ],
+  "b": [
+   31.1048,
+   77.1734
+  ],
+  "fact": "Flat as a table across the Indo-Gangetic Plain for 250 km, then the Himalayan foothills hit all at once."
+ },
+ {
+  "id": "calgary-banff",
+  "from": "Calgary",
+  "to": "Banff",
+  "a": [
+   51.0447,
+   -114.0719
+  ],
+  "b": [
+   51.1784,
+   -115.5708
+  ],
+  "fact": "The prairies end abruptly at the Rocky Mountain front, and you're among the peaks."
+ },
+ {
+  "id": "athens-delphi",
+  "from": "Athens",
+  "to": "Delphi",
+  "a": [
+   37.9838,
+   23.7275
+  ],
+  "b": [
+   38.4824,
+   22.501
+  ],
+  "fact": "Past Mount Parnitha and across the Boeotian plain to the sanctuary on the slopes of Parnassus."
+ }
+]

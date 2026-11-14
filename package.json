@@ -1,0 +1,26 @@
+{
+  "name": "elevation",
+  "private": true,
+  "description": "Daily elevation-profile sketching game",
+  "scripts": {
+    "gen:routes": "node scripts/generate_routes.mjs",
+    "bake:profiles": "node scripts/bake_profiles.mjs",
+    "bake:maps": "node scripts/bake_maps.mjs",
+    "bake": "node scripts/bake_profiles.mjs && node scripts/plan_days.mjs && node scripts/bake_maps.mjs && node scripts/bake_relief.mjs",
+    "build": "node scripts/build.mjs",
+    "serve": "python3 -m http.server 8000",
+    "check": "node scripts/check.mjs",
+    "bake:relief": "node scripts/bake_relief.mjs",
+    "verify:terrain": "node scripts/verify_terrain.mjs && node scripts/verify_spikes.mjs",
+    "plan:days": "node scripts/plan_days.mjs"
+  },
+  "devDependencies": {
+    "@geo-maps/earth-lakes-1km": "0.6.0",
+    "@turf/bbox-clip": "7.4.0",
+    "all-the-cities": "3.1.0",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "topojson-client": "3.1.0",
+    "world-atlas": "2.0.2"
+  }
+}
