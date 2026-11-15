@@ -113,4 +113,89 @@ for (const [name, samples, path] of cases) {
   console.log(`Turning round redraws the part you go back over: ${ok ? "yes" : "NO"}`);
   if (!ok) failed = true;
 }
+
+// Layout stability in a real browser, at iPhone 13 size in light and dark mode, on the plain site and the
+// artifact bundle: the chart must not move by even half a pixel before, during or after strokes while the live
+// readout changes length, and must stay put on screen even when something above it reflows mid-stroke (a late
+// font swap, the error bar). Skip with NO_BROWSER=1.
+if (!process.env.NO_BROWSER) failed = (await layoutCheck()) || failed;
 process.exit(failed ? 1 : 0);
+
+async function layoutCheck() {
+  const { chromium, devices } = require("playwright");
+  const { createServer } = await import("node:http");
+  const { readFileSync, existsSync } = await import("node:fs");
+  const { join, extname } = await import("node:path");
+  const ROOT = new URL("..", import.meta.url).pathname;
+  const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg" };
+  const server = createServer((req, res) => {
+    let path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    if (path === "/artifact.html") {
+      res.writeHead(200, { "content-type": "text/html" });
+      return res.end(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>[hidden]{display:none!important}</style></head><body>${readFileSync(join(ROOT, "dist/elevation.html"), "utf8")}</body></html>`);
+    }
+    if (path.endsWith("/")) path += "index.html";
+    const file = path.startsWith("/data/routes/") ? join(ROOT, "dist", path) : join(ROOT, path);
+    if (!file.startsWith(ROOT) || !existsSync(file)) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { "content-type": types[extname(file)] || "application/octet-stream" });
+    res.end(readFileSync(file));
+  }).listen(0);
+  const base = `http://localhost:${server.address().port}`;
+  const browser = await chromium.launch();
+  let bad = false;
+  console.log("\nChart position while drawing (iPhone 13; max movement of the chart box, px):");
+  const pages = existsSync(join(ROOT, "dist/elevation.html")) ? [["site", "/"], ["artifact", "/artifact.html"]] : [["site", "/"]];
+  for (const [label, path] of pages) for (const scheme of ["light", "dark"]) {
+    const ctx = await browser.newContext({ ...devices["iPhone 13"], colorScheme: scheme, deviceScaleFactor: 1 });
+    await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+    await ctx.addInitScript(() => { try { localStorage.setItem("elevation:v1", JSON.stringify({ seenHelp: true, scoring: 2 })); } catch {} });
+    const page = await ctx.newPage();
+    const errors = []; page.on("pageerror", (e) => errors.push(e.message));
+    await page.goto(base + path);
+    await page.waitForFunction(() => document.getElementById("from")?.textContent !== "—" && document.getElementById("chart")?.width > 0, null, { timeout: 8000 });
+    await page.evaluate(() => { const c = document.getElementById("chart"); window.scrollTo(0, c.getBoundingClientRect().top + scrollY - 160); });
+    await page.waitForTimeout(800);
+    // Sample after each painted frame: the chart, the prompt above it and the buttons below it, plus the readout.
+    await page.evaluate(() => {
+      const box = (id) => { const r = document.querySelector(id).getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+      window.__samples = [];
+      const tick = () => { setTimeout(() => {
+        window.__samples.push({ chart: box("#chart"), prompt: box("#prompt"), submit: box("#submit"), y: scrollY, readout: document.getElementById("readout").textContent });
+        if (window.__rec) requestAnimationFrame(tick);
+      }, 0); };
+      window.__rec = true; requestAnimationFrame(tick);
+    });
+    const cdp = await ctx.newCDPSession(page);
+    const r = await page.evaluate(() => { const b = document.getElementById("chart").getBoundingClientRect(); return { x: b.left, y: b.top, w: b.width, h: b.height }; });
+    const send = (type, p) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: p ? [{ x: p[0], y: p[1], id: 1, radiusX: 8, radiusY: 8, force: 1 }] : [] });
+    const stroke = async (path, n, during) => {
+      await send("touchStart", path(0));
+      for (let i = 1; i <= n; i++) { await send("touchMove", path(i / n)); if (during && i === Math.round(n / 2)) await during(); await page.waitForTimeout(16); }
+      await send("touchEnd"); await page.waitForTimeout(250);
+    };
+    const X = (u) => r.x + 55 + (r.w - 75) * u, Y = (v) => r.y + 20 + (r.h - 55) * v;
+    // Strokes that sweep the readout from the top of the axis (longest numbers) to the bottom (shortest).
+    await stroke((u) => [X(u * 0.5), Y(0.02 + 0.96 * u)], 50);
+    await stroke((u) => [X(0.4 + u * 0.6), Y(0.98 - 0.96 * Math.abs(Math.sin(u * 6)))], 70);
+    await stroke((u) => [X(0.2 + u * 0.3), Y(0.5 + 0.45 * Math.sin(u * 9))], 40);
+    const calm = await page.evaluate(() => { const s = window.__samples; window.__samples = []; return s; });
+    // Reflow above the chart mid-stroke, applied the way a font swap lands (in the rendering steps of a frame).
+    await stroke((u) => [X(u), Y(0.5 + 0.3 * Math.sin(u * 5))], 60, () => page.evaluate(() => requestAnimationFrame(() => {
+      const st = document.createElement("style"); st.textContent = "#prompt, .route-title, .route-meta { font-size: 21px !important; letter-spacing: .04em; }";
+      document.head.appendChild(st);
+      const eb = document.getElementById("error-bar"); eb.hidden = false; eb.textContent = "Simulated error bar during a stroke";
+    })));
+    const shaken = await page.evaluate(() => { window.__rec = false; return window.__samples; });
+    const spread = (ss, f) => { const v = ss.map(f); return Math.max(...v) - Math.min(...v); };
+    const move = (ss, k, abs) => Math.max(...[0, 1, 2, 3].map((i) => spread(ss, (s) => s[k][i] + (abs && i === 1 ? s.y : 0))));
+    const lens = new Set(calm.map((s) => s.readout.length));
+    const m = { chart: move(calm, "chart", true), screen: move(calm, "chart"), prompt: move(calm, "prompt", true), submit: move(calm, "submit", true), shaken: move(shaken, "chart") };
+    const ok = m.chart < 0.5 && m.screen < 0.5 && m.prompt < 0.5 && m.submit < 0.5 && m.shaken < 0.5 && lens.size >= 4 && !errors.length;
+    console.log(`  ${(label + " " + scheme).padEnd(16)} ${calm.length} frames, readout lengths ${[...lens].sort((a, b) => a - b).join("/")}: chart ${m.chart.toFixed(2)} (on screen ${m.screen.toFixed(2)}), prompt ${m.prompt.toFixed(2)}, buttons ${m.submit.toFixed(2)}; with a reflow above mid-stroke: chart on screen ${m.shaken.toFixed(2)}  ${ok ? "ok" : "FAIL"}`);
+    if (errors.length) console.log("  page errors:", errors.join("; "));
+    if (!ok) bad = true;
+    await ctx.close();
+  }
+  await browser.close(); server.close();
+  return bad;
+}

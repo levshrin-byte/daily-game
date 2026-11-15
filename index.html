@@ -93,9 +93,11 @@
     <section class="card draw">
       <div class="draw-head">
         <span id="prompt">Sketch how high the ground is along the line, from A to B.</span>
-        <span id="readout" class="readout mono" aria-live="off"></span>
       </div>
       <div class="canvas-wrap">
+        <!-- The live readout has its own fixed slot over the chart's empty top-right corner, so its text never
+             moves the prompt, the chart or the buttons while you draw. -->
+        <span id="readout" class="readout mono" aria-live="off"></span>
         <canvas id="chart" aria-label="Elevation drawing area"></canvas>
         <div id="hint" class="hint"><span class="finger" aria-hidden="true"></span>Drag from A to B to draw</div>
         <div id="toast" class="toast" role="status" aria-live="polite"></div>

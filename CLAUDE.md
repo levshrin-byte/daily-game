@@ -66,6 +66,11 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
   a real drag, one finger at a time; a direction lock stops sideways jitter rewriting columns; centred (zero-lag)
   smoothing of the finger's height and RDP simplification remove shake. `npm run sim:input` tests it with simulated
   fingers. Never smooth the terrain itself.
+- **Nothing may move the chart while a finger is down.** The live readout sits in a fixed, absolutely positioned
+  slot over the chart's empty top-right corner (never put it back in the flow next to the prompt: its changing
+  length rewrapped the prompt and made the chart jump mid-stroke). A layout guard in game.js (`pinChart`, a
+  ResizeObserver on everything above the chart) scrolls back any shift from a late font swap or the error bar
+  before it is painted. `npm run sim:input` checks the chart box frame by frame in a real browser.
 - Never let `history.replaceState` (or any other nice-to-have browser API) abort loading a puzzle: wrap it.
 - **Route data must be real.** Every profile comes from the AWS Terrain Tiles DEM; never invent, smooth into
   shape or hand-edit terrain. Routes that fail the checks are dropped, not fixed up. See `DATA.md`.

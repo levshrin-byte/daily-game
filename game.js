@@ -591,20 +591,44 @@
     // Your finger hides the line, so show where it is.
     $("readout").textContent = `${fmtH(drawn[col])} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
   }
+  // Layout guard: the chart must not move under a finger. Nothing above it changes size while you draw (the
+  // readout has its own fixed slot), but a late font swap or the error bar could still reflow the page. While a
+  // finger is down, each frame checks where the chart sits on screen and scrolls back by any shift, so it stays put.
+  let pinTop = null, pinFrame = 0;
+  function holdChart() {
+    if (pinTop == null) return;
+    const d = chart.getBoundingClientRect().top - pinTop;
+    if (Math.abs(d) >= 0.5) { try { window.scrollBy(0, d); } catch {} }
+  }
+  function pinChart() {
+    pinTop = chart.getBoundingClientRect().top;
+    const tick = () => { holdChart(); pinFrame = pinTop == null ? 0 : requestAnimationFrame(tick); };
+    cancelAnimationFrame(pinFrame); pinFrame = requestAnimationFrame(tick);
+  }
+  function unpinChart() { holdChart(); pinTop = null; cancelAnimationFrame(pinFrame); pinFrame = 0; }
+  // A size change above the chart (text rewrapping when a font arrives, say) is caught after layout but before
+  // the frame is painted, so the correction never shows on screen.
+  try {
+    const ro = new ResizeObserver(holdChart);
+    const above = [...document.body.children, ...document.querySelectorAll("main > *, section.draw > *")];
+    for (const el of above) ro.observe(el);
+  } catch {}
   function pushUndo() { undoStack.push(drawn.slice()); if (undoStack.length > 60) undoStack.shift(); }
   chart.addEventListener("pointerdown", (e) => {
     if (revealed || (e.pointerType === "mouse" && e.button !== 0)) return;
     e.preventDefault();
     if (stroke) {                                   // a second finger
-      if (!stroke.live) { try { chart.releasePointerCapture(stroke.id); } catch {} stroke = null; }
+      if (!stroke.live) { try { chart.releasePointerCapture(stroke.id); } catch {} stroke = null; unpinChart(); }
       return;
     }
     try { chart.setPointerCapture(e.pointerId); } catch {}
     stroke = createStroke(pointerPos(e), INPUT);
     stroke.id = e.pointerId;
+    pinChart();
   });
   chart.addEventListener("pointermove", (e) => {
     if (!stroke || e.pointerId !== stroke.id || revealed) return;
+    holdChart();
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
     let changed = false;
     for (const ev of evs.length ? evs : [e]) {
@@ -618,6 +642,7 @@
     if (!stroke || e.pointerId !== stroke.id) return;
     const was = stroke; stroke = null;
     $("readout").textContent = "";
+    unpinChart();
     if (was.live) { saveDraft(); showTools(); }
     else if (e.type === "pointerup" && !drawn.some((v) => v != null) && !revealed) toast("Drag across the chart to draw");
   }
