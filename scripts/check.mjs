@@ -8,6 +8,7 @@
 //  - the map data and relief load, the calendar opens and replays day 1's Easy route
 //  - previews: Help → "Preview any route" → search → Preview → draw and submit; nothing may change in results,
 //    stats, streak or the share card; Exit preview goes back to today
+//  - long routes: the "150+ mi" length filter shows only routes that long; the newest one previews and scores
 //  - the artifact run makes history.replaceState throw, as it does in a sandboxed frame
 //  - results saved by the one-a-day version are moved to the matching day and difficulty
 // Fails on page errors, sideways scrolling or any of the above, and saves screenshots to .cache/screens/
@@ -209,6 +210,7 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"], ["ho
     if (!(days >= 1 && replay.no === "#1" && replay.tier === "0" && replay.from === "Denver" && (label === "artifact" || days === 1 || replay.hash === "#p1e"))) problems.push("archive replay failed " + JSON.stringify(replay));
 
     // ---- Previews, through the visible way in: Help → "Preview any route"
+    let longInfo = "";
     const before = await store(page);
     const streakBefore = await page.evaluate(() => document.getElementById("streak-chip").textContent);
     await page.tap("#help-btn");
@@ -239,6 +241,38 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"], ["ho
     const exited = await page.evaluate(() => ({ bar: document.getElementById("preview-bar").hidden, no: document.getElementById("puzzle-no").textContent }));
     if (!exited.bar) problems.push("Exit preview failed");
 
+    // ---- Long routes (150-300 mi): the length filter in "All routes", then preview the last (newest) long route
+    await page.tap("#help-btn");
+    await page.tap("#help-preview");
+    await page.waitForSelector(".arch-row[data-t]", { timeout: 5000 }).catch(() => {});
+    await page.fill("#route-search", "");
+    await page.tap('#route-length button[data-len="1"]');
+    const lenInfo = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll(".arch-row[data-t]")].filter((b) => !b.parentElement.hidden);
+      const btns = [...document.querySelectorAll("#route-length button")];
+      return { label: btns[1].textContent, shown: rows.length, minKm: Math.min(...rows.map((b) => +b.dataset.km)), small: btns.filter((x) => x.getBoundingClientRect().height < 43.5).length,
+        summary: document.getElementById("archive-summary").textContent, rowText: rows.at(-1)?.querySelector(".arch-date").textContent };
+    });
+    const wantMin = (scheme === "dark" ? 150 / 0.621371 : 250) - 0.5;   // shown rounded, as the list shows it
+    if (!(lenInfo.shown > 300 && lenInfo.minKm >= wantMin && !lenInfo.small && /Showing/.test(lenInfo.summary))) problems.push("length filter failed " + JSON.stringify(lenInfo));
+    if (label === "site") await page.screenshot({ path: join(OUT, `${label}-${scheme}-long-list.png`) });
+    const longRow = page.locator(".arch-row[data-t]:visible").last();
+    const longNo = await longRow.getAttribute("data-t");
+    await longRow.scrollIntoViewIfNeeded();
+    await longRow.tap();
+    await page.waitForTimeout(600);
+    await page.locator("#chart").scrollIntoViewIfNeeded();
+    const box3 = await page.locator("#chart").boundingBox();
+    await fingerDraw(page, Array.from({ length: 41 }, (_, i) => [box3.x + 52 + (box3.width - 64) * (i / 40), box3.y + 110 + 40 * Math.sin(i / 4)]));
+    await page.tap("#submit");
+    await page.waitForTimeout(2600);
+    const longPv = await page.evaluate(() => ({ what: document.getElementById("preview-what").textContent, dist: document.getElementById("distance").textContent, score: document.getElementById("score").textContent }));
+    if (!(longPv.what.startsWith(`Route ${longNo}:`) && /\d/.test(longPv.score))) problems.push("long route preview failed " + JSON.stringify(longPv));
+    await page.screenshot({ path: join(OUT, `${label}-${scheme}-long.png`), fullPage: true });
+    longInfo = `long filter ${lenInfo.label} → ${lenInfo.shown}, route ${longNo} ${longPv.dist} score ${longPv.score}`;
+    await page.tap("#exit-preview-2");
+    await page.waitForTimeout(300);
+
     if (label === "artifact" && tileRequests) problems.push(`the artifact asked for ${tileRequests} map tiles`);
 
     const end = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth > window.innerWidth, errorBar: document.getElementById("error-bar").hidden ? "" : document.getElementById("error-bar").textContent }));
@@ -252,7 +286,7 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"], ["ho
     failed ||= !ok;
     const maxJump = jumps.length ? Math.round(Math.max(...jumps)) : -1;
     console.log(`${ok ? "PASS" : "FAIL"} ${label}/${scheme}: paint ${paintMs} ms, load ${loadMs} ms | ${info.title} [${info.tiers}] | ${info.route}, score ${info.score} ` +
-      `"${info.takeaway}" | shaky stroke max column jump ${maxJump} m | calendar ${days} days, preview search → ${allRows} | ${problems.join("; ")}  → ${shot}`);
+      `"${info.takeaway}" | shaky stroke max column jump ${maxJump} m | calendar ${days} days, preview search → ${allRows} | ${longInfo} | ${problems.join("; ")}  → ${shot}`);
     await ctx.close();
   }
 }

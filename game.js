@@ -75,9 +75,9 @@
       return routeLoads[c];
     }));
   }
-  // Names of every route, for searching the "All routes" list: [id, from, to, country, region] per route.
+  // Names of every route, for searching the "All routes" list: [id, from, to, country, region, km] per route.
   let routeIndex = null, indexLoad = null;
-  const routeMeta = (i) => ROUTES[i] || (routeIndex && routeIndex[i] && { id: routeIndex[i][0], from: routeIndex[i][1], to: routeIndex[i][2], country: routeIndex[i][3], region: routeIndex[i][4] });
+  const routeMeta = (i) => ROUTES[i] || (routeIndex && routeIndex[i] && { id: routeIndex[i][0], from: routeIndex[i][1], to: routeIndex[i][2], country: routeIndex[i][3], region: routeIndex[i][4], distanceKm: routeIndex[i][5] });
   function loadIndex() {
     let all = true;
     for (let i = 0; i < ROUTE_COUNT && all; i++) all = !!ROUTES[i];
@@ -938,16 +938,20 @@
 
   // ---------- Calendar: past days, and all routes for previews ----------
   let archiveTab = "past";
+  const LONG_KM = [0, 150 / 0.621371, 250 / 0.621371];
+  let lengthPick = 0;
+  const lengthKm = (k) => (units === "imperial" ? LONG_KM[k] : [0, 250, 400][k]);
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function openArchive(tab) {
     if (tab) archiveTab = tab;
     document.querySelectorAll("#archive-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === archiveTab)));
-    $("route-search").hidden = archiveTab !== "all";
+    $("route-search").hidden = $("route-length").hidden = archiveTab !== "all";
+    lengthLabels();
     const list = $("archive-list"), s = stats();
     const rows = [];
     if (archiveTab === "all") {
       $("archive-title").textContent = "All routes";
-      $("archive-summary").textContent = `Testing: preview any of the ${ROUTE_COUNT} routes, including future days. Previews never count towards your stats, streak or share card.`;
+      $("archive-summary").textContent = $("archive-summary").dataset.base = `Testing: preview any of the ${fmt(ROUTE_COUNT)} routes, including future days. Previews never count towards your stats, streak or share card.`;
       if (!routeMeta(ROUTE_COUNT - 1)) {
         // The list needs every route's name: fetch the index first (a testing screen, so once is fine).
         $("archive-list").innerHTML = `<li class="muted">Loading routes…</li>`;
@@ -962,9 +966,10 @@
           if (!DAYS.length && t) return;
           const r = routeMeta(i), no = i + 1, res = store.previews[no];
           const when = n === today ? " · Today" : n > today ? "" : " · past";
-          rows.push(`<li><button class="arch-row${preview === no ? " current" : ""}" data-t="${no}" data-q="${esc(`${r.from} ${r.to} ${r.country} ${r.region} ${r.id} ${TIERS[t]} day ${n}`.toLowerCase())}" data-day="${n}">
+          const km = r.distanceKm || 0, long = km >= LONG_KM[1] ? " long" : "";
+          rows.push(`<li><button class="arch-row${preview === no ? " current" : ""}" data-t="${no}" data-km="${km}" data-q="${esc(`${r.from} ${r.to} ${r.country} ${r.region} ${r.id} ${TIERS[t]} day ${n}${long}`.toLowerCase())}" data-day="${n}">
           <span class="arch-no mono">${n}${TK[t].toUpperCase()}</span>
-          <span class="arch-main"><span class="arch-date">Day ${n} · ${fmtDate(n, { month: "short", day: "numeric" })}${when} · ${TIERS[t]}</span>
+          <span class="arch-main"><span class="arch-date">Day ${n} · ${fmtDate(n, { month: "short", day: "numeric" })}${when} · ${TIERS[t]} · <span class="arch-km">${fmtD(km)}</span></span>
             <span class="arch-route">${esc(r.from)} → ${esc(r.to)}</span></span>
           <span class="arch-res">${res ? `<b class="mono">${res.score}</b><span class="arch-diff">tested</span>` : `<span class="arch-play">Preview</span>`}</span>
         </button></li>`);
@@ -992,10 +997,27 @@
     const cur = list.querySelector(".current");
     if (cur) cur.scrollIntoView({ block: "nearest" });
   }
-  function filterRoutes() {
-    const q = archiveTab === "all" ? $("route-search").value.trim().toLowerCase().replace(/^#/, "") : "";
-    for (const b of $("archive-list").querySelectorAll("[data-q]")) b.parentElement.hidden = !!q && !b.dataset.q.includes(q) && b.dataset.day !== q;
+  // Length filter for the "All routes" list (testing): any, 150+ mi or 250+ mi (250+ or 400+ km in metric units).
+  function lengthLabels() {
+    document.querySelectorAll("#route-length button").forEach((b) => {
+      const k = +b.dataset.len;
+      b.textContent = k ? `${fmt(lengthKm(k) * U().dPer)}+ ${U().d}` : "Any length";
+      b.setAttribute("aria-pressed", String(k === lengthPick));
+    });
   }
+  function filterRoutes() {
+    const all = archiveTab === "all";
+    const q = all ? $("route-search").value.trim().toLowerCase().replace(/^#/, "") : "";
+    const min = all ? lengthKm(lengthPick) - 0.5 : 0;
+    let shown = 0;
+    for (const b of $("archive-list").querySelectorAll("[data-q]")) {
+      const hide = (!!q && !b.dataset.q.includes(q) && b.dataset.day !== q) || +b.dataset.km < min;
+      b.parentElement.hidden = hide;
+      if (!hide) shown++;
+    }
+    if (all && $("archive-summary").dataset.base) $("archive-summary").textContent = $("archive-summary").dataset.base + (q || lengthPick ? ` Showing ${fmt(shown)}.` : "");
+  }
+  document.querySelectorAll("#route-length button").forEach((b) => b.addEventListener("click", () => { lengthPick = +b.dataset.len; lengthLabels(); filterRoutes(); }));
   function closeDialog(d) { try { d.close(); } catch { d.removeAttribute("open"); } }
   $("route-search").addEventListener("input", filterRoutes);
   document.querySelectorAll("#archive-tabs button").forEach((b) => b.addEventListener("click", () => openArchive(b.dataset.tab)));

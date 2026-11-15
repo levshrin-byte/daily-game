@@ -1,0 +1,4 @@
+[
+ {"date":"2026-11-15","label":"the first two years of routes","kept":2172,"dropped":[{"id":"warragul-traralgon","why":"land sample at -44 m (lake-bed bathymetry?)"},{"id":"batticaloa-vakarai","why":"mostly over sea"},{"id":"bhamo-phek","why":"land sample at -117 m (lake-bed bathymetry?)"},{"id":"yangzhou-guli","why":"land sample at -43 m (lake-bed bathymetry?)"},{"id":"zhu-cheng-city-xinpu","why":"land sample at -33 m (lake-bed bathymetry?)"},{"id":"tha-muang-ban-phaeo","why":"nothing to draw (under 25 m of relief)"},{"id":"porto-alegre-marau","why":"sample 1 (862 m between 37 and 21 m) is not confirmed by a finer read (-993 m at z10)"}],"agreeMedian":0.0037,"agreeWorst":0.027},
+ {"date":"2026-11-15","label":"long routes, 150–300 miles","kept":312,"dropped":[{"id":"gyula-pristina","why":"sample 57 (404 m between 86 and 66 m) is not confirmed by a finer read (72 m at z10)"}],"agreeMedian":0.0046,"agreeWorst":0.0228,"km":[240.3,479.8]}
+]

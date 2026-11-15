@@ -9,6 +9,10 @@
 // it, and mid-grey (no change) on flat ground. The game blends it over the land colour with "soft-light" and
 // clips it to the Natural Earth land shapes, so it works in light and dark mode.
 // Needs data/maps/*.json (run bake_maps.mjs first). Run: npm run bake:relief
+//
+// Routes are only ever appended to ROUTES, so a sheet that already exists with all ten rows is kept as it is (not
+// re-encoded, and its routes not re-read); only the last, partly filled sheet and new ones are written. FORCE=1
+// (or naming route ids) recomputes and rewrites everything.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, unlinkSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tile } from "./lib/terrain.mjs";
@@ -42,8 +46,18 @@ for (const f of readdirSync(OUT)) {
   unlinkSync(OUT + f);
 }
 
+// The sheets, in ROUTES order. A full sheet already on disk is kept.
+const order = (() => { const window = {}; new Function("window", readFileSync(ROOT + "data/routes.js", "utf8"))(window); return window.ROUTES.map((r) => r.id); })();
+const sheetName = (c) => OUT + String(c).padStart(3, "0") + ".jpg";
+const keepSheet = (c) => !force && !only.length && (c + 1) * CHUNK <= order.length && existsSync(sheetName(c)) &&
+  jpeg.decode(readFileSync(sheetName(c)), { useTArray: true }).height === PX_H * CHUNK;
+const sheets = [];
+for (let c = 0; c * CHUNK < order.length; c++) if (!keepSheet(c)) sheets.push(c);
+const needed = new Set(sheets.flatMap((c) => order.slice(c * CHUNK, (c + 1) * CHUNK)));
+
 for (const [id, m] of Object.entries(maps)) {
   if (only.length && !only.includes(id)) continue;
+  if (!only.length && !needed.has(id)) continue;
   if (!force && !only.length && existsSync(CACHE + id + ".gray")) continue;
   const [x0, y0, w, h] = m.view;
   const px = w / PX_W;                                    // Mercator units per output pixel
@@ -90,10 +104,9 @@ for (const [id, m] of Object.entries(maps)) {
   console.error(`${id.padEnd(40)} z${z} ${tiles.size} tiles`);
 }
 
-// The sheets, in ROUTES order.
-const order = (() => { const window = {}; new Function("window", readFileSync(ROOT + "data/routes.js", "utf8"))(window); return window.ROUTES.map((r) => r.id); })();
-for (const f of readdirSync(OUT)) unlinkSync(OUT + f);
-for (let c = 0; c * CHUNK < order.length; c++) {
+const last = Math.ceil(order.length / CHUNK);
+for (const f of readdirSync(OUT)) if (!(parseInt(f, 10) < last)) unlinkSync(OUT + f);   // sheets past the end
+for (const c of sheets) {
   const ids = order.slice(c * CHUNK, (c + 1) * CHUNK);
   const rgba = Buffer.alloc(PX_W * PX_H * CHUNK * 4, 128);
   ids.forEach((id, k) => {
@@ -101,7 +114,7 @@ for (let c = 0; c * CHUNK < order.length; c++) {
     for (let p = 0; p < g.length; p++) { const o = (k * PX_W * PX_H + p) * 4; rgba[o] = rgba[o + 1] = rgba[o + 2] = g[p]; rgba[o + 3] = 255; }
   });
   const rows = PX_H * ids.length;
-  writeFileSync(OUT + String(c).padStart(3, "0") + ".jpg", jpeg.encode({ data: rgba.subarray(0, PX_W * rows * 4), width: PX_W, height: rows }, QUALITY).data);
+  writeFileSync(sheetName(c), jpeg.encode({ data: rgba.subarray(0, PX_W * rows * 4), width: PX_W, height: rows }, QUALITY).data);
 }
 const files = readdirSync(OUT);
 const kb = files.reduce((s, f) => s + readFileSync(OUT + f).length, 0) / 1024;

@@ -60,7 +60,8 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
   on the day; the share card covers the whole day. Links: `#p12m`. Old one-a-day results (`store.results`, kept as
   a backup) were moved to the slot where their route now plays (days 1-5 kept their routes).
 - **Route previews** (for the owner): the calendar always has an "All routes · testing" tab, also reachable from
-  Help → "Preview any route (testing)", five taps on the build stamp, or `#test`. Previews open at `#t<route no.>`,
+  Help → "Preview any route (testing)", five taps on the build stamp, or `#test`. Rows show each route's distance;
+  a length filter (Any / 150+ mi / 250+ mi, or 250+/400+ km) and the search word "long" find the long routes. Previews open at `#t<route no.>`,
   live in `store.previews` and never touch results, stats, streaks or share cards.
 - **Drawing input** is deliberate and calm (`INPUT` in game.js, helpers in `drawing.js`): a stroke counts only after
   a real drag, one finger at a time; a direction lock stops sideways jitter rewriting columns; centred (zero-lag)
@@ -100,7 +101,11 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
 - `scripts/lib/terrain.mjs`, `scripts/lib/geo.mjs`: shared DEM and land/region helpers.
 - Terrain tiles come from `elevation-tiles-prod.s3.amazonaws.com` and are cached in `.cache/tiles/`.
 - After changing routes: `npm run gen:routes && npm run bake && npm run build` (bake now also writes the relief).
-  To add routes without touching existing ones: `npm run gen:more` (EXTEND=n) then `npm run bake`.
+  To add routes without touching existing ones: `npm run gen:more` (EXTEND=n) then `npm run bake`; `npm run gen:long`
+  (LONG=1) does the same for 150-300 mi lines. The bake is incremental: routes already in `data/routes.js` are kept
+  byte for byte and only new ones are read and checked (each batch is logged in `scripts/bake_batches.json`, which
+  DATA.md reports); `bake_relief` keeps full sheets as they are. `FULL=1` forces a complete rebake (avoid: it can
+  change published profiles if the DEM changes). Check a new batch with `FROM=<first new index> node scripts/verify_spikes.mjs`.
 - Route files: `data/maps/NN.json` holds 20 routes, `data/relief/NNN.jpg` stacks 10 routes' relief (320×240 each),
   `data/routes/NN.json` (built into `dist/`) holds 50 packed routes; game.js `MAP_CHUNK`, `RELIEF_CHUNK` and
   `ROUTE_CHUNK` must match.

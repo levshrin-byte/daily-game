@@ -9,7 +9,7 @@
 //                          folder, plus _headers with caching and security headers. Nothing is deployed.
 //
 // Both builds write the route files the game loads on demand: data/routes/NN.json (50 routes each, packed) and
-// data/routes/index.json (names, for the route search). Maps (data/maps/NN.json) and the shaded relief
+// data/routes/index.json (names and distances, for the route search). Maps (data/maps/NN.json) and the shaded relief
 // (data/relief/NNN.jpg) are used as they are.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, copyFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -62,7 +62,7 @@ function writeRouteFiles(dir) {
   rmSync(dir + "routes", { recursive: true, force: true });
   for (let c = 0; c * ROUTE_CHUNK < routes.length; c++)
     write(`${dir}routes/${String(c).padStart(2, "0")}.json`, JSON.stringify(routes.slice(c * ROUTE_CHUNK, (c + 1) * ROUTE_CHUNK)));
-  write(dir + "routes/index.json", JSON.stringify(routes.map((r) => [r.id, r.from, r.to, r.country, r.region])));
+  write(dir + "routes/index.json", JSON.stringify(routes.map((r) => [r.id, r.from, r.to, r.country, r.region, Math.round(r.distanceKm)])));
 }
 const dataFiles = (sub) => readdirSync(ROOT + "data/" + sub).sort().map((f) => `data/${sub}/${f}`);
 

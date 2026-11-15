@@ -198,7 +198,12 @@
       <button type="button" data-tab="all" aria-pressed="false">All routes · testing</button>
     </div>
     <p id="archive-summary" class="muted"></p>
-    <input id="route-search" class="route-search" type="search" placeholder="Search by place, country or #" aria-label="Search routes" hidden>
+    <input id="route-search" class="route-search" type="search" placeholder="Search by place, country, # or “long”" aria-label="Search routes" hidden>
+    <div id="route-length" class="units tabs route-length" role="group" aria-label="Route length" hidden>
+      <button type="button" data-len="0" aria-pressed="true">Any length</button>
+      <button type="button" data-len="1" aria-pressed="false">150+ mi</button>
+      <button type="button" data-len="2" aria-pressed="false">250+ mi</button>
+    </div>
     <ol id="archive-list" class="archive-list"></ol>
   </dialog>
   <!-- build:end -->

@@ -2,7 +2,7 @@
 // A spike is a sample that stands out from both neighbours by more than 15% of the chart height.
 // "real" = the finer read at the same spot agrees with the baked value (a narrow ridge, summit or gorge);
 // "artifact" = the finer read disagrees by more than half the jump (a bad pixel or a coarse-zoom blend).
-// Run: node scripts/verify_spikes.mjs
+// Run: node scripts/verify_spikes.mjs   (FROM=n checks only routes from index n on, e.g. a newly added batch)
 import { readFileSync } from "node:fs";
 import { elevation, linePoints, SAMPLES } from "./lib/terrain.mjs";
 const ROOT = new URL("..", import.meta.url).pathname;
@@ -10,7 +10,7 @@ globalThis.window = {}; eval(readFileSync(ROOT + "data/routes.js", "utf8"));
 const span = (e) => ([1000, 2500, 5000, 9000].find((t) => t >= Math.max(...e) * 1.05) || 9000) - (Math.min(...e) < -50 ? -500 : 0);
 const zoomFor = (km, lat) => { for (let z = 8; z <= 12; z++) if ((40075 * Math.cos(lat * Math.PI / 180)) / (256 * 2 ** z) <= km / (SAMPLES - 1) / 3) return z; return 12; };
 let real = 0, art = 0; const bad = [];
-for (const r of window.ROUTES) {
+for (const r of window.ROUTES.slice(Number(process.env.FROM || 0))) {
   const e = r.elev, sp = span(e);
   const z = Math.min(14, zoomFor(r.distanceKm, (r.a[0] + r.b[0]) / 2) + 2), pts = linePoints(r.a, r.b);
   for (let i = 1; i < SAMPLES - 1; i++) {

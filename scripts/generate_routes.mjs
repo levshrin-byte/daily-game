@@ -12,13 +12,17 @@
 // after them (screened the same way, with a different seed so new candidates come up). New routes keep their
 // distance from the existing ones as well as from each other. This is how the list grows without touching
 // routes that are already scheduled: npm run gen:more (EXTEND=1800), then npm run bake.
+//
+// LONG=1 (with EXTEND=n, npm run gen:long) does the same but only pairs cities 240-480 km apart (about 150-300 miles
+// in a straight line), for a set of long routes. Same city pool, same screening, same balancing; its own seed.
 import { readFileSync, writeFileSync } from "node:fs";
 import { linePoints, elevation, haversine, zoomFor, stats } from "./lib/terrain.mjs";
 import { cities, landAt, regionOf, REGIONS, nearestCity } from "./lib/geo.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const EXTEND = Number(process.env.EXTEND || 0);
-const SEED = EXTEND ? 20261115 : 20261113;
+const LONG = !!process.env.LONG;
+const SEED = LONG ? 20261116 : EXTEND ? 20261115 : 20261113;
 const TARGET = EXTEND || Number(process.env.TARGET || 366);   // generated routes, on top of the curated ones
 const curated = JSON.parse(readFileSync(ROOT + "scripts/curated.json", "utf8"));
 // Routes kept as they are when extending (curated and earlier generated ones), in their existing order.
@@ -114,7 +118,7 @@ function nearSea(c) {
 }
 
 // ---------- Candidate generation ----------
-const BANDS = [[25, 80, 0.25], [80, 200, 0.45], [200, 420, 0.3]];
+const BANDS = LONG ? [[240, 480, 1]] : [[25, 80, 0.25], [80, 200, 0.45], [200, 420, 0.3]];
 function partner(A, islandOnly) {
   const band = pickWeighted(BANDS, (b) => b[2]);
   const near = citiesNear(A, band[1]).filter((B) => {

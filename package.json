@@ -16,7 +16,8 @@
     "sim:input": "node scripts/input_sim.mjs",
     "icons": "node scripts/make_icons.mjs",
     "build:site": "node scripts/build.mjs site",
-    "gen:more": "EXTEND=1830 node scripts/generate_routes.mjs"
+    "gen:more": "EXTEND=1830 node scripts/generate_routes.mjs",
+    "gen:long": "LONG=1 EXTEND=330 node scripts/generate_routes.mjs"
   },
   "devDependencies": {
     "@geo-maps/earth-lakes-1km": "0.6.0",
