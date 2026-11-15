@@ -16,6 +16,8 @@
   --water-edge: #5f9cc6;
   --land: #f5f1df;
   --relief-land: #dfe4cc;  /* land under the shaded relief */
+  --tile-dim: rgba(0, 0, 0, 0);   /* over map tiles (hosted site): none in light mode */
+  --ad-bg: #f1f4f2;               /* reserved ad slots (hosted site, off by default) */
   --test: #8a4fc4;
   --border: #8c8268;
   --route: #17201b;
@@ -38,6 +40,7 @@
     --route: #ffffff; --map-ink: #eef3ef; --halo: #0e1411; --pin-ink: #0e1411;
     --pin-a: #5fbf93; --pin-b: #e8735b; --bad: #e8735b;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+    --tile-dim: rgba(8, 12, 10, .35); --ad-bg: #121916;
     color-scheme: dark;
   }
 }
@@ -48,6 +51,7 @@
     --route: #ffffff; --map-ink: #eef3ef; --halo: #0e1411; --pin-ink: #0e1411;
   --pin-a: #5fbf93; --pin-b: #e8735b; --bad: #e8735b;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+  --tile-dim: rgba(8, 12, 10, .35); --ad-bg: #121916;
   color-scheme: dark;
 }
 
@@ -315,3 +319,17 @@ body.previewing .puzzle-bar .marker { color: var(--test); }
 .arch-cell b { font-size: 16px; }
 .arch-cell.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .arch-cell .arch-play { font-size: 13px; }
+
+/* Map credit links (hosted site, e.g. the OpenStreetMap tile credit). */
+.map-note a { color: inherit; }
+
+/* Ad slots (hosted site only, off unless config.js turns them on; see ADS.md). Each slot reserves its full
+   height before anything loads, so nothing on the page moves when an ad arrives or fails, and they sit only
+   below the game and inside the result card, well away from the map, the drawing chart and its buttons. */
+.ad-slot { margin: 28px auto 0; max-width: 680px; padding: 0 0 4px; text-align: center; contain: layout paint; overflow: hidden; }
+.ad-slot .ad-label { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.ad-slot .ad-fill { margin: 0 auto; max-width: 100%; background: var(--ad-bg); border: 1px dashed var(--line); border-radius: 10px; }
+.ad-slot[data-size="banner"] .ad-fill { width: 320px; height: 100px; }
+.ad-slot[data-size="rect"] .ad-fill { width: 300px; height: 250px; }
+main > .ad-slot { padding-inline: 16px; }
+.result .ad-slot { margin: 20px auto 4px; }

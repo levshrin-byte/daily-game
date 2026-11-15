@@ -7,14 +7,22 @@
 // scripts/curated.json are always kept. Deterministic for a given SEED.
 //
 // Run: npm run gen:routes   (then npm run bake)
+//
+// EXTEND=n keeps every route already in scripts/routes.json exactly as it is and adds n new generated routes
+// after them (screened the same way, with a different seed so new candidates come up). New routes keep their
+// distance from the existing ones as well as from each other. This is how the list grows without touching
+// routes that are already scheduled: npm run gen:more (EXTEND=1800), then npm run bake.
 import { readFileSync, writeFileSync } from "node:fs";
 import { linePoints, elevation, haversine, zoomFor, stats } from "./lib/terrain.mjs";
 import { cities, landAt, regionOf, REGIONS, nearestCity } from "./lib/geo.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
-const SEED = 20261113;
-const TARGET = Number(process.env.TARGET || 366);   // generated routes, on top of the curated ones
+const EXTEND = Number(process.env.EXTEND || 0);
+const SEED = EXTEND ? 20261115 : 20261113;
+const TARGET = EXTEND || Number(process.env.TARGET || 366);   // generated routes, on top of the curated ones
 const curated = JSON.parse(readFileSync(ROOT + "scripts/curated.json", "utf8"));
+// Routes kept as they are when extending (curated and earlier generated ones), in their existing order.
+const existing = EXTEND ? JSON.parse(readFileSync(ROOT + "scripts/routes.json", "utf8")) : [];
 
 // Share of the generated set per region (sums to 1).
 const REGION_SHARE = {
@@ -118,7 +126,8 @@ function partner(A, islandOnly) {
   return near.length ? pickWeighted(near, (c) => Math.pow(c.pop, 0.75)) : null;
 }
 const curatedEnds = curated.flatMap((r) => [r.a, r.b]);
-const tooCloseToCurated = (A, B) => curated.some((r) =>
+const keepApart = EXTEND ? existing : curated;
+const tooCloseToCurated = (A, B) => keepApart.some((r) =>
   (haversine(r.a, [A.lat, A.lon]) < 40 && haversine(r.b, [B.lat, B.lon]) < 40) ||
   (haversine(r.b, [A.lat, A.lon]) < 40 && haversine(r.a, [B.lat, B.lon]) < 40));
 
@@ -153,13 +162,17 @@ const uses = new Map();
 const kindCount = { flat: 0, hilly: 0, mountain: 0 }, tagCount = { island: 0, coastal: 0 };
 const regionCount = Object.fromEntries(REGIONS.map((r) => [r, 0]));
 const mid = (c) => [(c.A.lat + c.B.lat) / 2, (c.A.lon + c.B.lon) / 2];
-function allowed(c) {
-  if (regionCount[c.region] >= want[c.region]) return false;
-  if ((uses.get(c.A) || 0) >= 2 || (uses.get(c.B) || 0) >= 2) return false;
-  // Keep routes apart: no two with both ends close together, and midpoints at least 35 km apart.
-  return !chosen.some((o) => haversine(mid(o), mid(c)) < 35 ||
-    (o.A === c.A && o.B === c.B) || (o.A === c.B && o.B === c.A));
-}
+// When extending: midpoints of the existing routes, and how often each existing endpoint is already used.
+const oldMids = existing.map((r) => [(r.a[0] + r.b[0]) / 2, (r.a[1] + r.b[1]) / 2]);
+const oldUses = new Map();
+for (const r of existing) for (const n of [r.from, r.to]) oldUses.set(n, (oldUses.get(n) || 0) + 1);
+const used = (c) => (uses.get(c) || 0) + (oldUses.get(c.name) || 0);
+// Keep routes apart: no two with both ends close together, and midpoints at least 35 km apart. The open list
+// is narrowed after each pick (instead of re-checking every candidate against every pick), which gives the same
+// picks in the same order but scales to thousands of routes.
+for (const c of candidates) c.mid = mid(c);
+const fits = (c) => regionCount[c.region] < want[c.region] && used(c.A) < 2 && used(c.B) < 2;
+let open = candidates.filter((c) => fits(c) && !oldMids.some((m) => haversine(m, c.mid) < 35));
 function need(c) {
   const n = chosen.length + 1;
   let s = KIND_SHARE[c.kind] * n - kindCount[c.kind];                    // under-filled terrain type
@@ -169,7 +182,6 @@ function need(c) {
   return s + rand() * 0.6;                                               // some randomness, seeded
 }
 while (chosen.length < TARGET) {
-  const open = candidates.filter(allowed);
   if (!open.length) break;
   let best = open[0], bs = -Infinity;
   for (const c of open) { const s = need(c); if (s > bs) { bs = s; best = c; } }
@@ -177,11 +189,13 @@ while (chosen.length < TARGET) {
   uses.set(best.A, (uses.get(best.A) || 0) + 1); uses.set(best.B, (uses.get(best.B) || 0) + 1);
   kindCount[best.kind]++; regionCount[best.region]++;
   if (best.island) tagCount.island++; if (best.coastal) tagCount.coastal++;
+  open = open.filter((c) => fits(c) && haversine(best.mid, c.mid) >= 35 &&
+    !(best.A === c.A && best.B === c.B) && !(best.A === c.B && best.B === c.A));
 }
 
 // ---------- Output ----------
 const slug = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const ids = new Set(curated.map((r) => r.id));
+const ids = new Set([...curated, ...existing].map((r) => r.id));
 const generated = chosen.map((c) => {
   // Put the lower end first about half the time, so not every route is a climb.
   let [A, B] = rand() < 0.5 ? [c.A, c.B] : [c.B, c.A];
@@ -190,9 +204,9 @@ const generated = chosen.map((c) => {
   ids.add(id);
   return { id, from: A.name, to: B.name, a: [+A.lat.toFixed(4), +A.lon.toFixed(4)], b: [+B.lat.toFixed(4), +B.lon.toFixed(4)], source: "generated" };
 });
-const all = [...curated.map((r) => ({ ...r, source: "curated" })), ...generated];
+const all = EXTEND ? [...existing, ...generated] : [...curated.map((r) => ({ ...r, source: "curated" })), ...generated];
 writeFileSync(ROOT + "scripts/routes.json", JSON.stringify(all, null, 1) + "\n");
-console.error(`\nScreened ${tried} lines, ${candidates.length} passed, chose ${chosen.length} (+${curated.length} curated = ${all.length}).`);
+console.error(`\nScreened ${tried} lines, ${candidates.length} passed, chose ${chosen.length} (+${all.length - chosen.length} kept = ${all.length}).`);
 console.error("By region:", regionCount);
 console.error("By terrain:", kindCount, "tags:", tagCount);
 console.error(`Tiles downloaded this run: ${stats().fetched}`);

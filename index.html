@@ -11,6 +11,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- The Google Fonts stylesheet is added by game.js after first paint, so a slow font host can't hold up loading. -->
   <!-- build:end -->
+  <!-- Hosted site: app install, sharing and theme (not used by the artifact build). -->
+  <meta name="theme-color" content="#eaeeeb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1411" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-title" content="Elevation">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Elevation">
+  <meta property="og:title" content="Elevation: a daily elevation game">
+  <meta property="og:description" content="Three real routes a day. Sketch how high the ground is from A to B, then see how close you got.">
+  <meta property="og:image" content="icons/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Elevation: a sketched elevation profile over the real one">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="icons/og-image.png">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M1 28 L11 10 L16 18 L21 8 L31 28 Z' fill='%231f5f46'/></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -133,7 +149,11 @@
         <span id="countdown" class="countdown mono"></span>
         <button id="archive-btn-2" class="btn small">Past days</button>
       </div>
+      <!-- Ad slot (hosted site only; off by default): after everything else in the result card. -->
+      <div class="ad-slot" data-ad="result" data-size="rect" aria-label="Advertisement" hidden><span class="ad-label">Advertisement</span><div class="ad-fill"></div></div>
     </section>
+    <!-- Ad slot (hosted site only; off by default): below the game, never between the map and the chart. -->
+    <div class="ad-slot" data-ad="below-game" data-size="banner" aria-label="Advertisement" hidden><span class="ad-label">Advertisement</span><div class="ad-fill"></div></div>
   </main>
 
   <footer class="foot">
@@ -181,9 +201,11 @@
   </dialog>
   <!-- build:end -->
 
+  <script src="config.js"></script>
   <script src="data/routes.js"></script>
   <script src="data/days.js"></script>
   <script src="data/world.js"></script>
+  <script src="drawing.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

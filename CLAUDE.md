@@ -9,9 +9,9 @@ Don't deploy anywhere public (no GitHub Pages, no hosting) and don't buy a domai
 ## After every change (the phone loop)
 
 1. `npm install` (first time in a session: it installs the map-data, PNG and test tooling).
-2. `npm run build`, which writes `dist/elevation.html` (the page: CSS, game code and the packed route list inlined,
-   about 290 KB) and `dist/files.json` (the supporting files: `data/maps/*.json` and `data/relief/*.jpg`, which the
-   game fetches on demand).
+2. `npm run build`, which writes `dist/elevation.html` (the page: CSS, game code and the routes for the next month
+   inlined) and `dist/files.json` (a map of published path → source file for the supporting files the game fetches
+   on demand: `data/routes/*.json` from `dist/`, `data/maps/*.json` and `data/relief/*.jpg`).
 3. `npm run check`, which plays at iPhone size in light and dark mode on both the plain site and the artifact
    bundle (with Google Fonts made to hang, and on the bundle with `history.replaceState` made to throw, as in a
    sandboxed frame): first paint and load event (< 1.5 s); taps, wobbles and two-finger touches must draw nothing;
@@ -22,13 +22,24 @@ Don't deploy anywhere public (no GitHub Pages, no hosting) and don't buy a domai
 4. Publish `dist/elevation.html` with the Artifact tool **to the existing artifact URL** above, so the owner's
    link keeps working (from a new session: `action: "read"` that URL first, then publish with it as `url`).
    Don't pass `icon` on updates. Pass the files listed in `dist/files.json` as `files` (published path = repo path,
-   e.g. `"data/maps/00.json": "data/maps/00.json"`). One publish takes at most 255 files, so send the page with the
-   maps and the first relief images, then a second publish to the same artifact with the rest. Files you leave out
-   are kept, so after a code-only change publishing just the page is enough.
+   exactly as `dist/files.json` maps them, e.g. `"data/routes/00.json": "dist/data/routes/00.json"`). One publish
+   takes at most 255 files, so send the page with the route files and maps, then a second publish to the same
+   artifact with the relief sheets. Files you leave out are kept, so after a code-only change publishing just the
+   page is enough (but the route files must be republished whenever routes change).
 5. Send the owner one phone screenshot with SendUserFile when the change is visual.
 6. Commit and push to the session's branch.
 
 The footer shows `build <time>`, so the owner can confirm their phone has the new version.
+
+## Two builds: artifact (testing) and hosted site (not launched)
+
+- `npm run build` → the artifact above. `npm run build:site` → `dist/site/`, a static site with manifest, icons,
+  service worker, hashed files and `_headers` (see `DEPLOY.md`). **Never deploy it anywhere** until the owner approves
+  a launch; no domain purchase either.
+- One code base: `window.ELEVATION_CONFIG` says where it runs (`target: "artifact"` is written by the build;
+  `config.js` holds the site settings). Map tiles (OpenStreetMap), ads (reserved slots only, off; `ADS.md`) and the
+  service worker exist only on the site. The artifact keeps the "interim" relief label.
+- Ads must never come near the map, the chart or its buttons, and must reserve their space up front (no layout shift).
 
 ## Rules for the code
 
@@ -51,8 +62,10 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
 - **Route previews** (for the owner): the calendar always has an "All routes · testing" tab, also reachable from
   Help → "Preview any route (testing)", five taps on the build stamp, or `#test`. Previews open at `#t<route no.>`,
   live in `store.previews` and never touch results, stats, streaks or share cards.
-- **Drawing input** is deliberate (`INPUT` in game.js): a stroke counts only after a real drag, one finger at a
-  time, with light smoothing of the finger's height. Never smooth the terrain itself.
+- **Drawing input** is deliberate and calm (`INPUT` in game.js, helpers in `drawing.js`): a stroke counts only after
+  a real drag, one finger at a time; a direction lock stops sideways jitter rewriting columns; centred (zero-lag)
+  smoothing of the finger's height and RDP simplification remove shake. `npm run sim:input` tests it with simulated
+  fingers. Never smooth the terrain itself.
 - Never let `history.replaceState` (or any other nice-to-have browser API) abort loading a puzzle: wrap it.
 - **Route data must be real.** Every profile comes from the AWS Terrain Tiles DEM; never invent, smooth into
   shape or hand-edit terrain. Routes that fail the checks are dropped, not fixed up. See `DATA.md`.
@@ -75,10 +88,16 @@ The footer shows `build <time>`, so the owner can confirm their phone has the ne
   per-route vector maps (Natural Earth, GeoNames), drawn by `game.js`.
 - `scripts/bake_relief.mjs` → `data/relief/<id>.jpg`: **interim** shaded relief from the same DEM, shown under the map
   and labelled "interim" (satellite imagery can't load in an artifact; see `DATA.md`).
+- `drawing.js`: drawing input helpers (stroke start, direction lock, smoothing, RDP, columns). `config.js`: site
+  settings. `sw.js`, `manifest.webmanifest`, `icons/` (`npm run icons`), `site/_headers`, `site/robots.txt`: hosted site.
 - `scripts/verify_terrain.mjs`, `scripts/verify_spikes.mjs` (`npm run verify:terrain`): check baked profiles against a
   finer DEM read. `scripts/score_sim.mjs`: scoring simulation used to tune `SCORE` in game.js.
 - `scripts/lib/terrain.mjs`, `scripts/lib/geo.mjs`: shared DEM and land/region helpers.
 - Terrain tiles come from `elevation-tiles-prod.s3.amazonaws.com` and are cached in `.cache/tiles/`.
 - After changing routes: `npm run gen:routes && npm run bake && npm run build` (bake now also writes the relief).
+  To add routes without touching existing ones: `npm run gen:more` (EXTEND=n) then `npm run bake`.
+- Route files: `data/maps/NN.json` holds 20 routes, `data/relief/NNN.jpg` stacks 10 routes' relief (320×240 each),
+  `data/routes/NN.json` (built into `dist/`) holds 50 packed routes; game.js `MAP_CHUNK`, `RELIEF_CHUNK` and
+  `ROUTE_CHUNK` must match.
 - **Never reorder published days.** `scripts/schedule.json` is append-only: rebaking keeps its order and adds new
   routes at the end, and it refuses to drop a route that is already public or due within a week.

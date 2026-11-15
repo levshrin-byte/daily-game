@@ -24,7 +24,27 @@
   const SCORE = { win: 4, mix: 0.4, tol: 0.01, e50: 0.09, p: 1.8 };
 
   const $ = (id) => document.getElementById(id);
-  const ROUTES = window.ROUTES || [];
+
+  // ---------- Where the game runs ----------
+  // The same code runs in three places, set by window.ELEVATION_CONFIG (scripts/build.mjs writes it):
+  //  - "artifact": the Claude artifact used for testing. Its sandbox blocks every outside host, so no map tiles,
+  //    no service worker, no ads, and the shaded relief is labelled "interim".
+  //  - "site": the hosted static site (npm run build:site → dist/site/). config.js sets map tiles, ads and the
+  //    service worker.
+  //  - plain index.html from the repo (npm run serve), with config.js: like "site", for development.
+  // Nothing here assumes one or the other beyond these settings; anything optional is feature-detected and
+  // fails quietly (tiles fall back to the vector map, a missing service worker just means no offline play).
+  const CONFIG = Object.assign({ target: "site", data: "data/", tiles: null, ads: null, sw: false }, window.ELEVATION_CONFIG || {});
+  const ARTIFACT = CONFIG.target === "artifact";
+  document.documentElement.dataset.target = CONFIG.target;
+
+  // ---------- Routes ----------
+  // The page carries the routes for the first weeks of days (window.ROUTES, each with its index `i`); the rest
+  // load on demand from data/routes/NN.json (ROUTE_CHUNK routes per file, in ROUTES order), so the page stays
+  // small however many routes there are. The plain repo page (data/routes.js) carries all of them.
+  const ROUTE_COUNT = window.ROUTE_COUNT || (window.ROUTES || []).length;
+  const ROUTE_CHUNK = 50;
+  const ROUTES = new Array(ROUTE_COUNT);
   // The artifact build packs each profile into a short string (scripts/build.mjs): zigzag deltas in 5-bit digits.
   const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   function unpack(str) {
@@ -38,33 +58,59 @@
     }
     return out;
   }
-  for (const r of ROUTES) if (typeof r.elev === "string") r.elev = unpack(r.elev);
-  // Route maps load on demand (data/maps/NN.json, ten routes per file), so the page itself stays small.
+  function addRoute(r, i) {
+    if (typeof r.elev === "string") r.elev = unpack(r.elev);
+    r.i = i; ROUTES[i] = r;
+  }
+  (window.ROUTES || []).forEach((r, k) => addRoute(r, r.i != null ? r.i : k));
+  const fetchJSON = (url) => fetch(url).then((res) => { if (!res.ok) throw new Error("HTTP " + res.status + " for " + url); return res.json(); });
+  const routeLoads = {};
+  // Load the route files holding these route indices; resolves when all of them are in ROUTES.
+  function loadRoutes(indices) {
+    const chunks = [...new Set(indices.filter((i) => i >= 0 && i < ROUTE_COUNT && !ROUTES[i]).map((i) => Math.floor(i / ROUTE_CHUNK)))];
+    return Promise.all(chunks.map((c) => {
+      routeLoads[c] = routeLoads[c] || fetchJSON(`${CONFIG.data}routes/${String(c).padStart(2, "0")}.json`)
+        .then((list) => list.forEach((r, k) => { if (!ROUTES[c * ROUTE_CHUNK + k]) addRoute(r, c * ROUTE_CHUNK + k); }))
+        .catch((e) => { delete routeLoads[c]; throw e; });
+      return routeLoads[c];
+    }));
+  }
+  // Names of every route, for searching the "All routes" list: [id, from, to, country, region] per route.
+  let routeIndex = null, indexLoad = null;
+  const routeMeta = (i) => ROUTES[i] || (routeIndex && routeIndex[i] && { id: routeIndex[i][0], from: routeIndex[i][1], to: routeIndex[i][2], country: routeIndex[i][3], region: routeIndex[i][4] });
+  function loadIndex() {
+    let all = true;
+    for (let i = 0; i < ROUTE_COUNT && all; i++) all = !!ROUTES[i];
+    if (all) return Promise.resolve();
+    return (indexLoad = indexLoad || fetchJSON(`${CONFIG.data}routes/index.json`).then((j) => { routeIndex = j; }, (e) => { indexLoad = null; throw e; }));
+  }
+  // Route maps load on demand (data/maps/NN.json, MAP_CHUNK routes per file), so the page itself stays small.
   const MAPS = (window.MAPS = window.MAPS || {});
   // Anything not needed for the first screen waits for the page's load event, so a slow or unreachable host
   // (Google Fonts, in particular) can never hold the page in a "still loading" state.
   const afterLoad = (fn) => (document.readyState === "complete" ? fn() : window.addEventListener("load", fn, { once: true }));
   const WORLD = window.WORLD || [];
-  const MAP_CHUNK = 10;
+  const MAP_CHUNK = 20, RELIEF_CHUNK = 10, RELIEF_W = 320, RELIEF_H = 240;
   const mapLoads = {}, reliefLoads = {};
   function loadMap(r) {
     if (MAPS[r.id]) return Promise.resolve(MAPS[r.id]);
-    const c = Math.floor(ROUTES.indexOf(r) / MAP_CHUNK);
-    mapLoads[c] = mapLoads[c] || fetch(`data/maps/${String(c).padStart(2, "0")}.json`)
-      .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+    const c = Math.floor(r.i / MAP_CHUNK);
+    mapLoads[c] = mapLoads[c] || fetchJSON(`${CONFIG.data}maps/${String(c).padStart(2, "0")}.json`)
       .then((j) => Object.assign(MAPS, j))
       .catch((e) => { delete mapLoads[c]; throw e; });
     return mapLoads[c].then(() => MAPS[r.id]);
   }
-  // Interim shaded relief (scripts/bake_relief.mjs), one small JPEG per route.
+  // Shaded relief (scripts/bake_relief.mjs): one JPEG per RELIEF_CHUNK routes, each route's image stacked
+  // below the previous one. Resolves to { img, sy }: the sheet and the route's row in it.
   function loadRelief(r) {
-    reliefLoads[r.id] = reliefLoads[r.id] || new Promise((ok, fail) => {
+    const c = Math.floor(r.i / RELIEF_CHUNK);
+    reliefLoads[c] = reliefLoads[c] || new Promise((ok, fail) => {
       const img = new Image();
       img.onload = () => ok(img);
-      img.onerror = () => { delete reliefLoads[r.id]; fail(new Error("relief")); };
-      img.src = `data/relief/${r.id}.jpg`;
+      img.onerror = () => { delete reliefLoads[c]; fail(new Error("relief")); };
+      img.src = `${CONFIG.data}relief/${String(c).padStart(3, "0")}.jpg`;
     });
-    return reliefLoads[r.id];
+    return reliefLoads[c].then((img) => ({ img, sy: (r.i % RELIEF_CHUNK) * RELIEF_H }));
   }
   // A version stamp, so the owner can tell when a phone shows a stale copy: the artifact build time, or the
   // file's Last-Modified time on the plain site.
@@ -91,7 +137,7 @@
   const DAYS = window.DAYS || [];
   const TIERS = ["Easy", "Medium", "Hard"], TK = "emh";
   function dayIndices(n) {
-    if (!DAYS.length) { const i = (n - 1) % ROUTES.length; return [i, i, i]; }
+    if (!DAYS.length) { const i = (n - 1) % ROUTE_COUNT; return [i, i, i]; }
     const cycle = Math.floor((n - 1) / DAYS.length);
     if (cycle === 0) return DAYS[n - 1];
     const rand = mulberry32(20261109 + cycle * 7919);
@@ -150,7 +196,7 @@
   const firstOpen = (n) => { const t = [0, 1, 2].find((k) => !store.days[keyOf(n, k)]); return t == null ? 0 : t; };
   function puzzleFromHash() {
     const t = /^#t(\d+)$/.exec(location.hash);
-    if (t) return { preview: Math.min(ROUTES.length, Math.max(1, +t[1])) };
+    if (t) return { preview: Math.min(ROUTE_COUNT, Math.max(1, +t[1])) };
     const m = /^#p(\d+)([emh])?$/.exec(location.hash);
     const n = m ? Math.min(today, Math.max(1, +m[1])) : today;
     return { n, t: m && m[2] ? TK.indexOf(m[2]) : firstOpen(n), openAll: location.hash === "#test" };
@@ -213,6 +259,7 @@
     }
     const s = w / m.w;
     const relief = mapMode === "relief" ? reliefImg[route.id] : null;
+    const tiled = mapMode === "plain" && drawTiles(ctx, m, w, h);
 
     tracePolys(ctx, m.land, s);
     ctx.fillStyle = css(mapMode === "relief" ? "--relief-land" : "--land"); ctx.fill("evenodd");
@@ -220,13 +267,15 @@
       // Hillshade blended over the land colour (mid-grey = no change), clipped to the coastline.
       ctx.save(); ctx.clip("evenodd");
       ctx.globalCompositeOperation = "soft-light";
-      ctx.drawImage(relief, 0, 0, w, h); ctx.drawImage(relief, 0, 0, w, h);
+      for (let k = 0; k < 2; k++) ctx.drawImage(relief.img, 0, relief.sy, RELIEF_W, RELIEF_H, 0, 0, w, h);
       ctx.restore();
     }
     ctx.strokeStyle = css("--border"); ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke();
     tracePolys(ctx, m.water, s);
     ctx.fillStyle = css("--water"); ctx.fill("evenodd");
     ctx.strokeStyle = css("--water-edge"); ctx.lineWidth = 1; ctx.stroke();
+    // Map tiles (hosted site only) go over the vector map, which stays underneath while they load or if they fail.
+    if (tiled) tiled();
 
     // Labels are placed so they never overlap: endpoint names first, then towns where they fit.
     const [ax, ay] = m.a.map((v) => v * s), [bx, by] = m.b.map((v) => v * s);
@@ -262,7 +311,7 @@
     }
     ctx.font = `600 12px ${FONT_BODY()}`;
     const dots = [];
-    for (const [name, x, y] of m.places) {
+    for (const [name, x, y] of tiled ? [] : m.places) {   // tiles carry their own place names
       const px = x * s, py = y * s;
       const dot = box(px - 4, py - 4, px + 4, py + 4);
       if (!free(dot)) continue;
@@ -290,16 +339,55 @@
 
     scaleBar(ctx, m, s, h);
     locator(ctx, w);
+    ctx.font = `600 11px ${FONT_BODY()}`; ctx.textBaseline = "bottom";
     if (mapMode === "relief") {
-      ctx.font = `600 11px ${FONT_BODY()}`; ctx.textBaseline = "bottom";
-      haloText(ctx, relief ? "Shaded relief · interim" : reliefFailed[route.id] ? "Relief didn't load" : "Loading relief…", w - 8, h - 6, "right");
-    }
+      haloText(ctx, relief ? (ARTIFACT ? "Shaded relief · interim" : "Shaded relief") : reliefFailed[route.id] ? "Relief didn't load" : "Loading relief…", w - 8, h - 6, "right");
+    } else if (tiled) haloText(ctx, CONFIG.tiles.label, w - 8, h - 6, "right");
+  }
+
+  // ---------- Map tiles (hosted site only) ----------
+  // Standard slippy-map tiles (CONFIG.tiles: url with {z}/{x}/{y}, label, maxZoom), drawn into the same canvas
+  // over the baked map's Web Mercator box. Only the tiles in view are requested, never prefetched, as the OSM
+  // tile policy asks; the browser's HTTP cache handles reuse. maxZoom stays low enough that summit heights
+  // aren't printed on the map. Returns a function that paints the tiles loaded so far, or null when there are
+  // no tiles to show (artifact, no config, or tiles failing), so the plain vector map shows instead.
+  const tileImgs = new Map();
+  let tileFails = 0, tileRedraw = 0;
+  function drawTiles(ctx, m, w, h) {
+    const T = CONFIG.tiles;
+    if (!T || !m.view || tileFails > 8) return null;
+    if (document.readyState !== "complete") return null;   // images would hold up the load event
+    const [x0, y0, vw, vh] = m.view, dpr = window.devicePixelRatio || 1;
+    const z = Math.max(1, Math.min(T.maxZoom || 11, Math.round(Math.log2((w * dpr) / (256 * vw)))));
+    const n = 2 ** z, px = w / (vw * n);           // CSS px per tile
+    const list = [];
+    for (let ty = Math.max(0, Math.floor(y0 * n)); ty <= Math.min(n - 1, Math.floor((y0 + vh) * n)); ty++)
+      for (let tx = Math.floor(x0 * n); tx <= Math.floor((x0 + vw) * n); tx++) {
+        const url = T.url.replace("{z}", z).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
+        let img = tileImgs.get(url);
+        if (!img) {
+          if (tileImgs.size > 300) tileImgs.clear();
+          img = new Image();
+          img.onload = () => { if (!tileRedraw) tileRedraw = requestAnimationFrame(() => { tileRedraw = 0; if (route) drawMap(); }); };
+          img.onerror = () => { tileFails++; tileImgs.delete(url); };
+          img.src = url;
+          tileImgs.set(url, img);
+        }
+        list.push([img, (tx / n - x0) * (w / vw), (ty / n - y0) * (w / vw)]);
+      }
+    return () => {
+      for (const [img, x, y] of list) if (img.complete && img.naturalWidth) ctx.drawImage(img, x, y, px + 0.5, px + 0.5);
+      // Dark mode: tiles are light, so dim them with the theme's overlay (transparent in light mode).
+      ctx.fillStyle = css("--tile-dim"); ctx.fillRect(0, 0, w, h);
+    };
   }
   // Which map layer to show: the plain vector map, or the interim shaded relief on top of it.
-  let mapMode = store.mapMode === "plain" ? "plain" : "relief";
+  let mapMode = ["plain", "relief"].includes(store.mapMode) ? store.mapMode : CONFIG.tiles ? "plain" : "relief";
   const reliefImg = {}, reliefFailed = {}, mapFailed = {};
   function fetchMapData(r) {
-    if (!MAPS[r.id]) loadMap(r).then(() => { if (route === r) drawMap(); }, () => { mapFailed[r.id] = true; if (route === r) drawMap(); });
+    // Nothing is fetched before the page's load event, so no file can keep the page "loading" (the artifact
+    // host gives up on a page whose load event is slow). The map shows "Loading map…" for that moment.
+    if (!MAPS[r.id]) afterLoad(() => loadMap(r).then(() => { if (route === r) drawMap(); }, () => { mapFailed[r.id] = true; if (route === r) drawMap(); }));
     if (mapMode === "relief" && !reliefImg[r.id]) afterLoad(() => {
       loadRelief(r).then((img) => { reliefImg[r.id] = img; if (route === r) drawMap(); }, () => { reliefFailed[r.id] = true; if (route === r) drawMap(); });
     });
@@ -307,7 +395,15 @@
   function setMapMode(mode) {
     mapMode = mode; store.mapMode = mode; save(store);
     document.querySelectorAll("#map-mode button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
-    $("map-note").hidden = mode !== "relief";
+    // The note says what the layer is: interim relief in the artifact, the tile credit (with its link) on the site.
+    const note = $("map-note");
+    if (ARTIFACT || !(mode === "plain" ? CONFIG.tiles : true)) note.hidden = mode !== "relief";
+    else {
+      note.hidden = false;
+      note.innerHTML = mode === "plain"
+        ? CONFIG.tiles.credit
+        : "Shaded relief computed from AWS Terrain Tiles elevation data.";
+    }
     if (route) { fetchMapData(route); drawMap(); }
   }
   function box(x0, y0, x1, y1) { return { x0, y0, x1, y1 }; }
@@ -461,33 +557,39 @@
   }
 
   // ---------- Drawing input ----------
-  // Drawing has to be deliberate, so stray touches can't spoil a sketch:
-  //  - Nothing is drawn when a finger lands. A stroke only counts once it has moved at least INPUT.travel px
-  //    and INPUT.across px sideways; taps, dots and tiny wobbles are ignored completely.
-  //  - Once it counts, the stroke is drawn from where the finger first landed, so nothing is lost.
-  //  - One finger at a time: a second finger (or a palm) never draws, and two fingers landing together cancel
-  //    a stroke that hasn't started yet (that's a pinch or a scroll, not drawing).
-  //  - Light smoothing of the finger's height (an exponential moving average, in screen pixels) keeps a shaky
-  //    finger from making spikes. This is input handling only: the real terrain is never smoothed.
-  //  - Every stroke (and Clear) can be undone, one step at a time.
-  const INPUT = { travel: 14, across: 9, smooth: 0.45 };
+  // Drawing has to be deliberate and calm, so stray touches and a shaky finger can't spoil a sketch.
+  // Raw finger points go through these steps before anything is drawn or scored (the helpers are in
+  // drawing.js; scripts/input_sim.mjs tests them with simulated fingers):
+  //  1. Start: nothing is drawn when a finger lands. A stroke only counts once it has moved INPUT.travel px
+  //     in all and INPUT.across px sideways; taps, dots and tiny wobbles are ignored completely. Once it counts,
+  //     the stroke is drawn from where the finger first landed, so nothing is lost.
+  //  2. Direction lock: a stroke keeps going the way it started until the finger clearly comes back
+  //     (INPUT.back px). Smaller sideways jitter only moves the height at the tip, so it can't scribble new
+  //     heights over the last few columns.
+  //  3. Smoothing: each point's height is averaged with its neighbours in time (INPUT.sigmaT ms, for a fast
+  //     shake) or on screen (INPUT.sigmaD px, for a slow wavering finger). The window is centred, so the line
+  //     never trails behind the finger; only the newest few points under the fingertip are still settling.
+  //  4. Simplification: Ramer-Douglas-Peucker (INPUT.simplify px) removes leftover zigzags thinner than the
+  //     line itself, then the stroke is written into the chart's 120 columns.
+  // The line on screen is exactly what gets scored. One finger at a time: a second finger (or a palm) never
+  // draws, and two fingers landing together cancel a stroke that hasn't started yet (a pinch or a scroll).
+  // This is input handling only: the real terrain is never smoothed. Every stroke (and Clear) can be undone.
+  const INPUT = { travel: 14, across: 10, back: 10, sigmaT: 24, sigmaD: 5, simplify: 1.5 };
+  const { rasterize, createStroke } = window.DRAWING;
   let stroke = null, undoStack = [];
   function pointerPos(e) {
     const r = chart.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top, t: e.timeStamp || performance.now() };
   }
-  function paintTo(x, y) {
-    const col = clamp(colAt(x), 0, COLS - 1);
-    const m = clamp(elevAt(y), axis.lo, axis.hi);
-    const last = stroke.last;
-    if (last && last.col !== col) {
-      const dir = Math.sign(col - last.col);
-      for (let i = last.col + dir; i !== col; i += dir) drawn[i] = last.m + ((m - last.m) * (i - last.col)) / (col - last.col);
-    }
-    drawn[col] = m;
-    stroke.last = { col, m };
+  // Rewrite the stroke's columns from its points, on top of the drawing as it was when the stroke began.
+  function paintStroke() {
+    const pts = stroke.points();
+    const cols = rasterize(pts, { cols: COLS, colX: xOf, colAt: (x) => clamp(colAt(x), 0, COLS - 1) });
+    drawn = stroke.base.slice();
+    for (let c = 0; c < COLS; c++) if (cols[c] != null) drawn[c] = clamp(elevAt(cols[c]), axis.lo, axis.hi);
+    const col = clamp(colAt(pts[pts.length - 1].x), 0, COLS - 1);
     // Your finger hides the line, so show where it is.
-    $("readout").textContent = `${fmtH(m)} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
+    $("readout").textContent = `${fmtH(drawn[col])} · ${fmtD((route.distanceKm * col) / (COLS - 1))}`;
   }
   function pushUndo() { undoStack.push(drawn.slice()); if (undoStack.length > 60) undoStack.shift(); }
   chart.addEventListener("pointerdown", (e) => {
@@ -497,28 +599,20 @@
       if (!stroke.live) { try { chart.releasePointerCapture(stroke.id); } catch {} stroke = null; }
       return;
     }
-    const p = pointerPos(e);
     try { chart.setPointerCapture(e.pointerId); } catch {}
-    stroke = { id: e.pointerId, x0: p.x, y0: p.y, px: p.x, py: p.y, travel: 0, live: false, sy: p.y, last: null };
+    stroke = createStroke(pointerPos(e), INPUT);
+    stroke.id = e.pointerId;
   });
   chart.addEventListener("pointermove", (e) => {
     if (!stroke || e.pointerId !== stroke.id || revealed) return;
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    let changed = false;
     for (const ev of evs.length ? evs : [e]) {
-      const p = pointerPos(ev);
-      stroke.travel += Math.hypot(p.x - stroke.px, p.y - stroke.py);
-      stroke.px = p.x; stroke.py = p.y;
-      if (!stroke.live) {
-        if (stroke.travel < INPUT.travel || Math.abs(p.x - stroke.x0) < INPUT.across) continue;
-        // It's a real drag: start the stroke where the finger landed.
-        stroke.live = true; pushUndo();
-        paintTo(stroke.x0, stroke.y0);
-        $("hint").style.opacity = 0;
-      }
-      stroke.sy += INPUT.smooth * (p.y - stroke.sy);
-      paintTo(p.x, stroke.sy);
+      const wasLive = stroke.live;
+      changed = stroke.move(pointerPos(ev)) || changed;
+      if (stroke.live && !wasLive) { pushUndo(); stroke.base = drawn.slice(); $("hint").style.opacity = 0; }
     }
-    if (stroke.live) { showCoverage(); render(); }
+    if (changed) { paintStroke(); showCoverage(); render(); }
   });
   function endStroke(e) {
     if (!stroke || e.pointerId !== stroke.id) return;
@@ -622,7 +716,7 @@
   store.results = store.results || {};
   if (store.scoring !== SCORING) {
     for (const [n, res] of Object.entries(store.results)) {
-      const r = ROUTES[(+n - 1) % ROUTES.length];
+      const r = ROUTES[(+n - 1) % ROUTE_COUNT];
       if (!r || !res.drawing || res.drawing.length !== COLS) continue;
       const s2 = scoreOf(res.drawing, r, axisFor(r.elev));
       res.v1 = res.v1 || res.score; res.score = s2.score; res.squares = s2.squares;
@@ -828,12 +922,20 @@
     const rows = [];
     if (archiveTab === "all") {
       $("archive-title").textContent = "All routes";
-      $("archive-summary").textContent = `Testing: preview any of the ${ROUTES.length} routes, including future days. Previews never count towards your stats, streak or share card.`;
-      const days = DAYS.length || ROUTES.length;
+      $("archive-summary").textContent = `Testing: preview any of the ${ROUTE_COUNT} routes, including future days. Previews never count towards your stats, streak or share card.`;
+      if (!routeMeta(ROUTE_COUNT - 1)) {
+        // The list needs every route's name: fetch the index first (a testing screen, so once is fine).
+        $("archive-list").innerHTML = `<li class="muted">Loading routes…</li>`;
+        try { if (!$("archive").open) $("archive").showModal(); } catch { $("archive").setAttribute("open", ""); }
+        loadIndex().then(() => { if (archiveTab === "all" && $("archive").open) openArchive("all"); },
+          () => { $("archive-list").innerHTML = `<li class="muted">The route list didn't load. Check your connection and try again.</li>`; });
+        return;
+      }
+      const days = DAYS.length || ROUTE_COUNT;
       for (let n = 1; n <= days; n++) {
         dayIndices(n).forEach((i, t) => {
           if (!DAYS.length && t) return;
-          const r = ROUTES[i], no = i + 1, res = store.previews[no];
+          const r = routeMeta(i), no = i + 1, res = store.previews[no];
           const when = n === today ? " · Today" : n > today ? "" : " · past";
           rows.push(`<li><button class="arch-row${preview === no ? " current" : ""}" data-t="${no}" data-q="${esc(`${r.from} ${r.to} ${r.country} ${r.region} ${r.id} ${TIERS[t]} day ${n}`.toLowerCase())}" data-day="${n}">
           <span class="arch-no mono">${n}${TK[t].toUpperCase()}</span>
@@ -923,7 +1025,18 @@
   }
   const started = (k) => (drafts[k] ? drafts[k].drawn : store.drafts[k] || []).some((v) => v != null);
   // where: { n, t } for a daily puzzle, or { preview: routeNumber }.
+  let pending = null;
   function loadPuzzle(where) {
+    // Routes beyond the first weeks load on demand: fetch the route first, then come back here.
+    const idx = where.preview ? where.preview - 1 : dayIndices(where.n)[where.t];
+    if (!ROUTES[idx]) {
+      const token = (pending = {});
+      $("prompt").textContent = "Loading route…";
+      loadRoutes([idx]).then(() => { if (pending === token) loadPuzzle(where); },
+        () => { if (pending === token) { $("prompt").textContent = "This route didn't load. Check your connection, then tap it again."; toast("Route didn't load"); } });
+      return;
+    }
+    pending = null;
     if (route && !revealed) saveDraft();
     stroke = null;
     preview = where.preview || 0;
@@ -944,7 +1057,7 @@
     $("puzzle-date").textContent = fmtDate(day, { weekday: "short", month: "short", day: "numeric" });
     $("today-btn").hidden = !!preview || day === today;
     $("prev").disabled = preview ? preview <= 1 : day <= 1;
-    $("next").disabled = preview ? preview >= ROUTES.length : day >= today;
+    $("next").disabled = preview ? preview >= ROUTE_COUNT : day >= today;
     $("prev").setAttribute("aria-label", preview ? "Previous route" : "Previous day");
     $("next").setAttribute("aria-label", preview ? "Next route" : "Next day");
     $("from").textContent = route.from; $("to").textContent = route.to;
@@ -971,7 +1084,7 @@
   $("today-btn").addEventListener("click", () => loadPuzzle({ n: today, t: firstOpen(today) }));
   $("submit").addEventListener("click", submit);
   const step = (d) => {
-    if (preview) { const no = preview + d; if (no >= 1 && no <= ROUTES.length) loadPuzzle({ preview: no }); return; }
+    if (preview) { const no = preview + d; if (no >= 1 && no <= ROUTE_COUNT) loadPuzzle({ preview: no }); return; }
     const n = day + d; if (n >= 1 && n <= today) loadPuzzle({ n, t: tier });
   };
   $("prev").addEventListener("click", () => step(-1));
@@ -1017,15 +1130,36 @@
     l.href = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap";
     (document.head || document.documentElement).appendChild(l);
   }
+  // ---------- Ad slots (hosted site only) ----------
+  // Structure only: no ad provider, SDK or tracking is loaded. When config.js turns ads on, the slots in
+  // index.html are shown at their full reserved size straight away (so nothing moves later), and the page
+  // announces them with an "elevation:ad-slots" event for a future provider script to fill. Never in the artifact.
+  function setupAds() {
+    const A = CONFIG.ads;
+    if (ARTIFACT || !A || !A.enabled) return;
+    const slots = [...document.querySelectorAll(".ad-slot")].filter((el) => !A.slots || A.slots[el.dataset.ad] !== false);
+    for (const el of slots) el.hidden = false;
+    afterLoad(() => window.dispatchEvent(new CustomEvent("elevation:ad-slots", { detail: { slots } })));
+  }
+  // Offline play and quick repeat visits on the hosted site (sw.js). Optional: any failure is ignored.
+  function setupServiceWorker() {
+    if (ARTIFACT || !CONFIG.sw || !("serviceWorker" in navigator) || !window.isSecureContext) return;
+    afterLoad(() => { try { navigator.serviceWorker.register("sw.js").catch(() => {}); } catch {} });
+  }
+
+  // Start-up does the least it can before the first paint: the puzzle on screen. Each later step is guarded, so
+  // a problem in one shows in the error bar instead of leaving a half-loaded page.
   function start() {
-    if (!ROUTES.length) { $("prompt").textContent = "Route data failed to load."; return; }
+    if (!ROUTE_COUNT) { $("prompt").textContent = "Route data failed to load."; return; }
     const h = puzzleFromHash();
-    setMapMode(mapMode);
-    loadPuzzle(h);
-    afterLoad(loadFonts);
-    showStreakChip();
-    countdown(); setInterval(countdown, 1000);
-    if (h.openAll) openArchive("all");
+    const step = (fn) => { try { fn(); } catch (e) { showError(e && e.message || String(e)); } };
+    step(setupAds);
+    step(() => setMapMode(mapMode));
+    step(() => loadPuzzle(h));
+    afterLoad(() => { step(loadFonts); step(setupServiceWorker); });
+    step(showStreakChip);
+    step(() => { countdown(); setInterval(countdown, 1000); });
+    if (h.openAll) step(() => openArchive("all"));
     else if (!store.seenHelp) { store.seenHelp = true; save(store); try { $("help").showModal(); } catch {} }
   }
   start();

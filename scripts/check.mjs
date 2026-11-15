@@ -23,9 +23,19 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const OUT = process.env.SCREENS || join(ROOT, ".cache/screens");
 mkdirSync(OUT, { recursive: true });
 
-const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg", ".png": "image/png", ".webmanifest": "application/manifest+json" };
+// The hosted build is served under /site/ with the Content-Security-Policy from its own _headers file, so a
+// resource the policy would block fails here too.
+const siteCsp = existsSync(join(ROOT, "dist/site/_headers")) ? (/Content-Security-Policy: (.*)/.exec(readFileSync(join(ROOT, "dist/site/_headers"), "utf8")) || [])[1] : null;
 const server = createServer((req, res) => {
   let path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  if (path.startsWith("/site/")) {
+    if (path.endsWith("/")) path += "index.html";
+    const file = join(ROOT, "dist", path);
+    if (!file.startsWith(join(ROOT, "dist/site")) || !existsSync(file)) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { "content-type": types[extname(file)] || "application/octet-stream", ...(siteCsp ? { "content-security-policy": siteCsp } : {}) });
+    return res.end(readFileSync(file));
+  }
   if (path === "/artifact.html") {
     // Mimic the artifact host: wrap the bundle in a minimal page skeleton. Supporting files sit next to it.
     const body = readFileSync(join(ROOT, "dist/elevation.html"), "utf8");
@@ -33,7 +43,8 @@ const server = createServer((req, res) => {
     return res.end(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
   }
   if (path.endsWith("/")) path += "index.html";
-  const file = join(ROOT, path);
+  // Route files written by the build (dist/data/routes) sit next to the artifact page, as when published.
+  const file = path.startsWith("/data/routes/") ? join(ROOT, "dist", path) : join(ROOT, path);
   if (!file.startsWith(ROOT) || !existsSync(file)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { "content-type": types[extname(file)] || "application/octet-stream" });
   res.end(readFileSync(file));
@@ -64,15 +75,27 @@ const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("ele
 
 const browser = await chromium.launch();
 let failed = false;
-for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
+// A stand-in map tile (see-through, so screenshots still show the map), so tests never call the real
+// OpenStreetMap servers.
+const { PNG } = require("pngjs");
+const TILE = PNG.sync.write(new PNG({ width: 1, height: 1 }));
+for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"], ["hosted", "/site/"]]) {
   for (const scheme of ["light", "dark"]) {
     const ctx = await browser.newContext({ ...devices["iPhone 13"], colorScheme: scheme, deviceScaleFactor: 2 });
     // In a sandboxed frame the history API throws; the game must not care.
     if (label === "artifact") await ctx.addInitScript(() => { history.replaceState = () => { throw new DOMException("blocked", "SecurityError"); }; });
+    // Hosted run with ads on (structure only): slots must reserve their space and never touch the game.
+    if (label === "hosted") await ctx.addInitScript(() => { window.ELEVATION_CONFIG = { ads: { enabled: true } }; });
+    let tileRequests = 0;
+    await ctx.route(/tile\.openstreetmap\.org/, (r) => { tileRequests++; r.fulfill({ status: 200, contentType: "image/png", body: TILE }); });
     const page = await ctx.newPage();
     const errors = [], problems = [];
+    if (label === "hosted") await page.addInitScript(() => {
+      window.__cls = 0;
+      try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true }); } catch {}
+    });
     page.on("pageerror", (e) => errors.push(e.message));
-    page.on("console", (m) => m.type() === "error" && !/fonts\.g|ERR_TUNNEL|ERR_NAME|ERR_FAILED|ERR_ABORTED/.test(m.text()) && errors.push(m.text()));
+    page.on("console", (m) => (m.type() === "error" && !/fonts\.g|ERR_TUNNEL|ERR_NAME|ERR_FAILED|ERR_ABORTED/.test(m.text()) || /Content Security Policy|Refused to/.test(m.text())) && errors.push(m.text()));
     await page.route(/fonts\.(googleapis|gstatic)\.com/, () => {});
     const t0 = Date.now();
     await page.goto(base + path, { waitUntil: "commit" });
@@ -83,6 +106,8 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
     const loadMs = Math.round(await page.evaluate(() => performance.getEntriesByType("navigation")[0]?.loadEventEnd || -1));
     if (loadMs < 0 || loadMs > 1500) problems.push(`load event ${loadMs < 0 ? "never fired" : loadMs + " ms"}`);
     await page.waitForTimeout(3000);
+    // Layout shift while the page loads and settles, before any tap (the result card appearing later is the game).
+    const loadCls = label === "hosted" ? await page.evaluate(() => +window.__cls.toFixed(3)) : 0;
     if (label === "site") await page.screenshot({ path: join(OUT, `${label}-${scheme}-help.png`) });
     if (await page.locator("#help[open]").count()) await page.tap("#help-close");
     await page.tap(`#units button[data-u="${scheme === "dark" ? "imperial" : "metric"}"]`);
@@ -142,6 +167,22 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
       route: `${document.getElementById("from").textContent} → ${document.getElementById("to").textContent}`,
       overflow: document.documentElement.scrollWidth > window.innerWidth,
     }));
+    if (label === "hosted") {
+      const h = await page.evaluate(async () => {
+        const reg = await Promise.race([navigator.serviceWorker.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), 4000))]);
+        const slots = [...document.querySelectorAll(".ad-slot")].map((el) => ({ ad: el.dataset.ad, shown: !el.hidden && el.getBoundingClientRect().height > 0, h: Math.round(el.querySelector(".ad-fill").getBoundingClientRect().height) }));
+        const game = ["#chart", "#undo", "#clear", "#submit", "#map", "#tiers"].map((s) => document.querySelector(s).getBoundingClientRect());
+        const overlap = [...document.querySelectorAll(".ad-slot:not([hidden])")].some((el) => { const a = el.getBoundingClientRect(); return game.some((g) => g.width && a.left < g.right && a.right > g.left && a.top < g.bottom + 24 && a.bottom > g.top - 24); });
+        return { sw: reg, slots, overlap, manifest: !!document.querySelector('link[rel="manifest"]'), og: !!document.querySelector('meta[property="og:image"]'), note: document.getElementById("map-note").textContent };
+      });
+      const want = h.slots.find((x) => x.ad === "below-game"), inResult = h.slots.find((x) => x.ad === "result");
+      if (!h.sw) problems.push("service worker didn't register");
+      if (!want?.shown || want.h !== 100 || !inResult?.shown || inResult.h !== 250) problems.push("ad slots not reserved: " + JSON.stringify(h.slots));
+      if (h.overlap) problems.push("an ad slot sits within 24 px of the game");
+      if (loadCls > 0.05) problems.push(`layout shift while loading ${loadCls}`);
+      if (!h.manifest || !h.og) problems.push("missing manifest or social tags");
+      if (!tileRequests || !/OpenStreetMap/.test(h.note)) problems.push(`map tiles: ${tileRequests} requests, note "${h.note}"`);
+    }
     const shot = join(OUT, `${label}-${scheme}.png`);
     await page.screenshot({ path: shot, fullPage: true });
     if (await page.locator("#result").isHidden()) { console.log(`FAIL ${label}/${scheme}: no result after submit`, problems, errors); failed = true; await ctx.close(); continue; }
@@ -172,7 +213,7 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
     const streakBefore = await page.evaluate(() => document.getElementById("streak-chip").textContent);
     await page.tap("#help-btn");
     await page.tap("#help-preview");
-    await page.waitForTimeout(200);
+    await page.waitForSelector(".arch-row[data-t]", { timeout: 5000 }).catch(() => {});
     await page.fill("#route-search", "100");
     const allRows = await page.locator(".arch-row[data-t]:visible").count();
     if (label === "site") await page.screenshot({ path: join(OUT, `${label}-${scheme}-routes.png`) });
@@ -197,6 +238,8 @@ for (const [label, path] of [["site", "/"], ["artifact", "/artifact.html"]]) {
     await page.waitForTimeout(300);
     const exited = await page.evaluate(() => ({ bar: document.getElementById("preview-bar").hidden, no: document.getElementById("puzzle-no").textContent }));
     if (!exited.bar) problems.push("Exit preview failed");
+
+    if (label === "artifact" && tileRequests) problems.push(`the artifact asked for ${tileRequests} map tiles`);
 
     const end = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth > window.innerWidth, errorBar: document.getElementById("error-bar").hidden ? "" : document.getElementById("error-bar").textContent }));
     if (info.overflow || end.overflow) problems.push("sideways scroll");

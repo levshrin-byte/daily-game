@@ -1,0 +1,26 @@
+# Response headers for the hosted site, in the format Cloudflare Pages and Netlify read from _headers.
+# (Other hosts: set the same headers in their own config; see DEPLOY.md.)
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+
+# Cache-Control is set per path (hosts combine headers when several rules match, so none is set on /*).
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/app.*
+  Cache-Control: public, max-age=31536000, immutable
+/style.*
+  Cache-Control: public, max-age=31536000, immutable
+/data/*
+  Cache-Control: public, max-age=31536000, immutable
+/icons/*
+  Cache-Control: public, max-age=604800
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400
+/sw.js
+  Cache-Control: no-cache

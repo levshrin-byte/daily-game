@@ -12,7 +12,11 @@
     "check": "node scripts/check.mjs",
     "bake:relief": "node scripts/bake_relief.mjs",
     "verify:terrain": "node scripts/verify_terrain.mjs && node scripts/verify_spikes.mjs",
-    "plan:days": "node scripts/plan_days.mjs"
+    "plan:days": "node scripts/plan_days.mjs",
+    "sim:input": "node scripts/input_sim.mjs",
+    "icons": "node scripts/make_icons.mjs",
+    "build:site": "node scripts/build.mjs site",
+    "gen:more": "EXTEND=1830 node scripts/generate_routes.mjs"
   },
   "devDependencies": {
     "@geo-maps/earth-lakes-1km": "0.6.0",

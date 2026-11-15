@@ -152,9 +152,10 @@ for (const f of world110.features) for (const poly of polygonsOf(f.geometry)) {
   if (ring.length >= 4 && Math.abs(area(ring)) > 4) world.push(ring.flat());
 }
 
-// Maps are loaded on demand, ten routes per file, so the page itself stays small and loads fast.
-// data/maps/NN.json holds routes NN*10 .. NN*10+9 in ROUTES (daily) order; data/world.js is the locator outline.
-export const CHUNK = 10;
+// Maps are loaded on demand, twenty routes per file, so the page itself stays small and loads fast (and the
+// artifact stays under its file limit). data/maps/NN.json holds routes NN*20 .. NN*20+19 in ROUTES (daily)
+// order; game.js MAP_CHUNK must match. data/world.js is the locator outline.
+export const CHUNK = 20;
 mkdirSync(ROOT + "data/maps", { recursive: true });
 for (const f of readdirSync(ROOT + "data/maps")) unlinkSync(ROOT + "data/maps/" + f);
 let total = 0;

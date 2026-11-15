@@ -41,7 +41,10 @@ if (existsSync(FILE)) {
     break;   // later days are re-planned
   }
 }
-const tier = tiers(ROUTES.map((_, i) => i));
+// Tiers: thirds of the score among the routes still to plan (on the first run, all of them), so each new batch
+// of routes splits evenly into Easy, Medium and Hard and every route gets played. Planned days keep their tiers.
+const planned = new Set(days.flat());
+const tier = tiers(ROUTES.map((_, i) => i).filter((i) => !planned.has(i)));
 if (!days.length) {
   // First run: pin the one-a-day routes to their days, in the slot of their tier.
   const t = tier;
